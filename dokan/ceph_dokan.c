@@ -1829,7 +1829,7 @@ main(int argc, char* argv[])
 
     if (argc < 5) {
         ceph_show_version();
-        fprintf(stderr, "dokan-ceph.exe\n"
+        fprintf(stderr, "ceph-dokan.exe\n"
             "  -c CephConfFile  (ex. /r c:\\ceph.conf)\n"
             "  -l DriveLetter (ex. /l m)\n"
             "  -t ThreadCount (ex. /t 5)\n"
