@@ -1,0 +1,16 @@
+TARGETNAME=myapi
+TARGETTYPE=DYNLINK
+
+C_DEFINES=$(C_DEFINES) -DUNICODE -D_UNICODE
+
+TARGETLIBS=$(SDK_LIB_PATH)\kernel32.lib \
+		   $(SDK_LIB_PATH)\user32.lib \
+		   $(SDK_LIB_PATH)\advapi32.lib
+
+USE_MSVCRT=1
+
+SOURCES=myapi.c
+
+UMTYPE=windows
+
+
