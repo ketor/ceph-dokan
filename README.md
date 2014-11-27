@@ -17,11 +17,9 @@ If you compile dokan yourself, you will need to sign the dokan.sys with your own
 
 Now you can use ceph-dokan on your Windows and get full speed access to CephFS without slowly Samba.
 
-ceph-dokan.exe
-
-    -c CephConf  (ex. /r c:\ceph.conf)
-  
-    -l DriveLetter (ex. /l m)
+    ceph-dokan.exe
+     -c CephConf  (ex. /r c:\ceph.conf)
+     -l DriveLetter (ex. /l m)
 
 Example:  ceph-dokan.exe -c ceph.conf -l m
 
