@@ -270,17 +270,15 @@ struct pg_t {
   int32_t m_preferred;
 
   pg_t() : m_pool(0), m_seed(0), m_preferred(-1) {}
-  pg_t(ps_t seed, uint64_t pool, int pref=-1) {
-    m_seed = seed;
-    m_pool = pool;
-    m_preferred = pref;
+  pg_t(ps_t seed, uint64_t pool, int pref=-1) :
+    m_pool(pool), m_seed(seed), m_preferred(pref) {}
+  pg_t(const ceph_pg& cpg) :
+    m_pool(cpg.pool), m_seed(cpg.ps), m_preferred((__s16)cpg.preferred) {}
+
+  pg_t(const old_pg_t& opg) {
+    *this = opg.v;
   }
 
-  pg_t(const ceph_pg& cpg) {
-    m_pool = cpg.pool;
-    m_seed = cpg.ps;
-    m_preferred = (__s16)cpg.preferred;
-  }
   old_pg_t get_old_pg() const {
     old_pg_t o;
     assert(m_pool < 0xffffffffull);
@@ -288,9 +286,6 @@ struct pg_t {
     o.v.ps = m_seed;
     o.v.preferred = (__s16)m_preferred;
     return o;
-  }
-  pg_t(const old_pg_t& opg) {
-    *this = opg.v;
   }
 
   ps_t ps() const {
@@ -1471,8 +1466,10 @@ struct pool_stat_t {
   object_stat_collection_t stats;
   int64_t log_size;
   int64_t ondisk_log_size;    // >= active_log_size
+  int32_t up;       ///< number of up replicas or shards
+  int32_t acting;   ///< number of acting replicas or shards
 
-  pool_stat_t() : log_size(0), ondisk_log_size(0)
+  pool_stat_t() : log_size(0), ondisk_log_size(0), up(0), acting(0)
   { }
 
   void floor(int64_t f) {
@@ -1481,23 +1478,33 @@ struct pool_stat_t {
       log_size = f;
     if (ondisk_log_size < f)
       ondisk_log_size = f;
+    if (up < f)
+      up = f;
+    if (acting < f)
+      acting = f;
   }
 
   void add(const pg_stat_t& o) {
     stats.add(o.stats);
     log_size += o.log_size;
     ondisk_log_size += o.ondisk_log_size;
+    up += o.up.size();
+    acting += o.acting.size();
   }
   void sub(const pg_stat_t& o) {
     stats.sub(o.stats);
     log_size -= o.log_size;
     ondisk_log_size -= o.ondisk_log_size;
+    up -= o.up.size();
+    acting -= o.acting.size();
   }
 
   bool is_zero() const {
     return (stats.is_zero() &&
 	    log_size == 0 &&
-	    ondisk_log_size == 0);
+	    ondisk_log_size == 0 &&
+	    up == 0 &&
+	    acting == 0);
   }
 
   void dump(Formatter *f) const;

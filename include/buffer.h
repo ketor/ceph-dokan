@@ -51,9 +51,15 @@
 # include <assert.h>
 #endif
 
+#if __GNUC__ >= 4
+  #define CEPH_BUFFER_API  __attribute__ ((visibility ("default")))
+#else
+  #define CEPH_BUFFER_API
+#endif
+
 namespace ceph {
 
-class buffer {
+class CEPH_BUFFER_API buffer {
   /*
    * exceptions
    */
@@ -146,7 +152,7 @@ public:
   /*
    * a buffer pointer.  references (a subsequence of) a raw buffer.
    */
-  class ptr {
+  class CEPH_BUFFER_API ptr {
     raw *_raw;
     unsigned _off, _len;
 
@@ -163,7 +169,7 @@ public:
     ~ptr() {
       release();
     }
-    
+
     bool have_raw() const { return _raw ? true:false; }
 
     raw *clone();
@@ -232,7 +238,7 @@ public:
    * list - the useful bit!
    */
 
-  class list {
+  class CEPH_BUFFER_API list {
     // my private bits
     std::list<ptr> _buffers;
     unsigned _len;
@@ -240,7 +246,7 @@ public:
     ptr append_buffer;  // where i put small appends.
 
   public:
-    class iterator {
+    class CEPH_BUFFER_API iterator {
       list *bl;
       std::list<ptr> *ls; // meh.. just here to avoid an extra pointer dereference..
       unsigned off;  // in bl

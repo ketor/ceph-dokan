@@ -34,14 +34,12 @@
 //#endif
 
 /******* Constants **********/
-#undef DOUT_COND
-#define DOUT_COND(cct, l) cct && l <= XDOUT_CONDVAR(cct, dout_subsys)
 #define lockdep_dout(v) lsubdout(g_lockdep_ceph_ctx, lockdep, v)
-#define MAX_LOCKS  1000   // increase me as needed
+#define MAX_LOCKS  2000   // increase me as needed
 #define BACKTRACE_SKIP 2
 
 /******* Globals **********/
-int g_lockdep = get_env_int("CEPH_LOCKDEP");
+int g_lockdep = 0;
 struct lockdep_stopper_t {
   // disable lockdep when this module destructs.
   ~lockdep_stopper_t() {
@@ -141,7 +139,7 @@ int lockdep_register(const char *name)
 }
 
 
-// does a follow b?
+// does b follow a?
 static bool does_follow(int a, int b)
 {
 //by ketor  if (follows[a][b]) {
