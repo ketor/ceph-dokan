@@ -35,5 +35,5 @@ It is compiled by gcc, so it is native Win32 program with only one extra dll "pt
 
 Future
 -----------
-Ceph-Dokan will get continuous improvement and upgrade with the mainline Ceph code.
+Ceph-Dokan will get continuous improvement and upgrade with upstream Ceph code.
 
