@@ -15,8 +15,8 @@
 #ifndef PRIORITY_QUEUE_H
 #define PRIORITY_QUEUE_H
 
-#include "../common/Mutex.h"
-#include "../common/Formatter.h"
+#include "common/Mutex.h"
+#include "common/Formatter.h"
 
 #include <map>
 #include <utility>

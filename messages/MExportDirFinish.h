@@ -15,7 +15,7 @@
 #ifndef CEPH_MEXPORTDIRFINISH_H
 #define CEPH_MEXPORTDIRFINISH_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MExportDirFinish : public Message {
   dirfrag_t dirfrag;

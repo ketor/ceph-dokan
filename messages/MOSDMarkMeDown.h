@@ -15,7 +15,7 @@
 #ifndef CEPH_MOSDMARKMEDOWN_H
 #define CEPH_MOSDMARKMEDOWN_H
 
-#include "../messages/PaxosServiceMessage.h"
+#include "messages/PaxosServiceMessage.h"
 
 class MOSDMarkMeDown : public PaxosServiceMessage {
 

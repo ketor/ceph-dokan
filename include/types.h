@@ -64,11 +64,10 @@ using namespace std;
 #include "include/unordered_map.h"
 #include "include/hash_namespace.h"
 
-
 #include "object.h"
 #include "intarith.h"
 
-#include "../acconfig.h"
+#include "acconfig.h"
 
 #include "assert.h"
 
@@ -121,6 +120,12 @@ inline ostream& operator<<(ostream& out, const list<A>& ilist) {
     if (it != ilist.begin()) out << ",";
     out << *it;
   }
+  return out;
+}
+
+template<class A, class B, class C>
+inline ostream& operator<<(ostream&out, const boost::tuple<A, B, C> &t) {
+  out << boost::get<0>(t) <<"," << boost::get<1>(t) << "," << boost::get<2>(t);
   return out;
 }
 

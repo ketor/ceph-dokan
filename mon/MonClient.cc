@@ -12,36 +12,36 @@
  * 
  */
 
-#include "../msg/Messenger.h"
-#include "../messages/MMonGetMap.h"
-#include "../messages/MMonGetVersion.h"
-#include "../messages/MMonGetVersionReply.h"
-#include "../messages/MMonMap.h"
-#include "../messages/MAuth.h"
-#include "../messages/MLogAck.h"
-#include "../messages/MAuthReply.h"
-#include "../messages/MMonCommand.h"
-#include "../messages/MMonCommandAck.h"
-#include "../messages/MPing.h"
+#include "msg/Messenger.h"
+#include "messages/MMonGetMap.h"
+#include "messages/MMonGetVersion.h"
+#include "messages/MMonGetVersionReply.h"
+#include "messages/MMonMap.h"
+#include "messages/MAuth.h"
+#include "messages/MLogAck.h"
+#include "messages/MAuthReply.h"
+#include "messages/MMonCommand.h"
+#include "messages/MMonCommandAck.h"
+#include "messages/MPing.h"
 
-#include "../messages/MMonSubscribe.h"
-#include "../messages/MMonSubscribeAck.h"
-#include "../common/ConfUtils.h"
-#include "../common/ceph_argparse.h"
-#include "../common/errno.h"
-#include "../common/LogClient.h"
+#include "messages/MMonSubscribe.h"
+#include "messages/MMonSubscribeAck.h"
+#include "common/ConfUtils.h"
+#include "common/ceph_argparse.h"
+#include "common/errno.h"
+#include "common/LogClient.h"
 
 #include "MonClient.h"
 #include "MonMap.h"
 
-#include "../auth/Auth.h"
-#include "../auth/KeyRing.h"
-#include "../auth/AuthMethodList.h"
+#include "auth/Auth.h"
+#include "auth/KeyRing.h"
+#include "auth/AuthMethodList.h"
 
-#include "../include/str_list.h"
-#include "../include/addr_parsing.h"
+#include "include/str_list.h"
+#include "include/addr_parsing.h"
 
-#include "../common/config.h"
+#include "common/config.h"
 
 
 #define dout_subsys ceph_subsys_monc
@@ -116,7 +116,7 @@ int MonClient::get_monmap_privately()
   bool temp_msgr = false;
   Messenger* smessenger = NULL;
   if (!messenger) {
-    messenger = smessenger = Messenger::create(cct,
+    messenger = smessenger = Messenger::create(cct, cct->_conf->ms_type,
 					       entity_name_t::CLIENT(-1),
 					       "temp_mon_client", getpid());
     messenger->add_dispatcher_head(this);
@@ -218,7 +218,7 @@ int MonClient::ping_monitor(const string &mon_id, string *result_reply)
 
   MonClientPinger *pinger = new MonClientPinger(cct, result_reply);
 
-  Messenger *smsgr = Messenger::create(cct,
+  Messenger *smsgr = Messenger::create(cct, cct->_conf->ms_type,
 				       entity_name_t::CLIENT(-1),
 				       "temp_ping_client", getpid());
   smsgr->add_dispatcher_head(pinger);

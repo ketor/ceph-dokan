@@ -3,7 +3,7 @@
 
 #include "inode_backtrace.h"
 
-#include "../common/Formatter.h"
+#include "common/Formatter.h"
 
 /* inode_backpointer_t */
 

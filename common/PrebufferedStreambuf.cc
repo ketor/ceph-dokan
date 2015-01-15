@@ -1,5 +1,5 @@
 
-#include "../common/PrebufferedStreambuf.h"
+#include "common/PrebufferedStreambuf.h"
 
 PrebufferedStreambuf::PrebufferedStreambuf(char *buf, size_t len)
   : m_buf(buf), m_buf_len(len)

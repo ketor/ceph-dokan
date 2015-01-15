@@ -16,7 +16,7 @@
 #ifndef CEPH_MOSDREPSCRUB_H
 #define CEPH_MOSDREPSCRUB_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 /*
  * instruct an OSD initiate a replica scrub on a specific PG

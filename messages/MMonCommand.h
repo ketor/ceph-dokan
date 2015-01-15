@@ -15,7 +15,7 @@
 #ifndef CEPH_MMONCOMMAND_H
 #define CEPH_MMONCOMMAND_H
 
-#include "../messages/PaxosServiceMessage.h"
+#include "messages/PaxosServiceMessage.h"
 
 #include <vector>
 using std::vector;

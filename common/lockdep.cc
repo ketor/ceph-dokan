@@ -13,13 +13,13 @@
  */
 #include "BackTrace.h"
 #include "Clock.h"
-#include "../common/dout.h"
-#include "../common/environment.h"
-#include "../include/types.h"
+#include "common/dout.h"
+#include "common/environment.h"
+#include "include/types.h"
 #include "lockdep.h"
 
-#include "../include/unordered_map.h"
-#include "../include/hash_namespace.h"
+#include "include/unordered_map.h"
+#include "include/hash_namespace.h"
 
 //by ketor #if defined(__FreeBSD__) && defined(__LP64__)	// On FreeBSD pthread_t is a pointer.
 //CEPH_HASH_NAMESPACE_START

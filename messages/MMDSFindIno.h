@@ -15,8 +15,8 @@
 #ifndef CEPH_MDSFINDINO_H
 #define CEPH_MDSFINDINO_H
 
-#include "../msg/Message.h"
-#include "../include/filepath.h"
+#include "msg/Message.h"
+#include "include/filepath.h"
 
 struct MMDSFindIno : public Message {
   ceph_tid_t tid;

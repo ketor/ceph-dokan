@@ -15,8 +15,8 @@
 #ifndef CEPH_MOSDPGBACKFILL_H
 #define CEPH_MOSDPGBACKFILL_H
 
-#include "../msg/Message.h"
-#include "../osd/osd_types.h"
+#include "msg/Message.h"
+#include "osd/osd_types.h"
 
 class MOSDPGBackfill : public Message {
   static const int HEAD_VERSION = 3;

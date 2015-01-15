@@ -15,7 +15,7 @@
 #ifndef CEPH_MREMOVESNAPS_H
 #define CEPH_MREMOVESNAPS_H
 
-#include "../messages/PaxosServiceMessage.h"
+#include "messages/PaxosServiceMessage.h"
 
 struct MRemoveSnaps : public PaxosServiceMessage {
   map<int, vector<snapid_t> > snaps;

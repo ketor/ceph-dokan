@@ -3,13 +3,13 @@
 
 #include <limits.h>
 
-#include "../msg/Messenger.h"
+#include "msg/Messenger.h"
 #include "ObjectCacher.h"
 #include "WritebackHandler.h"
-#include "../common/errno.h"
-#include "../common/perf_counters.h"
+#include "common/errno.h"
+#include "common/perf_counters.h"
 
-#include "../include/assert.h"
+#include "include/assert.h"
 
 #define MAX_FLUSH_UNDER_LOCK 20  ///< max bh's we start writeback on while holding the lock
 
@@ -1723,11 +1723,19 @@ void ObjectCacher::purge_set(ObjectSet *oset)
   }
 
   ldout(cct, 10) << "purge_set " << oset << dendl;
+  const bool were_dirty = oset->dirty_or_tx > 0;
 
   for (xlist<Object*>::iterator i = oset->objects.begin();
        !i.end(); ++i) {
     Object *ob = *i;
 	purge(ob);
+  }
+
+  // Although we have purged rather than flushed, caller should still
+  // drop any resources associate with dirty data.
+  assert(oset->dirty_or_tx == 0);
+  if (flush_set_callback && were_dirty) {
+    flush_set_callback(flush_set_callback_arg, oset);
   }
 }
 

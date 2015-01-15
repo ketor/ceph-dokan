@@ -15,8 +15,8 @@
 #ifndef CEPH_MDSFINDINOREPLY_H
 #define CEPH_MDSFINDINOREPLY_H
 
-#include "../msg/Message.h"
-#include "../include/filepath.h"
+#include "msg/Message.h"
+#include "include/filepath.h"
 
 struct MMDSFindInoReply : public Message {
   ceph_tid_t tid;

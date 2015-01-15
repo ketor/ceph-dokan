@@ -15,7 +15,7 @@
 #ifndef CEPH_DEBUG_H
 #define CEPH_DEBUG_H
 
-#include "../common/dout.h"
+#include "common/dout.h"
 
 /* Global version of the stuff in common/dout.h
  */

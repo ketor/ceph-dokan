@@ -16,7 +16,7 @@
 #ifndef CEPH_MDIRUPDATE_H
 #define CEPH_MDIRUPDATE_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MDirUpdate : public Message {
   mds_rank_t from_mds;

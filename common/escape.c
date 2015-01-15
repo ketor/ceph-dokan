@@ -12,7 +12,7 @@
  *
  */
 
-#include "../common/escape.h"
+#include "common/escape.h"
 
 #include <stdio.h>
 #include <string.h>

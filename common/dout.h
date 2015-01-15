@@ -16,12 +16,12 @@
 #ifndef CEPH_DOUT_H
 #define CEPH_DOUT_H
 
-#include "../global/global_context.h"
-#include "../common/config.h"
-#include "../common/likely.h"
-#include "../common/Clock.h"
-#include "../log/Log.h"
-#include "../include/assert.h"
+#include "global/global_context.h"
+#include "common/config.h"
+#include "common/likely.h"
+#include "common/Clock.h"
+#include "log/Log.h"
+#include "include/assert.h"
 
 #include <winsock2.h>
 #include <iostream>

@@ -16,9 +16,9 @@
 #ifndef CEPH_MMONPAXOS_H
 #define CEPH_MMONPAXOS_H
 
-#include "../messages/PaxosServiceMessage.h"
-#include "../mon/mon_types.h"
-#include "../include/ceph_features.h"
+#include "messages/PaxosServiceMessage.h"
+#include "mon/mon_types.h"
+#include "include/ceph_features.h"
 
 class MMonPaxos : public Message {
 

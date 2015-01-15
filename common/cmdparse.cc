@@ -13,10 +13,10 @@
  */
 
 #include <cxxabi.h>
-#include "../common/cmdparse.h"
-#include "../include/str_list.h"
-#include "../json_spirit/json_spirit.h"
-#include "../common/debug.h"
+#include "common/cmdparse.h"
+#include "include/str_list.h"
+#include "json_spirit/json_spirit.h"
+#include "common/debug.h"
 
 using namespace std;
 

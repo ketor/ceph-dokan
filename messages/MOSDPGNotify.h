@@ -15,9 +15,9 @@
 #ifndef CEPH_MOSDPGPEERNOTIFY_H
 #define CEPH_MOSDPGPEERNOTIFY_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
-#include "../osd/osd_types.h"
+#include "osd/osd_types.h"
 
 /*
  * PGNotify - notify primary of my PGs and versions.

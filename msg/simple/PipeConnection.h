@@ -15,7 +15,7 @@
 #ifndef CEPH_MSG_PIPECONNECTION_H
 #define CEPH_MSG_PIPECONNECTION_H
 
-#include "../msg/Connection.h"
+#include "msg/Connection.h"
 
 class Pipe;
 
@@ -41,10 +41,7 @@ public:
 
   void reset_pipe(Pipe* p);
 
-  bool is_connected() {
-    Mutex::Locker l(lock);
-    return pipe != NULL;
-  }
+  bool is_connected();
 
   int send_message(Message *m);
   void send_keepalive();

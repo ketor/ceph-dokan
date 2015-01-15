@@ -17,8 +17,8 @@
 #ifndef CEPH_MPING_H
 #define CEPH_MPING_H
 
-#include "../msg/Message.h"
-#include "../include/encoding.h"
+#include "msg/Message.h"
+#include "include/encoding.h"
 
 class MPing : public Message {
  public:

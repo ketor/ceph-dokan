@@ -21,10 +21,10 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 
 #include "MonCap.h"
-#include "../include/stringify.h"
-#include "../common/config.h"
-#include "../common/debug.h"
-#include "../common/Formatter.h"
+#include "include/stringify.h"
+#include "common/config.h"
+#include "common/debug.h"
+#include "common/Formatter.h"
 
 #include <algorithm>
 

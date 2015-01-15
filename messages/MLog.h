@@ -15,8 +15,8 @@
 #ifndef CEPH_MLOG_H
 #define CEPH_MLOG_H
 
-#include "../common/LogEntry.h"
-#include "../messages/PaxosServiceMessage.h"
+#include "common/LogEntry.h"
+#include "messages/PaxosServiceMessage.h"
 
 #include <deque>
 //by ketor #include <uuid/uuid.h>

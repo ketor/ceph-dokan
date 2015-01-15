@@ -1,8 +1,8 @@
 #ifndef CEPH_INTTYPES_H
 #define CEPH_INTTYPES_H
 
-#include "../acconfig.h"
-#include "../common/ceph-mingw-type.h"
+#include "acconfig.h"
+#include "common/ceph-mingw-type.h"
 
 #ifdef HAVE_LINUX_TYPES_H
 #include <linux/types.h>

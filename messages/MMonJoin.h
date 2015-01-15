@@ -15,7 +15,7 @@
 #ifndef CEPH_MMONJOIN_H
 #define CEPH_MMONJOIN_H
 
-#include "../messages/PaxosServiceMessage.h"
+#include "messages/PaxosServiceMessage.h"
 
 #include <vector>
 using std::vector;

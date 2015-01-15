@@ -12,8 +12,8 @@
  *
  */
 
-#include "../common/debug.h"
-#include "../common/hex.h"
+#include "common/debug.h"
+#include "common/hex.h"
 
 #include <stdio.h>
 #include <string>

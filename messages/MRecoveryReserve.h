@@ -15,7 +15,7 @@
 #ifndef CEPH_MRECOVERY_H
 #define CEPH_MRECOVERY_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MRecoveryReserve : public Message {
   static const int HEAD_VERSION = 2;

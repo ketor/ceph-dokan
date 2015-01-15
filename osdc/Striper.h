@@ -15,8 +15,8 @@
 #ifndef CEPH_STRIPER_H
 #define CEPH_STRIPER_H
 
-#include "../include/types.h"
-#include "../osd/osd_types.h"
+#include "include/types.h"
+#include "osd/osd_types.h"
 
 class CephContext;
 

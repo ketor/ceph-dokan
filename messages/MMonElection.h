@@ -16,8 +16,8 @@
 #ifndef CEPH_MMONELECTION_H
 #define CEPH_MMONELECTION_H
 
-#include "../msg/Message.h"
-#include "../mon/MonMap.h"
+#include "msg/Message.h"
+#include "mon/MonMap.h"
 
 class MMonElection : public Message {
 

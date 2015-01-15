@@ -33,9 +33,9 @@
  *  
  */
 
-#include "../msg/Message.h"
-#include "../include/filepath.h"
-#include "../mds/mdstypes.h"
+#include "msg/Message.h"
+#include "include/filepath.h"
+#include "mds/mdstypes.h"
 
 #include <sys/types.h>
 #include <utime.h>

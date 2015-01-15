@@ -21,8 +21,8 @@
 //by ketor #include <keyutils.h>
 #include <sys/types.h>
 
-#include "../common/armor.h"
-#include "../common/safe_io.h"
+#include "common/armor.h"
+#include "common/safe_io.h"
 
 int read_secret_from_file(const char *filename, char *secret, size_t max_len)
 {

@@ -13,10 +13,10 @@
  */
 
 #include "CephxProtocol.h"
-#include "../common/Clock.h"
-#include "../common/config.h"
-#include "../common/debug.h"
-#include "../include/buffer.h"
+#include "common/Clock.h"
+#include "common/config.h"
+#include "common/debug.h"
+#include "include/buffer.h"
 
 #define dout_subsys ceph_subsys_auth
 #undef dout_prefix

@@ -18,7 +18,7 @@
 #include <vector>
 //by ketor #include <uuid/uuid.h>
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MCommand : public Message {
  public:

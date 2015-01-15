@@ -85,7 +85,7 @@
 
 #include "../Auth.h"
 #include "../RotatingKeyRing.h"
-#include "../common/debug.h"
+#include "common/debug.h"
 
 #include <errno.h>
 #include <sstream>

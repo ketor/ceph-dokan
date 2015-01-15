@@ -12,10 +12,10 @@
  *
  */
 
-#include "../common/Thread.h"
-#include "../common/code_environment.h"
-#include "../common/debug.h"
-#include "../common/signal.h"
+#include "common/Thread.h"
+#include "common/code_environment.h"
+#include "common/debug.h"
+#include "common/signal.h"
 #include "common/io_priority.h"
 
 #include <dirent.h>

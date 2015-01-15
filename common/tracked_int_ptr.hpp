@@ -19,8 +19,8 @@
 #include <list>
 #include <memory>
 #include <utility>
-#include "../common/Mutex.h"
-#include "../common/Cond.h"
+#include "common/Mutex.h"
+#include "common/Cond.h"
 
 template <class T>
 class TrackedIntPtr {

@@ -15,8 +15,8 @@
 #ifndef CEPH_MEXPORTDIRCANCEL_H
 #define CEPH_MEXPORTDIRCANCEL_H
 
-#include "../msg/Message.h"
-#include "../include/types.h"
+#include "msg/Message.h"
+#include "include/types.h"
 
 class MExportDirCancel : public Message {
   dirfrag_t dirfrag;

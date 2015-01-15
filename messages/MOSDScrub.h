@@ -16,7 +16,7 @@
 #ifndef CEPH_MOSDSCRUB_H
 #define CEPH_MOSDSCRUB_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 /*
  * instruct an OSD to scrub some or all pg(s)

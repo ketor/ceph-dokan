@@ -20,8 +20,8 @@
 #include <string>
 #include <vector>
 
-#include "../common/code_environment.h"
-#include "../common/common_init.h"
+#include "common/code_environment.h"
+#include "common/common_init.h"
 
 class CephContext;
 

@@ -15,8 +15,8 @@
 #ifndef CEPH_SAFE_IO
 #define CEPH_SAFE_IO
 
-#include "../acconfig.h"
-#include "../common/compiler_extensions.h"
+#include "acconfig.h"
+#include "common/compiler_extensions.h"
 #include <sys/types.h>
 
 #ifdef __cplusplus

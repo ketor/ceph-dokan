@@ -20,7 +20,7 @@
 #include <set>
 #include <string>
 
-#include "../include/buffer.h"
+#include "include/buffer.h"
 
 /*
  * Ceph configuration file support.

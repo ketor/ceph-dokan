@@ -16,8 +16,8 @@
 
 // is buf~len completely zero (in 8-byte chunks)
 
-#include "../common/Formatter.h"
-#include "../include/types.h"
+#include "common/Formatter.h"
+#include "include/types.h"
 
 bool buf_is_zero(const char *buf, size_t len);
 

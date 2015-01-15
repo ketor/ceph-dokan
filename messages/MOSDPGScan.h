@@ -15,8 +15,8 @@
 #ifndef CEPH_MOSDPGSCAN_H
 #define CEPH_MOSDPGSCAN_H
 
-#include "../msg/Message.h"
-#include "../osd/osd_types.h"
+#include "msg/Message.h"
+#include "osd/osd_types.h"
 
 class MOSDPGScan : public Message {
 

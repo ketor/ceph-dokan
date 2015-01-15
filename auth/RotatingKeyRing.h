@@ -15,11 +15,11 @@
 #ifndef CEPH_ROTATINGKEYRING_H
 #define CEPH_ROTATINGKEYRING_H
 
-#include "../common/config.h"
-#include "../common/Mutex.h"
+#include "common/config.h"
+#include "common/Mutex.h"
 
-#include "../auth/Crypto.h"
-#include "../auth/Auth.h"
+#include "auth/Crypto.h"
+#include "auth/Auth.h"
 
 /*
  * mediate access to a service's keyring and rotating secrets

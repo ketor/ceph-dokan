@@ -15,9 +15,9 @@
 #ifndef CEPH_MMDSRESOLVEACK_H
 #define CEPH_MMDSRESOLVEACK_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
-#include "../include/types.h"
+#include "include/types.h"
 
 
 class MMDSResolveAck : public Message {

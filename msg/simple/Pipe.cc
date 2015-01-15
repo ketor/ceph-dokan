@@ -21,18 +21,18 @@
 //#include <poll.h>
 #define SHUT_RDWR SD_BOTH
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 #include "Pipe.h"
 #include "SimpleMessenger.h"
 
-#include "../common/debug.h"
-#include "../common/errno.h"
+#include "common/debug.h"
+#include "common/errno.h"
 
 // Below included to get encode_encrypt(); That probably should be in Crypto.h, instead
 
-#include "../auth/Crypto.h"
-#include "../auth/cephx/CephxProtocol.h"
-#include "../auth/AuthSessionHandler.h"
+#include "auth/Crypto.h"
+#include "auth/cephx/CephxProtocol.h"
+#include "auth/AuthSessionHandler.h"
 
 // Constant to limit starting sequence number to 2^31.  Nothing special about it, just a big number.  PLR
 #define SEQ_MASK  0x7fffffff 
@@ -90,7 +90,7 @@ Pipe::Pipe(SimpleMessenger *r, int st, PipeConnection *con)
     state(st),
     connection_state(NULL),
     reader_running(false), reader_needs_join(false),
-    reader_dispatching(false),
+    reader_dispatching(false), notify_on_dispatch_done(false),
     writer_running(false),
     in_q(&(r->dispatch_queue)),
     send_keepalive(false),
@@ -254,8 +254,7 @@ void *Pipe::DelayedDelivery::entry()
 void Pipe::DelayedDelivery::stop_fast_dispatching() {
   Mutex::Locker l(delay_lock);
   stop_fast_dispatching_flag = true;
-  // we can't block if we're the delay thread; see Pipe::stop_and_wait()
-  while (delay_dispatching && !am_self())
+  while (delay_dispatching)
     delay_cond.Wait(delay_lock);
 }
 
@@ -464,6 +463,7 @@ int Pipe::accept()
 
     ldout(msgr->cct,10) << "accept:  setting up session_security." << dendl;
 
+  retry_existing_lookup:
     msgr->lock.Lock();
     pipe_lock.Lock();
     if (msgr->dispatch_queue.stop)
@@ -475,6 +475,21 @@ int Pipe::accept()
     existing = msgr->_lookup_pipe(peer_addr);
     if (existing) {
       existing->pipe_lock.Lock(true);  // skip lockdep check (we are locking a second Pipe here)
+      if (existing->reader_dispatching) {
+	/** we need to wait, or we can deadlock if downstream
+	 *  fast_dispatchers are (naughtily!) waiting on resources
+	 *  held by somebody trying to make use of the SimpleMessenger lock.
+	 *  So drop locks, wait, and retry. It just looks like a slow network
+	 *  to everybody else.
+	 */
+	pipe_lock.Unlock();
+	msgr->lock.Unlock();
+	existing->notify_on_dispatch_done = true;
+	while (existing->reader_dispatching)
+	  existing->cond.Wait(existing->pipe_lock);
+	existing->pipe_lock.Unlock();
+	goto retry_existing_lookup;
+      }
 
       if (connect.global_seq < existing->peer_global_seq) {
 	ldout(msgr->cct,10) << "accept existing " << existing << ".gseq " << existing->peer_global_seq
@@ -585,7 +600,7 @@ int Pipe::accept()
 	       << " > " << existing->connect_seq << dendl;
       goto replace;
     } // existing
-    else if (policy.resetcheck && connect.connect_seq > 0) {
+    else if (connect.connect_seq > 0) {
       // we reset, and they are opening a new session
       ldout(msgr->cct,0) << "accept we reset (peer sent cseq " << connect.connect_seq << "), sending RESETSESSION" << dendl;
       msgr->lock.Unlock();
@@ -1433,19 +1448,21 @@ void Pipe::stop_and_wait()
 {
   if (state != STATE_CLOSED)
     stop();
+
+  if (msgr->cct->_conf->ms_inject_internal_delays) {
+    ldout(msgr->cct, 10) << __func__ << " sleep for "
+			 << msgr->cct->_conf->ms_inject_internal_delays
+			 << dendl;
+    utime_t t;
+    t.set_from_double(msgr->cct->_conf->ms_inject_internal_delays);
+    t.sleep();
+  }
   
-  // HACK: we work around an annoying deadlock here.  If the fast
-  // dispatch method calls mark_down() on itself, it can block here
-  // waiting for the reader_dispatching flag to clear... which will
-  // clearly never happen.  Avoid the situation by skipping the wait
-  // if we are marking our *own* connect down. Do the same for the
-  // delayed dispatch thread.
   if (delay_thread) {
     delay_thread->stop_fast_dispatching();
   }
   while (reader_running &&
-	 reader_dispatching &&
-	 !reader_thread.am_self())
+	 reader_dispatching)
     cond.Wait(pipe_lock);
 }
 
@@ -1609,8 +1626,11 @@ void Pipe::reader()
           in_q->fast_dispatch(m);
           pipe_lock.Lock();
 	  reader_dispatching = false;
-	  if (state == STATE_CLOSED) // there might be somebody waiting
+	  if (state == STATE_CLOSED ||
+	      notify_on_dispatch_done) { // there might be somebody waiting
+	    notify_on_dispatch_done = false;
 	    cond.Signal();
+	  }
         } else {
           in_q->enqueue(m, m->get_priority(), conn_id);
         }
@@ -2246,7 +2266,6 @@ int Pipe::write_message(ceph_msg_header& header, ceph_msg_footer& footer, buffer
   // set up msghdr and iovecs
   struct msghdr msg;
   memset(&msg, 0, sizeof(msg));
-  struct iovec *msgvec = new iovec[3 + blist.buffers().size()];  // conservative upper bound
   msg.msg_iov = msgvec;
   int msglen = 0;
   
@@ -2351,7 +2370,6 @@ int Pipe::write_message(ceph_msg_header& header, ceph_msg_footer& footer, buffer
   ret = 0;
 
  out:
-  delete[] msgvec;
   return ret;
 
  fail:

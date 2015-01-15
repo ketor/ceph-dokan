@@ -12,7 +12,7 @@
  *
  */
 
-#include "../common/environment.h"
+#include "common/environment.h"
 
 #include <stdlib.h>
 #include <strings.h>

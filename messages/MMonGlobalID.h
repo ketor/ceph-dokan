@@ -15,7 +15,7 @@
 #ifndef CEPH_MMONGLOBALID_H
 #define CEPH_MMONGLOBALID_H
 
-#include "../messages/PaxosServiceMessage.h"
+#include "messages/PaxosServiceMessage.h"
 
 struct MMonGlobalID : public PaxosServiceMessage {
   uint64_t old_max_id;

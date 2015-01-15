@@ -15,9 +15,9 @@
 #ifndef CEPH_MMONGETVERSION_H
 #define CEPH_MMONGETVERSION_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
-#include "../include/types.h"
+#include "include/types.h"
 
 /*
  * This message is sent to the monitors to verify that the client's

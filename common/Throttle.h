@@ -7,7 +7,7 @@
 #include "Mutex.h"
 #include "Cond.h"
 #include <list>
-#include "../include/atomic.h"
+#include "include/atomic.h"
 
 class CephContext;
 class PerfCounters;

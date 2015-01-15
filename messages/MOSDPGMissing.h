@@ -16,7 +16,7 @@
 #ifndef CEPH_MOSDPGMISSING_H
 #define CEPH_MOSDPGMISSING_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MOSDPGMissing : public Message {
   epoch_t epoch;

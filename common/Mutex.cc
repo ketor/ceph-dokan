@@ -13,12 +13,12 @@
  */
 #include <string>
 
-#include "../common/Mutex.h"
-#include "../common/perf_counters.h"
-#include "../common/ceph_context.h"
-#include "../common/config.h"
-#include "../include/utime.h"
-#include "../common/Clock.h"
+#include "common/Mutex.h"
+#include "common/perf_counters.h"
+#include "common/ceph_context.h"
+#include "common/config.h"
+#include "include/utime.h"
+#include "common/Clock.h"
 
 Mutex::Mutex(const char *n, bool r, bool ld,
 	     bool bt,

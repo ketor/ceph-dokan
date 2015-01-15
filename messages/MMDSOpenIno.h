@@ -15,7 +15,7 @@
 #ifndef CEPH_MDSOPENINO_H
 #define CEPH_MDSOPENINO_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 struct MMDSOpenIno : public Message {
   inodeno_t ino;

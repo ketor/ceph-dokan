@@ -20,7 +20,7 @@
 #include <pthread.h>
 #include <include/assert.h>
 #include "lockdep.h"
-#include "../include/atomic.h"
+#include "include/atomic.h"
 
 class RWLock
 {

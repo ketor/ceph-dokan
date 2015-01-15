@@ -13,7 +13,7 @@
 #ifndef CEPH_MMONSYNC_H
 #define CEPH_MMONSYNC_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MMonSync : public Message
 {

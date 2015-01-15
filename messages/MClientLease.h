@@ -16,7 +16,7 @@
 #ifndef CEPH_MCLIENTLEASE_H
 #define CEPH_MCLIENTLEASE_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 struct MClientLease : public Message {
   struct ceph_mds_lease h;

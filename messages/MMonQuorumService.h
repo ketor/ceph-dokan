@@ -14,7 +14,7 @@
 #ifndef CEPH_MMON_QUORUM_SERVICE_H
 #define CEPH_MMON_QUORUM_SERVICE_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 struct MMonQuorumService : public Message
 {

@@ -12,9 +12,9 @@
  *
  */
 
-#include "../acconfig.h"
-#include "../ceph_ver.h"
-#include "../common/version.h"
+#include "acconfig.h"
+#include "ceph_ver.h"
+#include "common/version.h"
 
 #include <sstream>
 #include <string>

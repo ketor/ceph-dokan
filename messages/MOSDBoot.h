@@ -15,10 +15,10 @@
 #ifndef CEPH_MOSDBOOT_H
 #define CEPH_MOSDBOOT_H
 
-#include "../messages/PaxosServiceMessage.h"
+#include "messages/PaxosServiceMessage.h"
 
-#include "../include/types.h"
-#include "../osd/osd_types.h"
+#include "include/types.h"
+#include "osd/osd_types.h"
 
 class MOSDBoot : public PaxosServiceMessage {
 

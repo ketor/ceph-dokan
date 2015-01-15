@@ -16,7 +16,7 @@
 #ifndef CEPH_MEXPORTDIR_H
 #define CEPH_MEXPORTDIR_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 
 class MExportDir : public Message {

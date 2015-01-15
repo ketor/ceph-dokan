@@ -16,10 +16,10 @@
 #ifndef CEPH_MOSDSUBOPREPLY_H
 #define CEPH_MOSDSUBOPREPLY_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 #include "MOSDSubOp.h"
-#include "../os/ObjectStore.h"
+#include "os/ObjectStore.h"
 
 /*
  * OSD op reply

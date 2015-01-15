@@ -15,7 +15,7 @@
 #ifndef CEPH_MMDSFRAGMENTNOTIFY_H
 #define CEPH_MMDSFRAGMENTNOTIFY_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MMDSFragmentNotify : public Message {
   inodeno_t ino;

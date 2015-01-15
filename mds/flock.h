@@ -5,7 +5,7 @@
 
 #include <errno.h>
 
-#include "../common/debug.h"
+#include "common/debug.h"
 #include "mdstypes.h"
 
 

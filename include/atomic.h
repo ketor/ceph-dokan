@@ -26,6 +26,13 @@
  * crappy slow implementation that uses a pthreads spinlock.
  */
 #include <winsock2.h>
+
+#ifdef __struct_timespec_defined
+#ifndef HAVE_STRUCT_TIMESPEC
+#define HAVE_STRUCT_TIMESPEC
+#endif
+#endif
+
 #include <pthread.h>
 #include "include/Spinlock.h"
 

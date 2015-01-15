@@ -1,7 +1,7 @@
 /* Extended attribute names */
 
-#include "../common/ceph-mingw-type.h"
-#include "posix_acl.h"
+#include "common/ceph-mingw-type.h"
+#include "dokan/posix_acl.h"
 
 #include <string>
 
@@ -801,7 +801,7 @@ cleanup:
 }
 
 /*
-  对path指向的文件设置acl mask为rwx，与Samba的处理保持一�?
+  对path指向的文件设置acl mask为rwx，与Samba的处理保持一腿
 */
 int fuse_disable_acl_mask(struct ceph_mount_info *cmount, const char *path)
 {

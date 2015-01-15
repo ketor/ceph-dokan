@@ -1,5 +1,5 @@
 
-#include "../common/ceph-mingw-type.h"
+#include "common/ceph-mingw-type.h"
 #include "hash.h"
 
 /*

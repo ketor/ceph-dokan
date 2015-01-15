@@ -16,9 +16,9 @@
 #ifndef CEPH_MMDSMAP_H
 #define CEPH_MMDSMAP_H
 
-#include "../msg/Message.h"
-#include "../mds/MDSMap.h"
-#include "../include/ceph_features.h"
+#include "msg/Message.h"
+#include "mds/MDSMap.h"
+#include "include/ceph_features.h"
 
 //by ketor #include <uuid/uuid.h>
 

@@ -15,12 +15,12 @@
 #ifndef CEPH_MMDSCACHEREJOIN_H
 #define CEPH_MMDSCACHEREJOIN_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
-#include "../include/types.h"
+#include "include/types.h"
 
-#include "../mds/CInode.h"
-#include "../mds/CDir.h"
+#include "mds/CInode.h"
+#include "mds/CDir.h"
 
 // sent from replica to auth
 

@@ -17,7 +17,7 @@
 
 #include "Auth.h"
 #include "AuthMethodList.h"
-#include "../include/types.h"
+#include "include/types.h"
 
 // Different classes of session crypto handling
 

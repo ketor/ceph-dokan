@@ -16,8 +16,8 @@
 #ifndef CEPH_MOSDPGQUERY_H
 #define CEPH_MOSDPGQUERY_H
 
-#include "../common/hobject.h"
-#include "../msg/Message.h"
+#include "common/hobject.h"
+#include "msg/Message.h"
 
 /*
  * PGQuery - query another OSD as to the contents of their PGs

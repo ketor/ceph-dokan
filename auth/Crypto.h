@@ -15,11 +15,11 @@
 #ifndef CEPH_AUTH_CRYPTO_H
 #define CEPH_AUTH_CRYPTO_H
 
-#include "../include/types.h"
-#include "../include/utime.h"
+#include "include/types.h"
+#include "include/utime.h"
 
-#include "../common/Formatter.h"
-#include "../include/buffer.h"
+#include "common/Formatter.h"
+#include "include/buffer.h"
 
 #include <string>
 

@@ -3,8 +3,8 @@
 #ifndef CEPH_OSDC_OBJECTERWRITEBACKHANDLER_H
 #define CEPH_OSDC_OBJECTERWRITEBACKHANDLER_H
 
-#include "../osdc/Objecter.h"
-#include "../osdc/WritebackHandler.h"
+#include "osdc/Objecter.h"
+#include "osdc/WritebackHandler.h"
 
 class ObjecterWriteback : public WritebackHandler {
  public:

@@ -14,12 +14,12 @@
 
 #include "Striper.h"
 
-#include "../include/types.h"
-#include "../include/buffer.h"
-#include "../osd/OSDMap.h"
+#include "include/types.h"
+#include "include/buffer.h"
+#include "osd/OSDMap.h"
 
-#include "../common/config.h"
-#include "../common/debug.h"
+#include "common/config.h"
+#include "common/debug.h"
 
 #define dout_subsys ceph_subsys_striper
 #undef dout_prefix

@@ -18,11 +18,11 @@
 #include <vector>
 
 #include <include/utime.h>
-#include "../common/Mutex.h"
-#include "../include/xlist.h"
-#include "../msg/Message.h"
-#include "../include/memory.h"
-#include "../common/TrackedOp.h"
+#include "common/Mutex.h"
+#include "include/xlist.h"
+#include "msg/Message.h"
+#include "include/memory.h"
+#include "common/TrackedOp.h"
 
 /**
  * osd request identifier

@@ -12,10 +12,10 @@
  * 
  */
 
-#include "../common/config.h"
+#include "common/config.h"
 
 #include "CephxKeyServer.h"
-#include "../common/Timer.h"
+#include "common/Timer.h"
 
 #include <sstream>
 

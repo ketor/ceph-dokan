@@ -15,9 +15,9 @@
 #ifndef CEPH_MMONGETVERSIONREPLY_H
 #define CEPH_MMONGETVERSIONREPLY_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
-#include "../include/types.h"
+#include "include/types.h"
 
 /*
  * This message is sent from the monitors to clients in response to a

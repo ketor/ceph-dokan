@@ -12,7 +12,7 @@
  *
  */
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 #include "Pipe.h"
 #include "SimpleMessenger.h"
 #include "PipeConnection.h"
@@ -65,6 +65,11 @@ void PipeConnection::reset_pipe(Pipe *p)
   if (pipe)
     pipe->put();
   pipe = p->get();
+}
+
+bool PipeConnection::is_connected()
+{
+  return static_cast<SimpleMessenger*>(msgr)->is_connected(this);
 }
 
 int PipeConnection::send_message(Message *m)

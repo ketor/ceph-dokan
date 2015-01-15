@@ -16,7 +16,7 @@
 #ifndef MDS_CONTEXT_H
 #define MDS_CONTEXT_H
 
-#include "../include/Context.h"
+#include "include/Context.h"
 
 class MDS;
 

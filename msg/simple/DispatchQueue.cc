@@ -12,13 +12,13 @@
  * 
  */
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 #include "DispatchQueue.h"
 #include "SimpleMessenger.h"
-#include "../common/ceph_context.h"
+#include "common/ceph_context.h"
 
 #define dout_subsys ceph_subsys_ms
-#include "../common/debug.h"
+#include "common/debug.h"
 
 
 /*******************
@@ -28,7 +28,7 @@
 #undef dout_prefix
 #define dout_prefix *_dout << "-- " << msgr->get_myaddr() << " "
 
-double DispatchQueue::get_max_age(utime_t now) {
+double DispatchQueue::get_max_age(utime_t now) const {
   Mutex::Locker l(lock);
   if (marrival.empty())
     return 0;
@@ -60,7 +60,7 @@ void DispatchQueue::post_dispatch(Message *m, uint64_t msize)
   ldout(cct,20) << "done calling dispatch on " << m << dendl;
 }
 
-bool DispatchQueue::can_fast_dispatch(Message *m)
+bool DispatchQueue::can_fast_dispatch(Message *m) const
 {
   return msgr->ms_can_fast_dispatch(m);
 }

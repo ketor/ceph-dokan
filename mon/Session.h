@@ -15,11 +15,11 @@
 #ifndef CEPH_MON_SESSION_H
 #define CEPH_MON_SESSION_H
 
-#include "../include/xlist.h"
-#include "../msg/msg_types.h"
+#include "include/xlist.h"
+#include "msg/msg_types.h"
 
-#include "../auth/AuthServiceHandler.h"
-#include "../osd/OSDMap.h"
+#include "auth/AuthServiceHandler.h"
+#include "osd/OSDMap.h"
 
 #include "MonCap.h"
 

@@ -15,7 +15,7 @@
 #ifndef CEPH_MAUTH_H
 #define CEPH_MAUTH_H
 
-#include "../messages/PaxosServiceMessage.h"
+#include "messages/PaxosServiceMessage.h"
 
 struct MAuth : public PaxosServiceMessage {
   __u32 protocol;

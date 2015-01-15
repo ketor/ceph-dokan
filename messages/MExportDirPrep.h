@@ -16,8 +16,8 @@
 #ifndef CEPH_MEXPORTDIRPREP_H
 #define CEPH_MEXPORTDIRPREP_H
 
-#include "../msg/Message.h"
-#include "../include/types.h"
+#include "msg/Message.h"
+#include "include/types.h"
 
 class MExportDirPrep : public Message {
   dirfrag_t dirfrag;

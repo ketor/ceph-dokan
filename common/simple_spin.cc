@@ -12,7 +12,7 @@
  *
  */
 
-#include "../common/simple_spin.h"
+#include "common/simple_spin.h"
 
 #include <stdio.h>
 #include <stdint.h>

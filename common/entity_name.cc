@@ -12,8 +12,8 @@
  *
  */
 
-#include "../common/entity_name.h"
-#include "../include/msgr.h"
+#include "common/entity_name.h"
+#include "include/msgr.h"
 
 #include <errno.h>
 #include <sstream>

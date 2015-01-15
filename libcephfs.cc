@@ -17,19 +17,19 @@
 #include <string.h>
 #include <string>
 
-#include "../auth/Crypto.h"
-#include "../client/Client.h"
-#include "../include/cephfs/libcephfs.h"
-#include "../common/Mutex.h"
-#include "../common/ceph_argparse.h"
-#include "../common/common_init.h"
-#include "../common/config.h"
-#include "../common/version.h"
-#include "../mon/MonClient.h"
-#include "../include/str_list.h"
-#include "../messages/MMonMap.h"
-#include "../msg/Messenger.h"
-#include "../include/assert.h"
+#include "auth/Crypto.h"
+#include "client/Client.h"
+#include "include/cephfs/libcephfs.h"
+#include "common/Mutex.h"
+#include "common/ceph_argparse.h"
+#include "common/common_init.h"
+#include "common/config.h"
+#include "common/version.h"
+#include "mon/MonClient.h"
+#include "include/str_list.h"
+#include "messages/MMonMap.h"
+#include "msg/Messenger.h"
+#include "include/assert.h"
 
 struct ceph_mount_info
 {
@@ -77,7 +77,7 @@ public:
       goto fail;
 
     //network connection
-    messenger = Messenger::create(cct, entity_name_t::CLIENT(), "client", msgr_nonce);
+    messenger = Messenger::create(cct, cct->_conf->ms_type, entity_name_t::CLIENT(), "client", msgr_nonce);
 
     //at last the client
     ret = -CEPHFS_ERROR_NEW_CLIENT; //defined in libcephfs.h;

@@ -22,8 +22,8 @@
 #include <iomanip>
 using namespace std;
 
-#include "../include/unordered_map.h"
-#include "../include/hash_namespace.h"
+#include "include/unordered_map.h"
+#include "include/hash_namespace.h"
 
 #include "hash.h"
 #include "encoding.h"

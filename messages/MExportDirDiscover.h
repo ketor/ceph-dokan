@@ -15,8 +15,8 @@
 #ifndef CEPH_MEXPORTDIRDISCOVER_H
 #define CEPH_MEXPORTDIRDISCOVER_H
 
-#include "../msg/Message.h"
-#include "../include/types.h"
+#include "msg/Message.h"
+#include "include/types.h"
 
 class MExportDirDiscover : public Message {
   mds_rank_t from;

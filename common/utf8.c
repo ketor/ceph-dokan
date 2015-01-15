@@ -11,7 +11,7 @@
  * Foundation.  See file COPYING.
  *
  */
-#include "../common/utf8.h"
+#include "common/utf8.h"
 
 #include <stdio.h>
 #include <string.h>

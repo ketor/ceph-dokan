@@ -15,7 +15,7 @@
 #ifndef CEPH_MPOOLOP_H
 #define CEPH_MPOOLOP_H
 
-#include "../messages/PaxosServiceMessage.h"
+#include "messages/PaxosServiceMessage.h"
 
 
 class MPoolOp : public PaxosServiceMessage {

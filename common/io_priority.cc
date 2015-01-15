@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <errno.h>
 
-#include "../common/errno.h"
+#include "common/errno.h"
 #include "io_priority.h"
 
 pid_t ceph_gettid(void)

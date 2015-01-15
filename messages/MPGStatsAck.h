@@ -15,7 +15,7 @@
 #ifndef CEPH_MPGSTATSACK_H
 #define CEPH_MPGSTATSACK_H
 
-#include "../osd/osd_types.h"
+#include "osd/osd_types.h"
 
 class MPGStatsAck : public Message {
 public:

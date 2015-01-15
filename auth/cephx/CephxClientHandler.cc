@@ -20,7 +20,7 @@
 
 #include "../KeyRing.h"
 
-#include "../common/config.h"
+#include "common/config.h"
 
 #define dout_subsys ceph_subsys_auth
 #undef dout_prefix

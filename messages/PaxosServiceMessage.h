@@ -1,8 +1,8 @@
 #ifndef CEPH_PAXOSSERVICEMESSAGE_H
 #define CEPH_PAXOSSERVICEMESSAGE_H
 
-#include "../msg/Message.h"
-#include "../mon/Session.h"
+#include "msg/Message.h"
+#include "mon/Session.h"
 
 class PaxosServiceMessage : public Message {
  public:

@@ -6,14 +6,14 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "../common/Formatter.h"
+#include "common/Formatter.h"
 
-#include "../include/ceph_features.h"
-#include "../include/addr_parsing.h"
-#include "../common/ceph_argparse.h"
-#include "../common/errno.h"
+#include "include/ceph_features.h"
+#include "include/addr_parsing.h"
+#include "common/ceph_argparse.h"
+#include "common/errno.h"
 
-#include "../common/dout.h"
+#include "common/dout.h"
 
 using ceph::Formatter;
 

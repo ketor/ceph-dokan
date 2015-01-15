@@ -12,13 +12,13 @@
  *
  */
 
-#include "../common/debug.h"
+#include "common/debug.h"
 #include "Auth.h"
 #include "AuthAuthorizeHandler.h"
 #include "cephx/CephxAuthorizeHandler.h"
 #include "none/AuthNoneAuthorizeHandler.h"
 #include "AuthMethodList.h"
-#include "../common/Mutex.h"
+#include "common/Mutex.h"
 
 #define dout_subsys ceph_subsys_auth
 

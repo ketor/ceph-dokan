@@ -16,8 +16,8 @@
 #ifndef CEPH_MOSDPGCREATE_H
 #define CEPH_MOSDPGCREATE_H
 
-#include "../msg/Message.h"
-#include "../osd/osd_types.h"
+#include "msg/Message.h"
+#include "osd/osd_types.h"
 
 /*
  * PGCreate - instruct an OSD to create a pg, if it doesn't already exist

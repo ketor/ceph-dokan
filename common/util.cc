@@ -14,9 +14,9 @@
 
 #include <errno.h>
 
-#include "../include/util.h"
-#include "../common/errno.h"
-#include "../common/strtol.h"
+#include "include/util.h"
+#include "common/errno.h"
+#include "common/strtol.h"
 
 /*by ketor #ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>

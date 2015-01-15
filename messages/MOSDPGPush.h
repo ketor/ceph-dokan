@@ -15,8 +15,8 @@
 #ifndef MOSDPGPUSH_H
 #define MOSDPGPUSH_H
 
-#include "../msg/Message.h"
-#include "../osd/osd_types.h"
+#include "msg/Message.h"
+#include "osd/osd_types.h"
 
 class MOSDPGPush : public Message {
   static const int HEAD_VERSION = 2;

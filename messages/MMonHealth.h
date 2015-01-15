@@ -14,9 +14,9 @@
 #ifndef CEPH_MMON_HEALTH_H
 #define CEPH_MMON_HEALTH_H
 
-#include "../msg/Message.h"
-#include "../messages/MMonQuorumService.h"
-#include "../mon/mon_types.h"
+#include "msg/Message.h"
+#include "messages/MMonQuorumService.h"
+#include "mon/mon_types.h"
 
 struct MMonHealth : public MMonQuorumService
 {

@@ -15,9 +15,9 @@
 #ifndef CEPH_MMONGETMAP_H
 #define CEPH_MMONGETMAP_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
-#include "../include/types.h"
+#include "include/types.h"
 
 class MMonGetMap : public Message {
  public:

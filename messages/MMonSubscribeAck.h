@@ -15,7 +15,7 @@
 #ifndef CEPH_MMONSUBSCRIBEACK_H
 #define CEPH_MMONSUBSCRIBEACK_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 struct MMonSubscribeAck : public Message {
   __u32 interval;

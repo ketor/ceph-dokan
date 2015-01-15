@@ -16,8 +16,8 @@
 #ifndef CEPH_MMDSTABLEREQUEST_H
 #define CEPH_MMDSTABLEREQUEST_H
 
-#include "../msg/Message.h"
-#include "../mds/mds_table_types.h"
+#include "msg/Message.h"
+#include "mds/mds_table_types.h"
 
 class MMDSTableRequest : public Message {
  public:

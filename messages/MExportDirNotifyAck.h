@@ -15,7 +15,7 @@
 #ifndef CEPH_MEXPORTDIRNOTIFYACK_H
 #define CEPH_MEXPORTDIRNOTIFYACK_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MExportDirNotifyAck : public Message {
   dirfrag_t dirfrag;

@@ -1,11 +1,11 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#include "../include/crc32c.h"
+#include "include/crc32c.h"
 
 //by ketor #include "arch/probe.h"
 //#include "arch/intel.h"
-#include "../common/sctp_crc32.h"
+#include "common/sctp_crc32.h"
 //by ketor #include "common/crc32c_intel_baseline.h"
 //#include "common/crc32c_intel_fast.h"
 

@@ -15,13 +15,13 @@
 #ifndef CEPH_COMMON_ADMIN_SOCKET_H
 #define CEPH_COMMON_ADMIN_SOCKET_H
 
-#include "../common/Thread.h"
-#include "../common/Mutex.h"
+#include "common/Thread.h"
+#include "common/Mutex.h"
 
 #include <string>
 #include <map>
-#include "../include/buffer.h"
-#include "../common/cmdparse.h"
+#include "include/buffer.h"
+#include "common/cmdparse.h"
 
 class AdminSocket;
 class CephContext;
@@ -32,7 +32,7 @@ class AdminSocketHook {
 public:
   virtual bool call(std::string command, cmdmap_t &cmdmap, std::string format,
 		    bufferlist& out) = 0;
-  virtual ~AdminSocketHook() {};
+  virtual ~AdminSocketHook() {}
 };
 
 class AdminSocket : public Thread

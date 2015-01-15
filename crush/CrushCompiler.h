@@ -4,8 +4,8 @@
 #ifndef CEPH_CRUSH_COMPILER_H
 #define CEPH_CRUSH_COMPILER_H
 
-#include "../crush/CrushWrapper.h"
-#include "../crush/grammar.h"
+#include "crush/CrushWrapper.h"
+#include "crush/grammar.h"
 
 #include <map>
 #include <ostream>

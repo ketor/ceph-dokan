@@ -25,10 +25,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "../include/buffer.h"
-#include "../common/errno.h"
-#include "../common/utf8.h"
-#include "../common/ConfUtils.h"
+#include "include/buffer.h"
+#include "common/errno.h"
+#include "common/utf8.h"
+#include "common/ConfUtils.h"
 
 using std::cerr;
 using std::ostringstream;

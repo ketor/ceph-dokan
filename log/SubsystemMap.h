@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "../include/assert.h"
+#include "include/assert.h"
 
 namespace ceph {
 namespace log {

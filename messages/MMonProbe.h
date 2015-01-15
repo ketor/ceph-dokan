@@ -16,9 +16,9 @@
 #ifndef CEPH_MMONPROBE_H
 #define CEPH_MMONPROBE_H
 
-#include "../include/ceph_features.h"
-#include "../msg/Message.h"
-#include "../mon/MonMap.h"
+#include "include/ceph_features.h"
+#include "msg/Message.h"
+#include "mon/MonMap.h"
 
 class MMonProbe : public Message {
 public:

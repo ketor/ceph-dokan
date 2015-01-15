@@ -1,5 +1,5 @@
 
-#include "../include/types.h"
+#include "include/types.h"
 
 /*
  * Robert Jenkin's hash function.

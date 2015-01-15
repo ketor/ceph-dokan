@@ -21,7 +21,7 @@
 #include "Mutex.h"
 #include "Clock.h"
 
-#include "../include/Context.h"
+#include "include/Context.h"
 
 #include <winsock2.h>
 #include <pthread.h>

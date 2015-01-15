@@ -1,7 +1,22 @@
 
 #include <basetyps.h>
 #include <search.h>
+
 #include <time.h>
+
+#ifndef HAVE_STRUCT_TIMESPEC
+
+#ifndef __struct_timespec_defined
+
+#define _FAKE_TIME_H_SOURCED	1
+#define __need_struct_timespec	1
+#include <parts/time.h>
+#undef __need_struct_timespec
+
+#define HAVE_STRUCT_TIMESPEC 1
+
+#endif /* __struct_timespec_defined */
+#endif /* HAVE_STRUCT_TIMESPEC */
 
 #ifndef _CEPH_MINGW_TYPE_H
 #define _CEPH_MINGW_TYPE_H
@@ -53,9 +68,9 @@ struct iovec
   size_t iov_len;
 };
 
-
+#ifndef __struct_timespec_defined
 #ifndef HAVE_STRUCT_TIMESPEC
-#define HAVE_STRUCT_TIMESPEC
+#define HAVE_STRUCT_TIMESPEC 1
 #ifndef _TIMESPEC_DEFINED
 #define _TIMESPEC_DEFINED
 struct timespec {
@@ -64,6 +79,8 @@ struct timespec {
 };
 #endif /* _TIMESPEC_DEFINED */
 #endif /* HAVE_STRUCT_TIMESPEC */
+# define __struct_timespec_defined  1
+#endif /* __struct_timespec_defined */
 
 #define    EOPNOTSUPP   95    /* Operation not supported on transport endpoint */
 #define    EBADE        52    /* Invalid exchange */

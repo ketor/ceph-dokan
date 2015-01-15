@@ -16,7 +16,7 @@
 #ifndef CEPH_MOSDFAILURE_H
 #define CEPH_MOSDFAILURE_H
 
-#include "../messages/PaxosServiceMessage.h"
+#include "messages/PaxosServiceMessage.h"
 
 
 class MOSDFailure : public PaxosServiceMessage {

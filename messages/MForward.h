@@ -19,9 +19,9 @@
 #ifndef CEPH_MFORWARD_H
 #define CEPH_MFORWARD_H
 
-#include "../msg/Message.h"
-#include "../mon/MonCap.h"
-#include "../include/encoding.h"
+#include "msg/Message.h"
+#include "mon/MonCap.h"
+#include "include/encoding.h"
 
 struct MForward : public Message {
   uint64_t tid;

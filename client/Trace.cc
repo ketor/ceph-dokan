@@ -15,14 +15,14 @@
 
 
 #include "Trace.h"
-#include "../common/debug.h"
+#include "common/debug.h"
 
 #include <iostream>
 #include <map>
 
-#include "../common/Mutex.h"
+#include "common/Mutex.h"
 
-#include "../common/config.h"
+#include "common/config.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

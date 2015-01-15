@@ -15,9 +15,9 @@
 #ifndef CEPH_MMDSLoadTargets_H
 #define CEPH_MMDSLoadTargets_H
 
-#include "../msg/Message.h"
-#include "../messages/PaxosServiceMessage.h"
-#include "../include/types.h"
+#include "msg/Message.h"
+#include "messages/PaxosServiceMessage.h"
+#include "include/types.h"
 
 #include <map>
 using std::map;

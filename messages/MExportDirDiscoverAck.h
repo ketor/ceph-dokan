@@ -15,8 +15,8 @@
 #ifndef CEPH_MEXPORTDIRDISCOVERACK_H
 #define CEPH_MEXPORTDIRDISCOVERACK_H
 
-#include "../msg/Message.h"
-#include "../include/types.h"
+#include "msg/Message.h"
+#include "include/types.h"
 
 class MExportDirDiscoverAck : public Message {
   dirfrag_t dirfrag;

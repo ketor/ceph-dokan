@@ -5,16 +5,16 @@
 #define CEPH_CLIENT_METAREQUEST_H
 
 
-#include "../include/types.h"
-#include "../msg/msg_types.h"
-#include "../include/xlist.h"
-#include "../include/filepath.h"
-#include "../include/atomic.h"
-#include "../mds/mdstypes.h"
+#include "include/types.h"
+#include "msg/msg_types.h"
+#include "include/xlist.h"
+#include "include/filepath.h"
+#include "include/atomic.h"
+#include "mds/mdstypes.h"
 
-#include "../common/Mutex.h"
+#include "common/Mutex.h"
 
-#include "../messages/MClientRequest.h"
+#include "messages/MClientRequest.h"
 
 class MClientReply;
 struct Inode;

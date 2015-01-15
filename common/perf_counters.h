@@ -16,10 +16,10 @@
 #ifndef CEPH_COMMON_PERF_COUNTERS_H
 #define CEPH_COMMON_PERF_COUNTERS_H
 
-#include "../common/config_obs.h"
-#include "../common/Mutex.h"
-#include "../include/buffer.h"
-#include "../include/utime.h"
+#include "common/config_obs.h"
+#include "common/Mutex.h"
+#include "include/buffer.h"
+#include "include/utime.h"
 
 #include <stdint.h>
 #include <string>

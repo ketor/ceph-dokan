@@ -15,10 +15,10 @@
 #ifndef CEPH_MONMAP_H
 #define CEPH_MONMAP_H
 
-#include "../include/err.h"
+#include "include/err.h"
 
-#include "../msg/Message.h"
-#include "../include/types.h"
+#include "msg/Message.h"
+#include "include/types.h"
 //#include "common/config.h"
 
 namespace ceph {

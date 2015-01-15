@@ -15,8 +15,8 @@
 #ifndef CEPH_MMONSUBSCRIBE_H
 #define CEPH_MMONSUBSCRIBE_H
 
-#include "../msg/Message.h"
-#include "../include/ceph_features.h"
+#include "msg/Message.h"
+#include "include/ceph_features.h"
 
 /*
  * compatibility with old crap

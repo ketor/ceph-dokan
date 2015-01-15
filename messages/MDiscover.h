@@ -16,8 +16,8 @@
 #ifndef CEPH_MDISCOVER_H
 #define CEPH_MDISCOVER_H
 
-#include "../msg/Message.h"
-#include "../include/filepath.h"
+#include "msg/Message.h"
+#include "include/filepath.h"
 
 #include <string>
 

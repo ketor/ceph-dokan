@@ -15,9 +15,9 @@
 #ifndef CEPH_MON_TYPES_H
 #define CEPH_MON_TYPES_H
 
-#include "../include/utime.h"
-#include "../include/util.h"
-#include "../common/Formatter.h"
+#include "include/utime.h"
+#include "include/util.h"
+#include "common/Formatter.h"
 
 #define PAXOS_PGMAP      0  // before osd, for pg kick to behave
 #define PAXOS_MDSMAP     1

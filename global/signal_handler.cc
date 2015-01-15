@@ -12,12 +12,12 @@
  *
  */
 
-#include "../common/BackTrace.h"
-#include "../common/perf_counters.h"
-#include "../common/config.h"
-#include "../common/debug.h"
-#include "../global/pidfile.h"
-#include "../global/signal_handler.h"
+#include "common/BackTrace.h"
+#include "common/perf_counters.h"
+#include "common/config.h"
+#include "common/debug.h"
+#include "global/pidfile.h"
+#include "global/signal_handler.h"
 
 //#include <poll.h>
 #include <signal.h>
@@ -121,7 +121,7 @@ static void reraise_fatal(int signum)
 
 /// --- safe handler ---
 
-#include "../common/Thread.h"
+#include "common/Thread.h"
 #include <errno.h>
 
 /**

@@ -26,9 +26,9 @@
  * "files" are identified by ino. 
  */
 
-#include "../include/types.h"
+#include "include/types.h"
 
-#include "../osd/OSDMap.h"
+#include "osd/OSDMap.h"
 #include "Objecter.h"
 #include "Striper.h"
 

@@ -17,8 +17,8 @@
 #ifndef CEPH_MROUTE_H
 #define CEPH_MROUTE_H
 
-#include "../msg/Message.h"
-#include "../include/encoding.h"
+#include "msg/Message.h"
+#include "include/encoding.h"
 
 struct MRoute : public Message {
 

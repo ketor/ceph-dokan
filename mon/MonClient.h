@@ -15,21 +15,21 @@
 #ifndef CEPH_MONCLIENT_H
 #define CEPH_MONCLIENT_H
 
-#include "../msg/Dispatcher.h"
-#include "../msg/Messenger.h"
+#include "msg/Dispatcher.h"
+#include "msg/Messenger.h"
 
 #include "MonMap.h"
 
-#include "../common/Timer.h"
-#include "../common/Finisher.h"
+#include "common/Timer.h"
+#include "common/Finisher.h"
 
-#include "../auth/AuthClientHandler.h"
-#include "../auth/RotatingKeyRing.h"
+#include "auth/AuthClientHandler.h"
+#include "auth/RotatingKeyRing.h"
 
-#include "../messages/MMonSubscribe.h"
+#include "messages/MMonSubscribe.h"
 
-#include "../common/SimpleRNG.h"
-#include "../osd/osd_types.h"
+#include "common/SimpleRNG.h"
+#include "osd/osd_types.h"
 
 #include <memory>
 

@@ -16,7 +16,7 @@
 #ifndef CEPH_SPINLOCK_H
 #define CEPH_SPINLOCK_H
 
-#include "../acconfig.h"
+#include "acconfig.h"
 
 #include <pthread.h>
 

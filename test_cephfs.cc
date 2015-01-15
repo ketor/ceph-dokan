@@ -44,25 +44,25 @@ static int findfiles(struct ceph_mount_info *cmount, char* file_name)
 		printf("st_gid=%d\n", stbuf.st_gid);
 		printf("st_size=%d\n", stbuf.st_size);
 		
-		printf("sizeof(stbuf.st_atim) is [%d][%d][%d]\n",
-		 sizeof(stbuf.st_atim), sizeof(stbuf.st_atim.tv_sec),
-		 sizeof(stbuf.st_atim.tv_nsec));
-		
-		struct tm *tm_time;
-		tm_time = localtime(&stbuf.st_atim.tv_sec);
-		printf("atime = %04d-%02d-%02d %02d:%02d:%02d\n", 
-			tm_time->tm_year+1900, tm_time->tm_mon, tm_time->tm_mday,
-			tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec);
-
-		tm_time = localtime(&stbuf.st_mtim.tv_sec);
-		printf("mtime = %04d-%02d-%02d %02d:%02d:%02d\n", 
-			tm_time->tm_year+1900, tm_time->tm_mon, tm_time->tm_mday,
-			tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec);
-			
-		tm_time = localtime(&stbuf.st_ctim.tv_sec);
-		printf("ctime = %04d-%02d-%02d %02d:%02d:%02d\n", 
-			tm_time->tm_year+1900, tm_time->tm_mon, tm_time->tm_mday,
-			tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec);
+		//printf("sizeof(stbuf.st_atim) is [%d][%d][%d]\n",
+		// sizeof(stbuf.st_atim), sizeof(stbuf.st_atim.tv_sec),
+		// sizeof(stbuf.st_atim.tv_nsec));
+		//
+		//struct tm *tm_time;
+		//tm_time = localtime(&stbuf.st_atim.tv_sec);
+		//printf("atime = %04d-%02d-%02d %02d:%02d:%02d\n", 
+		//	tm_time->tm_year+1900, tm_time->tm_mon, tm_time->tm_mday,
+		//	tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec);
+        //
+		//tm_time = localtime(&stbuf.st_mtim.tv_sec);
+		//printf("mtime = %04d-%02d-%02d %02d:%02d:%02d\n", 
+		//	tm_time->tm_year+1900, tm_time->tm_mon, tm_time->tm_mday,
+		//	tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec);
+		//	
+		//tm_time = localtime(&stbuf.st_ctim.tv_sec);
+		//printf("ctime = %04d-%02d-%02d %02d:%02d:%02d\n", 
+		//	tm_time->tm_year+1900, tm_time->tm_mon, tm_time->tm_mday,
+		//	tm_time->tm_hour, tm_time->tm_min, tm_time->tm_sec);
     }
     
     fprintf(stderr, "ceph_readdir END[%d]\n", count);

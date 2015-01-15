@@ -16,13 +16,13 @@
 #define CEPH_AUTHCLIENTHANDLER_H
 
 
-#include "../auth/Auth.h"
+#include "auth/Auth.h"
 
-#include "../common/Mutex.h"
-#include "../common/Cond.h"
-#include "../common/RWLock.h"
+#include "common/Mutex.h"
+#include "common/Cond.h"
+#include "common/RWLock.h"
 
-#include "../common/Timer.h"
+#include "common/Timer.h"
 
 class CephContext;
 struct MAuthReply;

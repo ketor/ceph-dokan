@@ -6,8 +6,8 @@
 
 #include "BackTrace.h"
 
-#include "../common/version.h"
-#include "../acconfig.h"
+#include "common/version.h"
+#include "acconfig.h"
 
 #define _STR(x) #x
 #define STRINGIFY(x) _STR(x)

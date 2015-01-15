@@ -1,10 +1,10 @@
 #ifndef CEPH_CLIENT_DENTRY_H
 #define CEPH_CLIENT_DENTRY_H
 
-#include "../include/lru.h"
-#include "../include/xlist.h"
+#include "include/lru.h"
+#include "include/xlist.h"
 
-#include "../mds/mdstypes.h"
+#include "mds/mdstypes.h"
 
 class Dir;
 struct Inode;

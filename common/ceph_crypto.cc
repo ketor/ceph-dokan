@@ -12,10 +12,10 @@
  *
  */
 
-#include "../common/config.h"
-#include "../common/ceph_context.h"
+#include "common/config.h"
+#include "common/ceph_context.h"
 #include "ceph_crypto.h"
-#include "../auth/Crypto.h"
+#include "auth/Crypto.h"
 
 #include <pthread.h>
 #include <stdlib.h>

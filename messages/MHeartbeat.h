@@ -16,8 +16,8 @@
 #ifndef CEPH_MHEARTBEAT_H
 #define CEPH_MHEARTBEAT_H
 
-#include "../include/types.h"
-#include "../msg/Message.h"
+#include "include/types.h"
+#include "msg/Message.h"
 
 class MHeartbeat : public Message {
   mds_load_t load;

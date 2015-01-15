@@ -15,7 +15,7 @@
 #ifndef CEPH_MOSDPGTRIM_H
 #define CEPH_MOSDPGTRIM_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MOSDPGTrim : public Message {
 

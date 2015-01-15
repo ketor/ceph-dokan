@@ -1,7 +1,7 @@
 #ifndef __CEPH_SNAP_TYPES_H
 #define __CEPH_SNAP_TYPES_H
 
-#include "../include/types.h"
+#include "include/types.h"
 
 namespace ceph {
 

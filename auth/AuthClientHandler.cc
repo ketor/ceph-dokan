@@ -18,8 +18,8 @@
 #include "AuthClientHandler.h"
 #include "KeyRing.h"
 
-#include "../messages/MAuth.h"
-#include "../messages/MAuthReply.h"
+#include "messages/MAuth.h"
+#include "messages/MAuthReply.h"
 
 #include "cephx/CephxClientHandler.h"
 #include "none/AuthNoneClientHandler.h"

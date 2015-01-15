@@ -16,7 +16,7 @@
 #ifndef CEPH_MGENERICMESSAGE_H
 #define CEPH_MGENERICMESSAGE_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MGenericMessage : public Message {
   char tname[20];

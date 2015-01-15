@@ -15,7 +15,7 @@
 #ifndef CEPH_MCLIENTSESSION_H
 #define CEPH_MCLIENTSESSION_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MClientSession : public Message {
   static const int HEAD_VERSION = 2;

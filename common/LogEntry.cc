@@ -6,7 +6,7 @@
 #include "LogEntry.h"
 #include "Formatter.h"
 
-#include "../include/stringify.h"
+#include "include/stringify.h"
 
 
 

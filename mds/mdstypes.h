@@ -3,30 +3,31 @@
 #ifndef CEPH_MDSTYPES_H
 #define CEPH_MDSTYPES_H
 
-#include "../include/int_types.h"
+#include "include/int_types.h"
 
 #include <math.h>
 #include <ostream>
 #include <set>
 #include <map>
 
-#include "../common/config.h"
-#include "../common/Clock.h"
-#include "../common/DecayCounter.h"
+#include "common/config.h"
+#include "common/Clock.h"
+#include "common/DecayCounter.h"
 #include "MDSContext.h"
 
-#include "../include/frag.h"
-#include "../include/xlist.h"
-#include "../include/interval_set.h"
+#include "include/frag.h"
+#include "include/xlist.h"
+#include "include/interval_set.h"
 
 #include "inode_backtrace.h"
 
 //if"#define BOOST_SYSTEM_NO_DEPRECATED" or do not use pool.hpp,or link will need
 //boost::system::generic_category() & boost::system::system_category()
 //by ketor #include <boost/pool/pool.hpp>
-#include "../include/assert.h"
-#include "../include/hash_namespace.h"
+#include "include/assert.h"
+#include "include/hash_namespace.h"
 #include <boost/serialization/strong_typedef.hpp>
+
 
 #define CEPH_FS_ONDISK_MAGIC "ceph fs volume v011"
 
@@ -261,6 +262,44 @@ inline bool operator<(const vinodeno_t &l, const vinodeno_t &r) {
     (l.ino == r.ino && l.snapid < r.snapid);
 }
 
+struct quota_info_t
+{
+  int64_t max_bytes;
+  int64_t max_files;
+ 
+  quota_info_t() : max_bytes(0), max_files(0) {}
+
+  void encode(bufferlist& bl) const {
+    ENCODE_START(1, 1, bl);
+    ::encode(max_bytes, bl);
+    ::encode(max_files, bl);
+    ENCODE_FINISH(bl);
+  }
+  void decode(bufferlist::iterator& p) {
+    DECODE_START_LEGACY_COMPAT_LEN(1, 1, 1, p);
+    ::decode(max_bytes, p);
+    ::decode(max_files, p);
+    DECODE_FINISH(p);
+  }
+
+  void dump(Formatter *f) const;
+  static void generate_test_instances(list<quota_info_t *>& ls);
+
+  bool is_valid() const {
+    return max_bytes >=0 && max_files >=0;
+  }
+  bool is_enable() const {
+    return max_bytes || max_files;
+  }
+};
+WRITE_CLASS_ENCODER(quota_info_t)
+
+inline bool operator==(const quota_info_t &l, const quota_info_t &r) {
+  return memcmp(&l, &r, sizeof(l)) == 0;
+}
+
+ostream& operator<<(ostream &out, const quota_info_t &n);
+
 CEPH_HASH_NAMESPACE_START
   template<> struct hash<vinodeno_t> {
     size_t operator()(const vinodeno_t &vino) const { 
@@ -365,6 +404,8 @@ struct inode_t {
   frag_info_t dirstat;         // protected by my filelock
   nest_info_t rstat;           // protected by my nestlock
   nest_info_t accounted_rstat; // protected by parent's nestlock
+
+  quota_info_t quota;
  
   // special stuff
   version_t version;           // auth only
@@ -383,6 +424,7 @@ struct inode_t {
 	      version(0), file_data_version(0), xattr_version(0), backtrace_version(0) {
     clear_layout();
     memset(&dir_layout, 0, sizeof(dir_layout));
+    memset(&quota, 0, sizeof(quota));
   }
 
   // file type

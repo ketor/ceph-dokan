@@ -1,4 +1,4 @@
-#include "../include/uuid.h"
+#include "include/uuid.h"
 
 struct uuid {
 	uint32_t	time_low;

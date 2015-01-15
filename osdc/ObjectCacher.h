@@ -3,14 +3,14 @@
 #ifndef CEPH_OBJECTCACHER_H
 #define CEPH_OBJECTCACHER_H
 
-#include "../include/types.h"
-#include "../include/lru.h"
-#include "../include/Context.h"
-#include "../include/xlist.h"
+#include "include/types.h"
+#include "include/lru.h"
+#include "include/Context.h"
+#include "include/xlist.h"
 
-#include "../common/Cond.h"
-#include "../common/Finisher.h"
-#include "../common/Thread.h"
+#include "common/Cond.h"
+#include "common/Finisher.h"
+#include "common/Thread.h"
 
 #include "Objecter.h"
 #include "Striper.h"

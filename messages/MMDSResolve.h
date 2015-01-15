@@ -15,9 +15,9 @@
 #ifndef CEPH_MMDSRESOLVE_H
 #define CEPH_MMDSRESOLVE_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
-#include "../include/types.h"
+#include "include/types.h"
 
 class MMDSResolve : public Message {
  public:

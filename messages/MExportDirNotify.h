@@ -15,7 +15,7 @@
 #ifndef CEPH_MEXPORTDIRNOTIFY_H
 #define CEPH_MEXPORTDIRNOTIFY_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MExportDirNotify : public Message {
   dirfrag_t base;

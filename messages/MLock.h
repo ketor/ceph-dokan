@@ -16,9 +16,9 @@
 #ifndef CEPH_MLOCK_H
 #define CEPH_MLOCK_H
 
-#include "../msg/Message.h"
-#include "../mds/locks.h"
-#include "../mds/SimpleLock.h"
+#include "msg/Message.h"
+#include "mds/locks.h"
+#include "mds/SimpleLock.h"
 
 class MLock : public Message {
   int32_t     action;  // action type

@@ -15,7 +15,7 @@
 #ifndef CEPH_MBACKFILL_H
 #define CEPH_MBACKFILL_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MBackfillReserve : public Message {
   static const int HEAD_VERSION = 3;

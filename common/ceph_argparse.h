@@ -28,8 +28,8 @@
 #include <string>
 #include <vector>
 
-#include "../common/entity_name.h"
-#include "../msg/msg_types.h"
+#include "common/entity_name.h"
+#include "msg/msg_types.h"
 
 /////////////////////// Types ///////////////////////
 class CephInitParameters

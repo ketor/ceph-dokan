@@ -19,11 +19,11 @@
 
 #include "SimpleMessenger.h"
 
-#include "../common/config.h"
-#include "../common/Timer.h"
-#include "../common/errno.h"
-#include "../auth/Crypto.h"
-#include "../include/Spinlock.h"
+#include "common/config.h"
+#include "common/Timer.h"
+#include "common/errno.h"
+#include "auth/Crypto.h"
+#include "include/Spinlock.h"
 
 #define dout_subsys ceph_subsys_ms
 #undef dout_prefix
@@ -266,7 +266,19 @@ void SimpleMessenger::queue_reap(Pipe *pipe)
   lock.Unlock();
 }
 
-
+bool SimpleMessenger::is_connected(Connection *con)
+{
+  bool r = false;
+  if (con) {
+    Pipe *p = static_cast<Pipe *>(static_cast<PipeConnection*>(con)->get_pipe());
+    if (p) {
+      assert(p->msgr == this);
+      r = p->is_connected();
+      p->put();
+    }
+  }
+  return r;
+}
 
 int SimpleMessenger::bind(const entity_addr_t &bind_addr)
 {
@@ -581,7 +593,7 @@ void SimpleMessenger::mark_down_all()
     Pipe *p = *q;
     ldout(cct,5) << "mark_down_all accepting_pipe " << p << dendl;
     p->pipe_lock.Lock();
-    p->stop_and_wait();
+    p->stop();
     PipeConnectionRef con = p->connection_state;
     if (con && con->clear_pipe(p))
       dispatch_queue.queue_reset(con.get());
@@ -596,7 +608,7 @@ void SimpleMessenger::mark_down_all()
     rank_pipe.erase(it);
     p->unregister_pipe();
     p->pipe_lock.Lock();
-    p->stop_and_wait();
+    p->stop();
     PipeConnectionRef con = p->connection_state;
     if (con && con->clear_pipe(p))
       dispatch_queue.queue_reset(con.get());
@@ -613,7 +625,7 @@ void SimpleMessenger::mark_down(const entity_addr_t& addr)
     ldout(cct,1) << "mark_down " << addr << " -- " << p << dendl;
     p->unregister_pipe();
     p->pipe_lock.Lock();
-    p->stop_and_wait();
+    p->stop();
     if (p->connection_state) {
       // generate a reset event for the caller in this case, even
       // though they asked for it, since this is the addr-based (and
@@ -640,7 +652,7 @@ void SimpleMessenger::mark_down(Connection *con)
     assert(p->msgr == this);
     p->unregister_pipe();
     p->pipe_lock.Lock();
-    p->stop_and_wait();
+    p->stop();
     if (p->connection_state) {
       // do not generate a reset event for the caller in this case,
       // since they asked for it.

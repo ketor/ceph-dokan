@@ -15,8 +15,8 @@
 #ifndef MOSDPGPULL_H
 #define MOSDPGPULL_H
 
-#include "../msg/Message.h"
-#include "../osd/osd_types.h"
+#include "msg/Message.h"
+#include "osd/osd_types.h"
 
 class MOSDPGPull : public Message {
   static const int HEAD_VERSION = 2;

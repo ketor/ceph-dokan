@@ -18,9 +18,9 @@
 #include <errno.h>
 #include <sstream>
 
-#include "../common/config.h"
-#include "../include/assert.h"
-#include "../include/ceph_features.h"
+#include "common/config.h"
+#include "include/assert.h"
+#include "include/ceph_features.h"
 
 #define dout_subsys ceph_subsys_auth
 

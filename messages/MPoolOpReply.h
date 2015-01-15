@@ -15,7 +15,7 @@
 #ifndef CEPH_MPOOLOPREPLY_H
 #define CEPH_MPOOLOPREPLY_H
 
-#include "../common/errno.h"
+#include "common/errno.h"
 
 class MPoolOpReply : public PaxosServiceMessage {
 public:

@@ -2,7 +2,7 @@
 // vim: ts=8 sw=2 smarttab
 
 #include "ClientSnapRealm.h"
-#include "../common/Formatter.h"
+#include "common/Formatter.h"
 
 void SnapRealm::dump(Formatter *f) const
 {

@@ -17,7 +17,7 @@
 #ifndef CEPH_MOSDALIVE_H
 #define CEPH_MOSDALIVE_H
 
-#include "../messages/PaxosServiceMessage.h"
+#include "messages/PaxosServiceMessage.h"
 
 class MOSDAlive : public PaxosServiceMessage {
  public:

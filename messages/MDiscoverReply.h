@@ -16,8 +16,8 @@
 #ifndef CEPH_MDISCOVERREPLY_H
 #define CEPH_MDISCOVERREPLY_H
 
-#include "../msg/Message.h"
-#include "../include/filepath.h"
+#include "msg/Message.h"
+#include "include/filepath.h"
 
 #include <string>
 

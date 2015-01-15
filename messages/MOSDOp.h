@@ -16,9 +16,9 @@
 #ifndef CEPH_MOSDOP_H
 #define CEPH_MOSDOP_H
 
-#include "../msg/Message.h"
-#include "../osd/osd_types.h"
-#include "../include/ceph_features.h"
+#include "msg/Message.h"
+#include "osd/osd_types.h"
+#include "include/ceph_features.h"
 
 /*
  * OSD op

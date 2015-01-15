@@ -15,9 +15,9 @@
 #ifndef CEPH_MMONMAP_H
 #define CEPH_MMONMAP_H
 
-#include "../include/ceph_features.h"
-#include "../msg/Message.h"
-#include "../mon/MonMap.h"
+#include "include/ceph_features.h"
+#include "msg/Message.h"
+#include "mon/MonMap.h"
 
 class MMonMap : public Message {
 public:

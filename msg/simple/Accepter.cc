@@ -18,14 +18,14 @@
 //#include <sys/uio.h>
 #include <limits.h>
 //#include <poll.h>
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 #include "Accepter.h"
 #include "Pipe.h"
 #include "SimpleMessenger.h"
 
-#include "../common/debug.h"
-#include "../common/errno.h"
+#include "common/debug.h"
+#include "common/errno.h"
 
 #define dout_subsys ceph_subsys_ms
 

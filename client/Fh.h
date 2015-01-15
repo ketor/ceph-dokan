@@ -1,8 +1,8 @@
 #ifndef CEPH_CLIENT_FH_H
 #define CEPH_CLIENT_FH_H
 
-#include "../common/Readahead.h"
-#include "../include/types.h"
+#include "common/Readahead.h"
+#include "include/types.h"
 
 struct Inode;
 class Cond;

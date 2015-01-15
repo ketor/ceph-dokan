@@ -15,11 +15,11 @@
 #ifndef CEPH_FINISHER_H
 #define CEPH_FINISHER_H
 
-#include "../include/atomic.h"
-#include "../common/Mutex.h"
-#include "../common/Cond.h"
-#include "../common/Thread.h"
-#include "../common/perf_counters.h"
+#include "include/atomic.h"
+#include "common/Mutex.h"
+#include "common/Cond.h"
+#include "common/Thread.h"
+#include "common/perf_counters.h"
 
 class CephContext;
 
@@ -49,20 +49,24 @@ class Finisher {
  public:
   void queue(Context *c, int r = 0) {
     finisher_lock.Lock();
+    if (finisher_queue.empty()) {
+      finisher_cond.Signal();
+    }
     if (r) {
       finisher_queue_rval.push_back(pair<Context*, int>(c, r));
       finisher_queue.push_back(NULL);
     } else
       finisher_queue.push_back(c);
-    finisher_cond.Signal();
     if (logger)
       logger->inc(l_finisher_queue_len);
     finisher_lock.Unlock();
   }
   void queue(vector<Context*>& ls) {
     finisher_lock.Lock();
+    if (finisher_queue.empty()) {
+      finisher_cond.Signal();
+    }
     finisher_queue.insert(finisher_queue.end(), ls.begin(), ls.end());
-    finisher_cond.Signal();
     if (logger)
       logger->inc(l_finisher_queue_len, ls.size());
     finisher_lock.Unlock();
@@ -70,8 +74,10 @@ class Finisher {
   }
   void queue(deque<Context*>& ls) {
     finisher_lock.Lock();
+    if (finisher_queue.empty()) {
+      finisher_cond.Signal();
+    }
     finisher_queue.insert(finisher_queue.end(), ls.begin(), ls.end());
-    finisher_cond.Signal();
     if (logger)
       logger->inc(l_finisher_queue_len, ls.size());
     finisher_lock.Unlock();
@@ -79,8 +85,10 @@ class Finisher {
   }
   void queue(list<Context*>& ls) {
     finisher_lock.Lock();
+    if (finisher_queue.empty()) {
+      finisher_cond.Signal();
+    }
     finisher_queue.insert(finisher_queue.end(), ls.begin(), ls.end());
-    finisher_cond.Signal();
     if (logger)
       logger->inc(l_finisher_queue_len, ls.size());
     finisher_lock.Unlock();

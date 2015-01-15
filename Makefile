@@ -61,11 +61,12 @@ test-cephfs.exe:test_cephfs.o libcephfs.dll
 	@echo "MAKE "$@" FINISH"
 	@echo "**************************************************************"
 
-ceph-dokan.exe:dokan/ceph_dokan.o dokan/posix_acl.o dokan/dokan.lib $(OBJECTS)
-	$(CPP) $(CFLAGS) $(CLIBS) -o $@ $^ -lws2_32 -lpthread -unicode -static-libgcc -static-libstdc++
+ceph-dokan.exe:dokan/ceph_dokan.o dokan/posix_acl.o dokan/dokan.lib libcephfs.dll
+	$(CPP) $(CFLAGS) $(CLIBS) -o $@ $^ -lws2_32 -lpthread -unicode 
 	@echo "**************************************************************"
 	@echo "MAKE "$@" FINISH"
 	@echo "**************************************************************"
 
 clean:
-	rm -f $(OBJECTS) dokan/ceph_dokan.o test_cephfs.o
+	rm -f $(OBJECTS) dokan/*.o *.o libcephfs.dll ceph-dokan.exe test-cephfs.exe
+

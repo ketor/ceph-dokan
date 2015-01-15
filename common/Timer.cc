@@ -17,8 +17,8 @@
 #include "Thread.h"
 #include "Timer.h"
 
-#include "../common/config.h"
-#include "../include/Context.h"
+#include "common/config.h"
+#include "include/Context.h"
 
 #define dout_subsys ceph_subsys_timer
 #undef dout_prefix

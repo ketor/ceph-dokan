@@ -16,7 +16,7 @@
 #ifndef CEPH_MEXPORTCAPSACK_H
 #define CEPH_MEXPORTCAPSACK_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 
 class MExportCapsAck : public Message {

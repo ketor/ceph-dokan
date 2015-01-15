@@ -1,7 +1,7 @@
 #ifndef CEPH_CRYPTO_H
 #define CEPH_CRYPTO_H
 
-#include "../acconfig.h"
+#include "acconfig.h"
 
 #define CEPH_CRYPTO_MD5_DIGESTSIZE 16
 #define CEPH_CRYPTO_HMACSHA1_DIGESTSIZE 20

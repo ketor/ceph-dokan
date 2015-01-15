@@ -4,10 +4,10 @@
 #ifndef __CEPH_OS_SEQUENCERPOSITION_H
 #define __CEPH_OS_SEQUENCERPOSITION_H
 
-#include "../include/types.h"
-#include "../include/cmp.h"
-#include "../include/encoding.h"
-#include "../common/Formatter.h"
+#include "include/types.h"
+#include "include/cmp.h"
+#include "include/encoding.h"
+#include "common/Formatter.h"
 
 #include <ostream>
 

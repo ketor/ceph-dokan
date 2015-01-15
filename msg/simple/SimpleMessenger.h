@@ -15,25 +15,25 @@
 #ifndef CEPH_SIMPLEMESSENGER_H
 #define CEPH_SIMPLEMESSENGER_H
 
-#include "../include/types.h"
-#include "../include/xlist.h"
+#include "include/types.h"
+#include "include/xlist.h"
 
 #include <list>
 #include <map>
 using namespace std;
-#include "../include/unordered_map.h"
-#include "../include/unordered_set.h"
+#include "include/unordered_map.h"
+#include "include/unordered_set.h"
 
-#include "../common/Mutex.h"
-#include "../include/atomic.h"
-#include "../include/Spinlock.h"
-#include "../common/Cond.h"
-#include "../common/Thread.h"
-#include "../common/Throttle.h"
+#include "common/Mutex.h"
+#include "include/atomic.h"
+#include "include/Spinlock.h"
+#include "common/Cond.h"
+#include "common/Thread.h"
+#include "common/Throttle.h"
 
-#include "../msg/SimplePolicyMessenger.h"
-#include "../msg/Message.h"
-#include "../include/assert.h"
+#include "msg/SimplePolicyMessenger.h"
+#include "msg/Message.h"
+#include "include/assert.h"
 
 #include "DispatchQueue.h"
 #include "Pipe.h"
@@ -409,6 +409,11 @@ public:
    * ready to be torn down.
    */
   void queue_reap(Pipe *pipe);
+
+  /**
+   * Used to get whether this connection ready to send
+   */
+  bool is_connected(Connection *con);
   /**
    * @} // SimpleMessenger Internals
    */

@@ -1,14 +1,14 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#include "../include/types.h"
-#include "../include/utime.h"
+#include "include/types.h"
+#include "include/utime.h"
 
 #include "Dentry.h"
 #include "Dir.h"
 #include "Inode.h"
 
-#include "../common/Formatter.h"
+#include "common/Formatter.h"
 
 void Dentry::dump(Formatter *f) const
 {

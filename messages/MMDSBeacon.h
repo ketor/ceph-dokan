@@ -15,11 +15,11 @@
 #ifndef CEPH_MMDSBEACON_H
 #define CEPH_MMDSBEACON_H
 
-#include "../messages/PaxosServiceMessage.h"
+#include "messages/PaxosServiceMessage.h"
 
-#include "../include/types.h"
+#include "include/types.h"
 
-#include "../mds/MDSMap.h"
+#include "mds/MDSMap.h"
 
 //by ketor #include <uuid/uuid.h>
 

@@ -9,12 +9,12 @@
 #include <iostream>
 #include <sstream>
 
-#include "../common/errno.h"
-#include "../common/safe_io.h"
-#include "../common/Clock.h"
-#include "../include/assert.h"
-#include "../include/compat.h"
-#include "../include/on_exit.h"
+#include "common/errno.h"
+#include "common/safe_io.h"
+#include "common/Clock.h"
+#include "include/assert.h"
+#include "include/compat.h"
+#include "include/on_exit.h"
 
 #define DEFAULT_MAX_NEW    100
 #define DEFAULT_MAX_RECENT 10000

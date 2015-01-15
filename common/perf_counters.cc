@@ -12,12 +12,12 @@
  *
  */
 
-#include "../include/int_types.h"
+#include "include/int_types.h"
 
-#include "../common/perf_counters.h"
-#include "../common/dout.h"
-#include "../common/errno.h"
-#include "../common/Formatter.h"
+#include "common/perf_counters.h"
+#include "common/dout.h"
+#include "common/errno.h"
+#include "common/Formatter.h"
 
 #include <errno.h>
 #include <map>

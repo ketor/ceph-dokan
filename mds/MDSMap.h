@@ -18,20 +18,20 @@
 
 #include <errno.h>
 
-#include "../include/types.h"
-#include "../common/Clock.h"
-#include "../msg/Message.h"
+#include "include/types.h"
+#include "common/Clock.h"
+#include "msg/Message.h"
 
 #include <set>
 #include <map>
 #include <string>
 
-#include "../common/config.h"
+#include "common/config.h"
 
-#include "../include/CompatSet.h"
-#include "../include/ceph_features.h"
-#include "../common/Formatter.h"
-#include "../mds/mdstypes.h"
+#include "include/CompatSet.h"
+#include "include/ceph_features.h"
+#include "common/Formatter.h"
+#include "mds/mdstypes.h"
 
 /*
 

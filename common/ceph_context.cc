@@ -14,21 +14,22 @@
 
 #include <time.h>
 
-#include "../common/admin_socket.h"
-#include "../common/perf_counters.h"
-#include "../common/Thread.h"
-#include "../common/ceph_context.h"
-#include "../common/config.h"
-#include "../common/debug.h"
+//#include <boost/algorithm/string.hpp>
+#include "common/admin_socket.h"
+#include "common/perf_counters.h"
+#include "common/Thread.h"
+#include "common/ceph_context.h"
+#include "common/config.h"
+#include "common/debug.h"
 //by ketor #include./common/HeartbeatMap.h"
-#include "../common/errno.h"
+#include "common/errno.h"
 //by ketor #include "common/lockdep.h"
-#include "../common/Formatter.h"
-#include "../log/Log.h"
-#include "../auth/Crypto.h"
-#include "../include/str_list.h"
-#include "../common/Mutex.h"
-#include "../common/Cond.h"
+#include "common/Formatter.h"
+#include "log/Log.h"
+#include "auth/Crypto.h"
+#include "include/str_list.h"
+#include "common/Mutex.h"
+#include "common/Cond.h"
 
 #include <iostream>
 #include <pthread.h>
@@ -263,6 +264,7 @@ CephContext::CephContext(uint32_t module_type_)
     _crypto_aes(NULL)
 {
   ceph_spin_init(&_service_thread_lock);
+  ceph_spin_init(&_associated_objs_lock);
 
   _log = new ceph::log::Log(&_conf->subsys);
   _log->start();
@@ -294,9 +296,11 @@ CephContext::CephContext(uint32_t module_type_)
 
 CephContext::~CephContext()
 {
-
   join_service_thread();
 
+  /*for (map<string, AssociatedSingletonObject*>::iterator it = _associated_objs.begin();
+       it != _associated_objs.end(); it++)
+    delete it->second;*/
   //by ketor _admin_socket->unregister_command("perfcounters_dump");
   //_admin_socket->unregister_command("perf dump");
   //_admin_socket->unregister_command("1");
@@ -330,6 +334,7 @@ CephContext::~CephContext()
 
   delete _conf;
   ceph_spin_destroy(&_service_thread_lock);
+  ceph_spin_destroy(&_associated_objs_lock);
 
   delete _crypto_none;
   delete _crypto_aes;

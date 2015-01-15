@@ -7,8 +7,8 @@
 #include <ostream>
 using std::ostream;
 
-#include "../include/types.h"
-#include "../msg/msg_types.h"
+#include "include/types.h"
+#include "msg/msg_types.h"
 
 class CephContext;
 

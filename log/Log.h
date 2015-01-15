@@ -4,7 +4,7 @@
 #ifndef __CEPH_LOG_LOG_H
 #define __CEPH_LOG_LOG_H
 
-#include "../common/Thread.h"
+#include "common/Thread.h"
 
 #include <winsock2.h>
 #include <pthread.h>

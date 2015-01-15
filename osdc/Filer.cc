@@ -14,19 +14,19 @@
 
 
 #include "Filer.h"
-#include "../osd/OSDMap.h"
+#include "osd/OSDMap.h"
 #include "Striper.h"
 
-#include "../messages/MOSDOp.h"
-#include "../messages/MOSDOpReply.h"
-#include "../messages/MOSDMap.h"
+#include "messages/MOSDOp.h"
+#include "messages/MOSDOpReply.h"
+#include "messages/MOSDMap.h"
 
-#include "../msg/Messenger.h"
+#include "msg/Messenger.h"
 
-#include "../include/Context.h"
+#include "include/Context.h"
 
-#include "../common/Finisher.h"
-#include "../common/config.h"
+#include "common/Finisher.h"
+#include "common/config.h"
 
 #define dout_subsys ceph_subsys_filer
 #undef dout_prefix

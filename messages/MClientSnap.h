@@ -15,7 +15,7 @@
 #ifndef CEPH_MCLIENTSNAP_H
 #define CEPH_MCLIENTSNAP_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 struct MClientSnap : public Message {
   ceph_mds_snap_head head;

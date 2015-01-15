@@ -1,7 +1,7 @@
 #ifndef CEPH_FORMATTER_H
 #define CEPH_FORMATTER_H
 
-#include "../include/int_types.h"
+#include "include/int_types.h"
 
 #include <deque>
 #include <iostream>
@@ -11,7 +11,7 @@
 #include <stdarg.h>
 #include <string>
 
-#include "../include/buffer.h"
+#include "include/buffer.h"
 
 namespace ceph {
 

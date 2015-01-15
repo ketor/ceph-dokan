@@ -22,12 +22,12 @@ extern struct ceph_file_layout g_default_file_layout;
 #include <map>
 #include <set>
 
-#include "../common/ConfUtils.h"
-#include "../common/entity_name.h"
-#include "../common/Mutex.h"
-#include "../log/SubsystemMap.h"
-#include "../common/config_obs.h"
-#include "../msg/msg_types.h"
+#include "common/ConfUtils.h"
+#include "common/entity_name.h"
+#include "common/Mutex.h"
+#include "log/SubsystemMap.h"
+#include "common/config_obs.h"
+#include "msg/msg_types.h"
 
 enum {
   CEPH_DEFAULT_CRUSH_REPLICATED_RULESET,
@@ -220,7 +220,7 @@ public:
 #define OPTION(name, ty, init) OPTION_##ty(name)
 #define SUBSYS(name, log, gather)
 #define DEFAULT_SUBSYS(log, gather)
-#include "../common/config_opts.h"
+#include "common/config_opts.h"
 #undef OPTION_OPT_INT
 #undef OPTION_OPT_LONGLONG
 #undef OPTION_OPT_STR
@@ -276,7 +276,7 @@ enum config_subsys_id {
 #define SUBSYS(name, log, gather) \
   ceph_subsys_##name,
 #define DEFAULT_SUBSYS(log, gather)
-#include "../common/config_opts.h"
+#include "common/config_opts.h"
 #undef SUBSYS
 #undef OPTION
 #undef DEFAULT_SUBSYS

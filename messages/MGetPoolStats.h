@@ -18,7 +18,7 @@
 
 //by ketor #include <uuid/uuid.h>
 
-#include "../messages/PaxosServiceMessage.h"
+#include "messages/PaxosServiceMessage.h"
 
 class MGetPoolStats : public PaxosServiceMessage {
 public:

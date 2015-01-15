@@ -1,6 +1,6 @@
 
 #include "snap_types.h"
-#include "../common/Formatter.h"
+#include "common/Formatter.h"
 
 void SnapRealmInfo::encode(bufferlist& bl) const
 {

@@ -15,8 +15,8 @@
 #ifndef CEPH_MAUTHREPLY_H
 #define CEPH_MAUTHREPLY_H
 
-#include "../msg/Message.h"
-#include "../common/errno.h"
+#include "msg/Message.h"
+#include "common/errno.h"
 
 struct MAuthReply : public Message {
   __u32 protocol;

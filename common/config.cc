@@ -12,22 +12,22 @@
  *
  */
 
-#include "../auth/Auth.h"
-#include "../common/ConfUtils.h"
-#include "../common/ceph_argparse.h"
-#include "../common/common_init.h"
-#include "../common/config.h"
-#include "../common/static_assert.h"
-#include "../common/strtol.h"
-#include "../common/version.h"
-#include "../include/str_list.h"
-#include "../include/types.h"
-#include "../include/stringify.h"
-#include "../msg/msg_types.h"
-#include "../osd/osd_types.h"
-#include "../common/errno.h"
+#include "auth/Auth.h"
+#include "common/ConfUtils.h"
+#include "common/ceph_argparse.h"
+#include "common/common_init.h"
+#include "common/config.h"
+#include "common/static_assert.h"
+#include "common/strtol.h"
+#include "common/version.h"
+#include "include/str_list.h"
+#include "include/types.h"
+#include "include/stringify.h"
+#include "msg/msg_types.h"
+#include "osd/osd_types.h"
+#include "common/errno.h"
 
-#include "../include/assert.h"
+#include "include/assert.h"
 
 #include <errno.h>
 #include <sstream>
@@ -90,7 +90,7 @@ struct config_option config_optionsp[] = {
        { STRINGIFY(name), type, offsetof(struct md_config_t, name) },
 #define SUBSYS(name, log, gather)
 #define DEFAULT_SUBSYS(log, gather)
-#include "../common/config_opts.h"
+#include "common/config_opts.h"
 #undef OPTION
 #undef SUBSYS
 #undef DEFAULT_SUBSYS
@@ -134,7 +134,7 @@ md_config_t::md_config_t()
 #define OPTION(name, type, def_val) OPTION_##type(name, def_val)
 #define SUBSYS(name, log, gather)
 #define DEFAULT_SUBSYS(log, gather)
-#include "../common/config_opts.h"
+#include "common/config_opts.h"
 #undef OPTION_OPT_INT
 #undef OPTION_OPT_LONGLONG
 #undef OPTION_OPT_STR
@@ -160,7 +160,7 @@ void md_config_t::init_subsys()
 #define DEFAULT_SUBSYS(log, gather) \
   subsys.add(ceph_subsys_, "none", log, gather);
 #define OPTION(a, b, c)
-#include "../common/config_opts.h"
+#include "common/config_opts.h"
 #undef OPTION
 #undef SUBSYS
 #undef DEFAULT_SUBSYS

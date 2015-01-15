@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-#include "../common/code_environment.h"
+#include "common/code_environment.h"
 
 class CephContext;
 class CephInitParameters;

@@ -13,8 +13,8 @@
 #ifndef CEPH_MMONSCRUB_H
 #define CEPH_MMONSCRUB_H
 
-#include "../msg/Message.h"
-#include "../mon/mon_types.h"
+#include "msg/Message.h"
+#include "mon/mon_types.h"
 
 class MMonScrub : public Message
 {

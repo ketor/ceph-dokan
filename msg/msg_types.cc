@@ -6,7 +6,7 @@
 #include <string.h>
 //by ketor #include <netdb.h>
 
-#include "../common/Formatter.h"
+#include "common/Formatter.h"
 
 void entity_name_t::dump(Formatter *f) const
 {

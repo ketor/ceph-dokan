@@ -16,8 +16,8 @@
 
 #include <errno.h>
 
-#include "../include/str_map.h"
-#include "../include/str_list.h"
+#include "include/str_map.h"
+#include "include/str_list.h"
 
 //#include "json_spirit/json_spirit.h"
 

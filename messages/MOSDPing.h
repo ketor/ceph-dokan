@@ -15,10 +15,10 @@
 #ifndef CEPH_MOSDPING_H
 #define CEPH_MOSDPING_H
 
-#include "../common/Clock.h"
+#include "common/Clock.h"
 
-#include "../msg/Message.h"
-#include "../osd/osd_types.h"
+#include "msg/Message.h"
+#include "osd/osd_types.h"
 
 
 class MOSDPing : public Message {

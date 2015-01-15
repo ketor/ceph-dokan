@@ -17,15 +17,15 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/optional.hpp>
-#include "../include/memory.h"
+#include "include/memory.h"
 #include <set>
 #include <map>
 #include <utility>
 #include <string>
 #include <errno.h>
 
-#include "../include/Context.h"
-#include "../common/sharedptr_registry.hpp"
+#include "include/Context.h"
+#include "common/sharedptr_registry.hpp"
 
 namespace MapCacher {
 /**

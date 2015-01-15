@@ -12,10 +12,10 @@
  *
  */
 
-#include "../common/debug.h"
-#include "../common/errno.h"
-#include "../common/safe_io.h"
-#include "../global/pidfile.h"
+#include "common/debug.h"
+#include "common/errno.h"
+#include "common/safe_io.h"
+#include "global/pidfile.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -27,7 +27,7 @@
 #include <sys/param.h>
 #endif
 
-#include "../include/compat.h"
+#include "include/compat.h"
 
 #define dout_prefix *_dout
 

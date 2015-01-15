@@ -15,7 +15,7 @@
 #ifndef CEPH_MCOMMANDREPLY_H
 #define CEPH_MCOMMANDREPLY_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 #include "MCommand.h"
 
 class MCommandReply : public Message {

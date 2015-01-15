@@ -33,24 +33,30 @@ int g_GID = 0;
 BOOL g_UseACL  = FALSE;
 struct ceph_mount_info *cmount;
 
-/*only d_name[256] is usefull*/
-struct dirent {
-    unsigned long long d_ino;       /* inode number */
-    unsigned short d_reclen;    /* length of this record */
-    unsigned short d_namlen;    /* length of this record */
-    unsigned char  d_type;      /* type of file; not supported
-                                   by all file system types */
-    unsigned long long d_time_create;
-    unsigned long long d_time_access;
-    unsigned long long d_time_write;
-    unsigned long d_size;
-    char          d_name[256]; /* filename */
-};
 
+//deprecated:MinGW Now support dirent, so use MinGW's
+/*only d_name[256] is usefull*/
+//struct dirent {
+//    unsigned long long d_ino;       /* inode number */
+//    unsigned short d_reclen;    /* length of this record */
+//    unsigned short d_namlen;    /* length of this record */
+//    unsigned char  d_type;      /* type of file; not supported
+//                                   by all file system types */
+//    unsigned long long d_time_create;
+//    unsigned long long d_time_access;
+//    unsigned long long d_time_write;
+//    unsigned long d_size;
+//    char          d_name[256]; /* filename */
+//};
+
+//MinGW Now support dirent, so use MinGW's
+#include <dirent.h>
+
+/* mingw/include/part/time.h already have this
 struct timespec {
     unsigned long long tv_sec;
     unsigned int tv_nsec;
-};
+}; */ 
 
 #define __dev_t unsigned long long
 #define __ino_t unsigned long long
@@ -1511,7 +1517,7 @@ WinCephSetFileAttributes(
     int len = wchar_to_char(file_name, FileName, MAX_PATH_CEPH);
     ToLinuxFilePath(file_name);
     
-    fwprintf(stderr, L"SetFileAttributes [%s][%d]\n", FileName, FileAttributes);
+    //fwprintf(stderr, L"SetFileAttributes [%s][%d]\n", FileName, FileAttributes);
     
     return 0;
 }

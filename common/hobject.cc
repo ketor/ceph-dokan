@@ -1,9 +1,9 @@
 // -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
 // vim: ts=8 sw=2 smarttab
 
-#include "../include/types.h"
+#include "include/types.h"
 #include "hobject.h"
-#include "../common/Formatter.h"
+#include "common/Formatter.h"
 
 static void append_escaped(const string &in, string *out)
 {
@@ -132,6 +132,7 @@ void hobject_t::decode(bufferlist::iterator& bl)
     ::decode(pool, bl);
   }
   DECODE_FINISH(bl);
+  build_filestore_key_cache();
 }
 
 //by ketor void hobject_t::decode(json_spirit::Value& v)
@@ -155,6 +156,7 @@ void hobject_t::decode(bufferlist::iterator& bl)
 //    else if (p.name_ == "namespace")
 //      nspace = p.value_.get_str();
 //  }
+//  build_filestore_key_cache();
 //}
 
 void hobject_t::dump(Formatter *f) const
@@ -184,7 +186,7 @@ ostream& operator<<(ostream& out, const hobject_t& o)
 {
   if (o.is_max())
     return out << "MAX";
-  out << std::hex << o.hash << std::dec;
+  out << std::hex << o.get_hash() << std::dec;
   if (o.get_key().length())
     out << "." << o.get_key();
   out << "/" << o.oid << "/" << o.snap;
@@ -233,6 +235,7 @@ void ghobject_t::decode(bufferlist::iterator& bl)
     shard_id = shard_id_t::NO_SHARD;
   }
   DECODE_FINISH(bl);
+  hobj.set_hash(hobj.get_hash()); //to call build_filestore_key_cache();
 }
 
 /*by ketorvoid ghobject_t::decode(json_spirit::Value& v)

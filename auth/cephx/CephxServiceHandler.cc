@@ -16,8 +16,7 @@
 #include "CephxServiceHandler.h"
 #include "CephxProtocol.h"
 
-#include "../../auth/cephx/CephxKeyServer.h"
-
+#include "auth/cephx/CephxKeyServer.h"
 #include "../Auth.h"
 
 //by ketor #include "mon/Monitor.h"
@@ -25,8 +24,8 @@
 #include <errno.h>
 #include <sstream>
 
-#include "../common/config.h"
-#include "../include/assert.h"
+#include "common/config.h"
+#include "include/assert.h"
 
 #define dout_subsys ceph_subsys_auth
 #undef dout_prefix

@@ -15,8 +15,8 @@
 #ifndef MOSDPGPUSHREPLY_H
 #define MOSDPGPUSHREPLY_H
 
-#include "../msg/Message.h"
-#include "../osd/osd_types.h"
+#include "msg/Message.h"
+#include "osd/osd_types.h"
 
 class MOSDPGPushReply : public Message {
   static const int HEAD_VERSION = 2;

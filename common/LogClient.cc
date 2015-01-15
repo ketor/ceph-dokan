@@ -14,15 +14,15 @@
 
 
 
-#include "../include/types.h"
-#include "../include/str_map.h"
+#include "include/types.h"
+#include "include/str_map.h"
 
-#include "../msg/Messenger.h"
-#include "../msg/Message.h"
+#include "msg/Messenger.h"
+#include "msg/Message.h"
 
-#include "../messages/MLog.h"
-#include "../messages/MLogAck.h"
-#include "../mon/MonMap.h"
+#include "messages/MLog.h"
+#include "messages/MLogAck.h"
+#include "mon/MonMap.h"
 
 #include <iostream>
 #include <errno.h>
@@ -34,9 +34,9 @@
 #include <sys/mount.h>
 #endif // DARWIN
 
-#include "../common/LogClient.h"
+#include "common/LogClient.h"
 
-#include "../common/config.h"
+#include "common/config.h"
 
 #define dout_subsys ceph_subsys_monc
 

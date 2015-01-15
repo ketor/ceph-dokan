@@ -1,4 +1,4 @@
-#include "../common/errno.h"
+#include "common/errno.h"
 #include "acconfig.h"
 
 #include <sstream>

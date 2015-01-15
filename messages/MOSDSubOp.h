@@ -16,8 +16,8 @@
 #ifndef CEPH_MOSDSUBOP_H
 #define CEPH_MOSDSUBOP_H
 
-#include "../msg/Message.h"
-#include "../osd/osd_types.h"
+#include "msg/Message.h"
+#include "osd/osd_types.h"
 
 /*
  * OSD sub op - for internal ops on pobjects between primary and replicas(/stripes/whatever)

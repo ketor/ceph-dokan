@@ -16,7 +16,7 @@
 #ifndef CEPH_MOSDPGLOG_H
 #define CEPH_MOSDPGLOG_H
 
-#include "../msg/Message.h"
+#include "msg/Message.h"
 
 class MOSDPGLog : public Message {
 

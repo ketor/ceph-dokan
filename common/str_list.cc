@@ -12,7 +12,7 @@
  *
  */
 
-#include "../include/str_list.h"
+#include "include/str_list.h"
 
 using std::string;
 using std::vector;

@@ -16,11 +16,11 @@
 #include <sstream>
 #include <stdint.h>
 #include <include/utime.h>
-#include "../common/Mutex.h"
-#include "../common/histogram.h"
-#include "../include/xlist.h"
-#include "../msg/Message.h"
-#include "../include/memory.h"
+#include "common/Mutex.h"
+#include "common/histogram.h"
+#include "include/xlist.h"
+#include "msg/Message.h"
+#include "include/memory.h"
 
 class TrackedOp;
 typedef ceph::shared_ptr<TrackedOp> TrackedOpRef;

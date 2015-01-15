@@ -16,8 +16,8 @@
 #ifndef CEPH_MOSDPGREMOVE_H
 #define CEPH_MOSDPGREMOVE_H
 
-#include "../common/hobject.h"
-#include "../msg/Message.h"
+#include "common/hobject.h"
+#include "msg/Message.h"
 
 
 class MOSDPGRemove : public Message {

@@ -11,9 +11,9 @@
  * Foundation.  See file COPYING.
  *
  */
-#include "../acconfig.h"
+#include "acconfig.h"
 
-#include "../common/code_environment.h"
+#include "common/code_environment.h"
 
 #include <errno.h>
 #include <iostream>
