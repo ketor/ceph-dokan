@@ -9,9 +9,9 @@ How to use
 
 First install Dokan 0.6.0 on your Windows.
 
-Dokan 0.6.0 now support Windows XP/Vista/7/2008. 
+Dokan 0.6.0 support Windows XP/Vista/7/2008/8/2012. 
 
-After compile from source it can support Win8.
+If you use Win8 or Win2012, you need install Dokan in Windows 7 compatibility mode.
 
 If you compile dokan yourself, you will need to sign the dokan.sys with your own cert.
 
@@ -31,7 +31,7 @@ Introduction
 
 This program is based on original Ceph code and modifid for Win32 Platform.
 
-It is compiled by gcc, so it is native Win32 program with only one extra dll "pthreadGC2.dll".
+It is compiled by gcc/g++, so it is native Win32 program.
 
 Future
 -----------
