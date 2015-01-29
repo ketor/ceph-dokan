@@ -19,7 +19,7 @@
 #include "include/str_map.h"
 #include "include/str_list.h"
 
-//#include "json_spirit/json_spirit.h"
+#include "json_spirit/json_spirit.h"
 
 using namespace std;
 
@@ -29,7 +29,33 @@ int get_json_str_map(
     map<string,string> *str_map,
     bool fallback_to_plain)
 {
+  json_spirit::mValue json;
+  try {
+    // try json parsing first
 
+    json_spirit::read_or_throw(str, json);
+
+    if (json.type() != json_spirit::obj_type) {
+      ss << str << " must be a JSON object but is of type "
+	 << json.type() << " instead";
+      return -EINVAL;
+    }
+
+    json_spirit::mObject o = json.get_obj();
+
+    for (map<string, json_spirit::mValue>::iterator i = o.begin();
+	 i != o.end();
+	 ++i) {
+      (*str_map)[i->first] = i->second.get_str();
+    }
+  } catch (json_spirit::Error_position &e) {
+    if (fallback_to_plain) {
+      // fallback to key=value format
+      get_str_map(str, "\t\n ", str_map);
+    } else {
+      return -EINVAL;
+    }
+  }
   return 0;
 }
 

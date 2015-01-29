@@ -16,7 +16,7 @@
 #define CEPH_MCOMMAND_H
 
 #include <vector>
-//by ketor #include <uuid/uuid.h>
+#include <uuid/uuid.h>
 
 #include "msg/Message.h"
 

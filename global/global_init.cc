@@ -119,12 +119,11 @@ void global_init(std::vector < const char * > *alt_def_args,
   g_lockdep = g_ceph_context->_conf->lockdep;
 
   // signal stuff
-  //int siglist[] = { SIGPIPE, 0 };
-  int siglist[] = { 0, 0 };
+  int siglist[] = { SIGPIPE, 0 };
   block_signals(siglist, NULL);
 
-//  if (g_conf->fatal_signal_handlers)
-//    install_standard_sighandlers();
+  if (g_conf->fatal_signal_handlers)
+    install_standard_sighandlers();
 
   if (g_conf->log_flush_on_exit)
     g_ceph_context->_log->set_flush_on_exit();
@@ -132,8 +131,7 @@ void global_init(std::vector < const char * > *alt_def_args,
   if (g_conf->run_dir.length() &&
       code_env == CODE_ENVIRONMENT_DAEMON &&
       !(flags & CINIT_FLAG_NO_DAEMON_ACTIONS)) {
-    //int r = ::mkdir(g_conf->run_dir.c_str(), 0755);
-    int r = ::mkdir(g_conf->run_dir.c_str());
+    int r = ::mkdir(g_conf->run_dir.c_str(), 0755);
     if (r < 0 && errno != EEXIST) {
       r = -errno;
       derr << "warning: unable to create " << g_conf->run_dir << ": " << cpp_strerror(r) << dendl;
@@ -168,8 +166,16 @@ int global_init_prefork(CephContext *cct, int flags)
   if (g_code_env != CODE_ENVIRONMENT_DAEMON)
     return -1;
   const md_config_t *conf = cct->_conf;
-  if (!conf->daemonize)
+  if (!conf->daemonize) {
+    if (atexit(pidfile_remove_void)) {
+      derr << "global_init_daemonize: failed to set pidfile_remove function "
+	   << "to run at exit." << dendl;
+    }
+
+    pidfile_write(g_conf);
+
     return -1;
+  }
 
   // stop log thread
   g_ceph_context->_log->flush();
@@ -179,19 +185,19 @@ int global_init_prefork(CephContext *cct, int flags)
 
 void global_init_daemonize(CephContext *cct, int flags)
 {
-//by ketor  if (global_init_prefork(cct, flags) < 0)
-//    return;
-//
-//  int ret = daemon(1, 1);
-//  if (ret) {
-//    ret = errno;
-//    derr << "global_init_daemonize: BUG: daemon error: "
-//	 << cpp_strerror(ret) << dendl;
-//    exit(1);
-//  }
-//
-//  global_init_postfork_start(cct);
-//  global_init_postfork_finish(cct, flags);
+  if (global_init_prefork(cct, flags) < 0)
+    return;
+
+  int ret = daemon(1, 1);
+  if (ret) {
+    ret = errno;
+    derr << "global_init_daemonize: BUG: daemon error: "
+	 << cpp_strerror(ret) << dendl;
+    exit(1);
+  }
+
+  global_init_postfork_start(cct);
+  global_init_postfork_finish(cct, flags);
 }
 
 void global_init_postfork_start(CephContext *cct)

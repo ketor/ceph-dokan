@@ -14,7 +14,7 @@
 
 #include <sys/types.h>
 #include <unistd.h>
-//by ketor #include <sys/syscall.h>   /* For SYS_xxx definitions */
+#include <sys/syscall.h>   /* For SYS_xxx definitions */
 #include <algorithm>
 #include <errno.h>
 

@@ -16,10 +16,9 @@
 #include "CephxServiceHandler.h"
 #include "CephxProtocol.h"
 
-#include "auth/cephx/CephxKeyServer.h"
 #include "../Auth.h"
 
-//by ketor #include "mon/Monitor.h"
+#include "mon/Monitor.h"
 
 #include <errno.h>
 #include <sstream>

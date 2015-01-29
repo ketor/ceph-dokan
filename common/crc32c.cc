@@ -3,11 +3,11 @@
 
 #include "include/crc32c.h"
 
-//by ketor #include "arch/probe.h"
-//#include "arch/intel.h"
+#include "arch/probe.h"
+#include "arch/intel.h"
 #include "common/sctp_crc32.h"
-//by ketor #include "common/crc32c_intel_baseline.h"
-//#include "common/crc32c_intel_fast.h"
+#include "common/crc32c_intel_baseline.h"
+#include "common/crc32c_intel_fast.h"
 
 /*
  * choose best implementation based on the CPU architecture.
@@ -16,13 +16,13 @@ ceph_crc32c_func_t ceph_choose_crc32(void)
 {
   // make sure we've probed cpu features; this might depend on the
   // link order of this file relative to arch/probe.cc.
-//by ketor   ceph_arch_probe();
+  ceph_arch_probe();
 
   // if the CPU supports it, *and* the fast version is compiled in,
   // use that.
-//by ketor   if (ceph_arch_intel_sse42 && ceph_crc32c_intel_fast_exists()) {
-//    return ceph_crc32c_intel_fast;
-//  }
+  if (ceph_arch_intel_sse42 && ceph_crc32c_intel_fast_exists()) {
+    return ceph_crc32c_intel_fast;
+  }
 
   // default
   return ceph_crc32c_sctp;

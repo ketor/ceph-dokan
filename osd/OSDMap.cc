@@ -2308,17 +2308,18 @@ void OSDMap::dump(Formatter *f) const
   dump_erasure_code_profiles(erasure_code_profiles, f);
 }
 
-//by ketor void OSDMap::generate_test_instances(list<OSDMap*>& o)
-//{
-//  o.push_back(new OSDMap);
-//
-//  CephContext *cct = new CephContext(CODE_ENVIRONMENT_UTILITY);
-//  o.push_back(new OSDMap);
-//  uuid_d fsid;
-//  o.back()->build_simple(cct, 1, fsid, 16, 7, 8);
-//  o.back()->created = o.back()->modified = utime_t(1, 2);  // fix timestamp
-//  cct->put();
-//}
+void OSDMap::generate_test_instances(list<OSDMap*>& o)
+{
+  o.push_back(new OSDMap);
+
+  CephContext *cct = new CephContext(CODE_ENVIRONMENT_UTILITY);
+  o.push_back(new OSDMap);
+  uuid_d fsid;
+  o.back()->build_simple(cct, 1, fsid, 16, 7, 8);
+  o.back()->created = o.back()->modified = utime_t(1, 2);  // fix timestamp
+  o.back()->blacklist[entity_addr_t()] = utime_t(5, 6);
+  cct->put();
+}
 
 string OSDMap::get_flag_string(unsigned f)
 {
@@ -2476,9 +2477,13 @@ void OSDMap::print_osd_line(int cur, ostream *out, Formatter *f) const
 	   << (exists(cur) ? get_weightf(cur) : 0)
 	   << std::setprecision(p)
 	   << "\t";
+      *out << std::setprecision(4)
+	   << (exists(cur) ? get_primary_affinityf(cur) : 0)
+	   << std::setprecision(p);
     }
     if (f) {
       f->dump_float("reweight", get_weightf(cur));
+      f->dump_float("primary_affinity", get_primary_affinityf(cur));
     }
   }
 }
@@ -2486,7 +2491,7 @@ void OSDMap::print_osd_line(int cur, ostream *out, Formatter *f) const
 void OSDMap::print_tree(ostream *out, Formatter *f) const
 {
   if (out)
-    *out << "# id\tweight\ttype name\tup/down\treweight\n";
+    *out << "# id\tweight\ttype name\tup/down\treweight\tprimary-affinity\n";
   if (f)
     f->open_array_section("nodes");
   set<int> touched;
@@ -2625,102 +2630,112 @@ bool OSDMap::crush_ruleset_in_use(int ruleset) const
   return false;
 }
 
-//by ketor int OSDMap::build_simple(CephContext *cct, epoch_t e, uuid_d &fsid,
-//			  int nosd, int pg_bits, int pgp_bits)
-//{
-//  ldout(cct, 10) << "build_simple on " << num_osd
-//		 << " osds with " << pg_bits << " pg bits per osd, "
-//		 << dendl;
-//  epoch = e;
-//  set_fsid(fsid);
-//  created = modified = ceph_clock_now(cct);
-//
-//  if (nosd >=  0) {
-//    set_max_osd(nosd);
-//  } else {
-//    // count osds
-//    int maxosd = 0, numosd = 0;
-//    const md_config_t *conf = cct->_conf;
-//    vector<string> sections;
-//    conf->get_all_sections(sections);
-//    for (vector<string>::iterator i = sections.begin(); i != sections.end(); ++i) {
-//      if (i->find("osd.") != 0)
-//	continue;
-//
-//      const char *begin = i->c_str() + 4;
-//      char *end = (char*)begin;
-//      int o = strtol(begin, &end, 10);
-//      if (*end != '\0')
-//	continue;
-//
-//      if (o > cct->_conf->mon_max_osd) {
-//	lderr(cct) << "[osd." << o << "] in config has id > mon_max_osd " << cct->_conf->mon_max_osd << dendl;
-//	return -ERANGE;
-//      }
-//      numosd++;
-//      if (o > maxosd)
-//	maxosd = o;
-//    }
-//
-//    set_max_osd(maxosd + 1);
-//  }
-//
-//  // pgp_num <= pg_num
-//  if (pgp_bits > pg_bits)
-//    pgp_bits = pg_bits;
-//
-//  vector<string> pool_names;
-//  pool_names.push_back("data");
-//  pool_names.push_back("metadata");
-//  pool_names.push_back("rbd");
-//
-//  int poolbase = get_max_osd() ? get_max_osd() : 1;
-//
-//  for (vector<string>::iterator p = pool_names.begin();
-//       p != pool_names.end(); ++p) {
-//    int64_t pool = ++pool_max;
-//    pools[pool].type = pg_pool_t::TYPE_REPLICATED;
-//    pools[pool].flags = cct->_conf->osd_pool_default_flags;
-//    if (cct->_conf->osd_pool_default_flag_hashpspool)
-//      pools[pool].flags |= pg_pool_t::FLAG_HASHPSPOOL;
-//    pools[pool].size = cct->_conf->osd_pool_default_size;
-//    pools[pool].min_size = cct->_conf->get_osd_pool_default_min_size();
-//    pools[pool].crush_ruleset =
-//      CrushWrapper::get_osd_pool_default_crush_replicated_ruleset(cct);
-//    pools[pool].object_hash = CEPH_STR_HASH_RJENKINS;
-//    pools[pool].set_pg_num(poolbase << pg_bits);
-//    pools[pool].set_pgp_num(poolbase << pgp_bits);
-//    pools[pool].last_change = epoch;
-//    if (*p == "data")
-//      pools[pool].crash_replay_interval = cct->_conf->osd_default_data_pool_replay_window;
-//    pool_name[pool] = *p;
-//    name_pool[*p] = pool;
-//  }
-//
-//  stringstream ss;
-//  int r;
-//  if (nosd >= 0)
-//    r = build_simple_crush_map(cct, *crush, nosd, &ss);
-//  else
-//    r = build_simple_crush_map_from_conf(cct, *crush, &ss);
-//
-//  if (r < 0)
-//    lderr(cct) << ss.str() << dendl;
-//  
-//  for (int i=0; i<get_max_osd(); i++) {
-//    set_state(i, 0);
-//    set_weight(i, CEPH_OSD_OUT);
-//  }
-//
-//  map<string,string> erasure_code_profile_map;
-//  r = get_str_map(cct->_conf->osd_pool_default_erasure_code_profile,
-//		  ss,
-//		  &erasure_code_profile_map);
-//  erasure_code_profile_map["directory"] =
-//    cct->_conf->osd_pool_default_erasure_code_directory;
-//  set_erasure_code_profile("default", erasure_code_profile_map);
-//  return r;
-//}
+int OSDMap::build_simple(CephContext *cct, epoch_t e, uuid_d &fsid,
+			  int nosd, int pg_bits, int pgp_bits)
+{
+  ldout(cct, 10) << "build_simple on " << num_osd
+		 << " osds with " << pg_bits << " pg bits per osd, "
+		 << dendl;
+  epoch = e;
+  set_fsid(fsid);
+  created = modified = ceph_clock_now(cct);
+
+  if (nosd >=  0) {
+    set_max_osd(nosd);
+  } else {
+    // count osds
+    int maxosd = 0, numosd = 0;
+    const md_config_t *conf = cct->_conf;
+    vector<string> sections;
+    conf->get_all_sections(sections);
+    for (vector<string>::iterator i = sections.begin(); i != sections.end(); ++i) {
+      if (i->find("osd.") != 0)
+	continue;
+
+      const char *begin = i->c_str() + 4;
+      char *end = (char*)begin;
+      int o = strtol(begin, &end, 10);
+      if (*end != '\0')
+	continue;
+
+      if (o > cct->_conf->mon_max_osd) {
+	lderr(cct) << "[osd." << o << "] in config has id > mon_max_osd " << cct->_conf->mon_max_osd << dendl;
+	return -ERANGE;
+      }
+      numosd++;
+      if (o > maxosd)
+	maxosd = o;
+    }
+
+    set_max_osd(maxosd + 1);
+  }
+
+  // pgp_num <= pg_num
+  if (pgp_bits > pg_bits)
+    pgp_bits = pg_bits;
+
+  vector<string> pool_names;
+  pool_names.push_back("rbd");
+
+  stringstream ss;
+  int r;
+  if (nosd >= 0)
+    r = build_simple_crush_map(cct, *crush, nosd, &ss);
+  else
+    r = build_simple_crush_map_from_conf(cct, *crush, &ss);
+
+  int poolbase = get_max_osd() ? get_max_osd() : 1;
+
+  int const default_replicated_ruleset = crush->get_osd_pool_default_crush_replicated_ruleset(cct);
+  assert(default_replicated_ruleset >= 0);
+
+  for (vector<string>::iterator p = pool_names.begin();
+       p != pool_names.end(); ++p) {
+    int64_t pool = ++pool_max;
+    pools[pool].type = pg_pool_t::TYPE_REPLICATED;
+    pools[pool].flags = cct->_conf->osd_pool_default_flags;
+    if (cct->_conf->osd_pool_default_flag_hashpspool)
+      pools[pool].flags |= pg_pool_t::FLAG_HASHPSPOOL;
+    pools[pool].size = cct->_conf->osd_pool_default_size;
+    pools[pool].min_size = cct->_conf->get_osd_pool_default_min_size();
+    pools[pool].crush_ruleset = default_replicated_ruleset;
+    pools[pool].object_hash = CEPH_STR_HASH_RJENKINS;
+    pools[pool].set_pg_num(poolbase << pg_bits);
+    pools[pool].set_pgp_num(poolbase << pgp_bits);
+    pools[pool].last_change = epoch;
+    pool_name[pool] = *p;
+    name_pool[*p] = pool;
+  }
+
+  if (r < 0)
+    lderr(cct) << ss.str() << dendl;
+  
+  for (int i=0; i<get_max_osd(); i++) {
+    set_state(i, 0);
+    set_weight(i, CEPH_OSD_OUT);
+  }
+
+  map<string,string> profile_map;
+  r = get_erasure_code_profile_default(cct, profile_map, &ss);
+  if (r < 0) {
+    lderr(cct) << ss.str() << dendl;
+    return r;
+  }
+  set_erasure_code_profile("default", profile_map);
+  return 0;
+}
+
+int OSDMap::get_erasure_code_profile_default(CephContext *cct,
+					     map<string,string> &profile_map,
+					     ostream *ss)
+{
+  int r = get_json_str_map(cct->_conf->osd_pool_default_erasure_code_profile,
+		      *ss,
+		      &profile_map);
+  profile_map["directory"] =
+    cct->_conf->osd_pool_default_erasure_code_directory;
+  return r;
+}
 
 int OSDMap::_build_crush_types(CrushWrapper& crush)
 {

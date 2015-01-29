@@ -13,7 +13,6 @@
 
 #include <sstream>
 #include "Crypto.h"
-/*by ketor 
 #ifdef USE_CRYPTOPP
 # include <cryptopp/modes.h>
 # include <cryptopp/aes.h>
@@ -22,7 +21,7 @@
 # include <nspr.h>
 # include <nss.h>
 # include <pk11pub.h>
-#endif*/
+#endif
 
 #include "include/assert.h"
 #include "common/Clock.h"
@@ -87,7 +86,7 @@ void CryptoNone::decrypt(const bufferptr& secret, const bufferlist& in,
   out = in;
 }
 
-/*by ketor 
+
 // ---------------------------------------------------
 #ifdef USE_CRYPTOPP
 # define AES_KEY_LEN     ((size_t)CryptoPP::AES::DEFAULT_KEYLENGTH)
@@ -215,99 +214,99 @@ static void nss_aes_operation(CK_ATTRIBUTE_TYPE op, const bufferptr& secret,
 
 #else
 # error "No supported crypto implementation found."
-#endif*/
+#endif
 
 int CryptoAES::create(bufferptr& secret)
 {
-//by ketor   bufferlist bl;
-//  int r = get_random_bytes(AES_KEY_LEN, bl);
-//  if (r < 0)
-//    return r;
-//  secret = buffer::ptr(bl.c_str(), bl.length());
+  bufferlist bl;
+  int r = get_random_bytes(AES_KEY_LEN, bl);
+  if (r < 0)
+    return r;
+  secret = buffer::ptr(bl.c_str(), bl.length());
   return 0;
 }
 
 int CryptoAES::validate_secret(bufferptr& secret)
 {
-//by ketor   if (secret.length() < (size_t)AES_KEY_LEN) {
-//    return -EINVAL;
-//  }
-//
+  if (secret.length() < (size_t)AES_KEY_LEN) {
+    return -EINVAL;
+  }
+
   return 0;
 }
 
 void CryptoAES::encrypt(const bufferptr& secret, const bufferlist& in, bufferlist& out,
 			std::string &error) const
 {
-//by ketor   if (secret.length() < AES_KEY_LEN) {
-//    error = "key is too short";
-//    return;
-//  }
-//#ifdef USE_CRYPTOPP
-//  {
-//    const unsigned char *key = (const unsigned char *)secret.c_str();
-//
-//    string ciphertext;
-//    CryptoPP::AES::Encryption aesEncryption(key, CryptoPP::AES::DEFAULT_KEYLENGTH);
-//    CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption( aesEncryption, (const byte*)CEPH_AES_IV );
-//    CryptoPP::StringSink *sink = new CryptoPP::StringSink(ciphertext);
-//    CryptoPP::StreamTransformationFilter stfEncryptor(cbcEncryption, sink);
-//
-//    for (std::list<bufferptr>::const_iterator it = in.buffers().begin();
-//	 it != in.buffers().end(); ++it) {
-//      const unsigned char *in_buf = (const unsigned char *)it->c_str();
-//      stfEncryptor.Put(in_buf, it->length());
-//    }
-//    try {
-//      stfEncryptor.MessageEnd();
-//    } catch (CryptoPP::Exception& e) {
-//      ostringstream oss;
-//      oss << "encryptor.MessageEnd::Exception: " << e.GetWhat();
-//      error = oss.str();
-//      return;
-//    }
-//    out.append((const char *)ciphertext.c_str(), ciphertext.length());
-//  }
-//#elif USE_NSS
-//  nss_aes_operation(CKA_ENCRYPT, secret, in, out, error);
-//#else
-//# error "No supported crypto implementation found."
-//#endif
+  if (secret.length() < AES_KEY_LEN) {
+    error = "key is too short";
+    return;
+  }
+#ifdef USE_CRYPTOPP
+  {
+    const unsigned char *key = (const unsigned char *)secret.c_str();
+
+    string ciphertext;
+    CryptoPP::AES::Encryption aesEncryption(key, CryptoPP::AES::DEFAULT_KEYLENGTH);
+    CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption( aesEncryption, (const byte*)CEPH_AES_IV );
+    CryptoPP::StringSink *sink = new CryptoPP::StringSink(ciphertext);
+    CryptoPP::StreamTransformationFilter stfEncryptor(cbcEncryption, sink);
+
+    for (std::list<bufferptr>::const_iterator it = in.buffers().begin();
+	 it != in.buffers().end(); ++it) {
+      const unsigned char *in_buf = (const unsigned char *)it->c_str();
+      stfEncryptor.Put(in_buf, it->length());
+    }
+    try {
+      stfEncryptor.MessageEnd();
+    } catch (CryptoPP::Exception& e) {
+      ostringstream oss;
+      oss << "encryptor.MessageEnd::Exception: " << e.GetWhat();
+      error = oss.str();
+      return;
+    }
+    out.append((const char *)ciphertext.c_str(), ciphertext.length());
+  }
+#elif USE_NSS
+  nss_aes_operation(CKA_ENCRYPT, secret, in, out, error);
+#else
+# error "No supported crypto implementation found."
+#endif
 }
 
 void CryptoAES::decrypt(const bufferptr& secret, const bufferlist& in, 
 			bufferlist& out, std::string &error) const
 {
-//by ketor #ifdef USE_CRYPTOPP
-//  const unsigned char *key = (const unsigned char *)secret.c_str();
-//
-//  CryptoPP::AES::Decryption aesDecryption(key, CryptoPP::AES::DEFAULT_KEYLENGTH);
-//  CryptoPP::CBC_Mode_ExternalCipher::Decryption cbcDecryption( aesDecryption, (const byte*)CEPH_AES_IV );
-//
-//  string decryptedtext;
-//  CryptoPP::StringSink *sink = new CryptoPP::StringSink(decryptedtext);
-//  CryptoPP::StreamTransformationFilter stfDecryptor(cbcDecryption, sink);
-//  for (std::list<bufferptr>::const_iterator it = in.buffers().begin(); 
-//       it != in.buffers().end(); ++it) {
-//      const unsigned char *in_buf = (const unsigned char *)it->c_str();
-//      stfDecryptor.Put(in_buf, it->length());
-//  }
-//
-//  try {
-//    stfDecryptor.MessageEnd();
-//  } catch (CryptoPP::Exception& e) {
-//    ostringstream oss;
-//    oss << "decryptor.MessageEnd::Exception: " << e.GetWhat();
-//    error = oss.str();
-//    return;
-//  }
-//
-//  out.append((const char *)decryptedtext.c_str(), decryptedtext.length());
-//#elif USE_NSS
-//  nss_aes_operation(CKA_DECRYPT, secret, in, out, error);
-//#else
-//# error "No supported crypto implementation found."
-//#endif
+#ifdef USE_CRYPTOPP
+  const unsigned char *key = (const unsigned char *)secret.c_str();
+
+  CryptoPP::AES::Decryption aesDecryption(key, CryptoPP::AES::DEFAULT_KEYLENGTH);
+  CryptoPP::CBC_Mode_ExternalCipher::Decryption cbcDecryption( aesDecryption, (const byte*)CEPH_AES_IV );
+
+  string decryptedtext;
+  CryptoPP::StringSink *sink = new CryptoPP::StringSink(decryptedtext);
+  CryptoPP::StreamTransformationFilter stfDecryptor(cbcDecryption, sink);
+  for (std::list<bufferptr>::const_iterator it = in.buffers().begin(); 
+       it != in.buffers().end(); ++it) {
+      const unsigned char *in_buf = (const unsigned char *)it->c_str();
+      stfDecryptor.Put(in_buf, it->length());
+  }
+
+  try {
+    stfDecryptor.MessageEnd();
+  } catch (CryptoPP::Exception& e) {
+    ostringstream oss;
+    oss << "decryptor.MessageEnd::Exception: " << e.GetWhat();
+    error = oss.str();
+    return;
+  }
+
+  out.append((const char *)decryptedtext.c_str(), decryptedtext.length());
+#elif USE_NSS
+  nss_aes_operation(CKA_DECRYPT, secret, in, out, error);
+#else
+# error "No supported crypto implementation found."
+#endif
 }
 
 

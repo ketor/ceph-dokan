@@ -15,7 +15,7 @@
 #ifndef CEPH_MLOGACK_H
 #define CEPH_MLOGACK_H
 
-//by ketor  #include <uuid/uuid.h>
+#include <uuid/uuid.h>
 
 class MLogAck : public Message {
 public:

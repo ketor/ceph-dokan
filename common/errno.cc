@@ -17,14 +17,14 @@ std::string cpp_strerror(int err)
   buf[0] = '\0';
 
   // strerror_r returns char * on Linux, and does not always fill buf
-//by ketor #ifdef STRERROR_R_CHAR_P
-//  errmsg = strerror_r(err, buf, sizeof(buf));
-//#else
-//  strerror_r(err, buf, sizeof(buf));
-//  errmsg = buf;
-//#endif
+#ifdef STRERROR_R_CHAR_P
+  errmsg = strerror_r(err, buf, sizeof(buf));
+#else
+  strerror_r(err, buf, sizeof(buf));
+  errmsg = buf;
+#endif
 
-  oss << "(" << err << ") " /*by ketor << errmsg*/;
+  oss << "(" << err << ") " << errmsg;
 
   return oss.str();
 }

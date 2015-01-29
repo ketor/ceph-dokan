@@ -12,8 +12,6 @@
 # include "acconfig.h"
 #endif
 
-#define __STRING(x) #x //by ketor
-
 class CephContext;
 
 #ifdef __cplusplus

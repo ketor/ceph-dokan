@@ -1,5 +1,9 @@
 
-#include <errno.h>
+#if defined(__linux__)
+#include <linux/errno.h>
+#else
+#include <sys/errno.h>
+#endif
 
 /*
  * base64 encode/decode.

@@ -14,8 +14,9 @@
 #ifndef CEPH_BUFFER_H
 #define CEPH_BUFFER_H
 
+#if defined(__linux__) || defined(__FreeBSD__)
 #include <stdlib.h>
-#include "common/ceph-mingw-type.h"
+#endif
 
 #ifndef _XOPEN_SOURCE
 # define _XOPEN_SOURCE 600
@@ -31,9 +32,9 @@
 #include <stdint.h>
 #include <string.h>
 
-//by ketor #ifndef __CYGWIN__
-//# include <sys/mman.h>
-//#endif
+#ifndef __CYGWIN__
+# include <sys/mman.h>
+#endif
 
 #include <iostream>
 #include <istream>
@@ -55,6 +56,11 @@
   #define CEPH_BUFFER_API  __attribute__ ((visibility ("default")))
 #else
   #define CEPH_BUFFER_API
+#endif
+
+#if defined(HAVE_XIO)
+struct xio_mempool_obj;
+class XioDispatchHook;
 #endif
 
 namespace ceph {
@@ -126,8 +132,8 @@ private:
   class raw;
   class raw_malloc;
   class raw_static;
-  //class raw_mmap_pages;
-  //class raw_posix_aligned;
+  class raw_mmap_pages;
+  class raw_posix_aligned;
   class raw_hack_aligned;
   class raw_char;
   class raw_pipe;
@@ -136,6 +142,8 @@ private:
   friend std::ostream& operator<<(std::ostream& out, const raw &r);
 
 public:
+  class xio_mempool;
+  class xio_msg_buffer;
 
   /*
    * named constructors 
@@ -150,6 +158,10 @@ public:
   static raw* create_page_aligned(unsigned len);
   static raw* create_zero_copy(unsigned len, int fd, int64_t *offset);
   static raw* create_unshareable(unsigned len);
+
+#if defined(HAVE_XIO)
+  static raw* create_msg(unsigned len, char *buf, XioDispatchHook *m_hook);
+#endif
 
   /*
    * a buffer pointer.  references (a subsequence of) a raw buffer.
@@ -512,6 +524,10 @@ public:
   };
 };
 
+#if defined(HAVE_XIO)
+xio_mempool_obj* get_xio_mp(const buffer::ptr& bp);
+#endif
+
 typedef buffer::ptr bufferptr;
 typedef buffer::list bufferlist;
 typedef buffer::hash bufferhash;
@@ -535,7 +551,7 @@ inline bool operator>=(bufferlist& l, bufferlist& r) {
   }
 }
 
-inline bool operator==(bufferlist &l, bufferlist &r) {
+inline bool operator==(const bufferlist &l, const bufferlist &r) {
   if (l.length() != r.length())
     return false;
   for (unsigned p = 0; p < l.length(); p++) {
