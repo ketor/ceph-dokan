@@ -6,6 +6,7 @@
 
 #include "common/Thread.h"
 
+#include <winsock2.h>
 #include <pthread.h>
 
 #include "Entry.h"

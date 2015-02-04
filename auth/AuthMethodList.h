@@ -20,7 +20,7 @@
 #include <list>
 #include <set>
 #include <string>
-
+typedef uint32_t __u32; //by ketor
 class CephContext;
 
 class AuthMethodList {

@@ -24,14 +24,11 @@
 #include "common/Mutex.h"
 #include "include/types.h"
 #include "include/compat.h"
-#if defined(HAVE_XIO)
-#include "msg/xio/XioMsg.h"
-#endif
 
 #include <errno.h>
 #include <fstream>
 #include <sstream>
-#include <sys/uio.h>
+//#include <sys/uio.h>
 #include <limits.h>
 
 namespace ceph {
@@ -219,57 +216,6 @@ static simple_spinlock_t buffer_debug_lock = SIMPLE_SPINLOCK_INITIALIZER;
     }
   };
 
-#ifndef __CYGWIN__
-  class buffer::raw_mmap_pages : public buffer::raw {
-  public:
-    raw_mmap_pages(unsigned l) : raw(l) {
-      data = (char*)::mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0);
-      if (!data)
-	throw bad_alloc();
-      inc_total_alloc(len);
-      bdout << "raw_mmap " << this << " alloc " << (void *)data << " " << l << " " << buffer::get_total_alloc() << bendl;
-    }
-    ~raw_mmap_pages() {
-      ::munmap(data, len);
-      dec_total_alloc(len);
-      bdout << "raw_mmap " << this << " free " << (void *)data << " " << buffer::get_total_alloc() << bendl;
-    }
-    raw* clone_empty() {
-      return new raw_mmap_pages(len);
-    }
-  };
-
-  class buffer::raw_posix_aligned : public buffer::raw {
-    unsigned align;
-  public:
-    raw_posix_aligned(unsigned l, unsigned _align) : raw(l) {
-      align = _align;
-      assert((align >= sizeof(void *)) && (align & (align - 1)) == 0);
-#ifdef DARWIN
-      data = (char *) valloc (len);
-#else
-      data = 0;
-      int r = ::posix_memalign((void**)(void*)&data, align, len);
-      if (r)
-	throw bad_alloc();
-#endif /* DARWIN */
-      if (!data)
-	throw bad_alloc();
-      inc_total_alloc(len);
-      bdout << "raw_posix_aligned " << this << " alloc " << (void *)data << " l=" << l << ", align=" << align << " total_alloc=" << buffer::get_total_alloc() << bendl;
-    }
-    ~raw_posix_aligned() {
-      ::free((void*)data);
-      dec_total_alloc(len);
-      bdout << "raw_posix_aligned " << this << " free " << (void *)data << " " << buffer::get_total_alloc() << bendl;
-    }
-    raw* clone_empty() {
-      return new raw_posix_aligned(len, align);
-    }
-  };
-#endif
-
-#ifdef __CYGWIN__
   class buffer::raw_hack_aligned : public buffer::raw {
     unsigned align;
     char *realdata;
@@ -296,184 +242,6 @@ static simple_spinlock_t buffer_debug_lock = SIMPLE_SPINLOCK_INITIALIZER;
       return new raw_hack_aligned(len, align);
     }
   };
-#endif
-
-#ifdef CEPH_HAVE_SPLICE
-  class buffer::raw_pipe : public buffer::raw {
-  public:
-    raw_pipe(unsigned len) : raw(len), source_consumed(false) {
-      size_t max = get_max_pipe_size();
-      if (len > max) {
-	bdout << "raw_pipe: requested length " << len
-	      << " > max length " << max << bendl;
-	throw malformed_input("length larger than max pipe size");
-      }
-      pipefds[0] = -1;
-      pipefds[1] = -1;
-
-      int r;
-      if (::pipe(pipefds) == -1) {
-	r = -errno;
-	bdout << "raw_pipe: error creating pipe: " << cpp_strerror(r) << bendl;
-	throw error_code(r);
-      }
-
-      r = set_nonblocking(pipefds);
-      if (r < 0) {
-	bdout << "raw_pipe: error setting nonblocking flag on temp pipe: "
-	      << cpp_strerror(r) << bendl;
-	throw error_code(r);
-      }
-
-      r = set_pipe_size(pipefds, len);
-      if (r < 0) {
-	bdout << "raw_pipe: could not set pipe size" << bendl;
-	// continue, since the pipe should become large enough as needed
-      }
-
-      inc_total_alloc(len);
-      bdout << "raw_pipe " << this << " alloc " << len << " "
-	    << buffer::get_total_alloc() << bendl;
-    }
-
-    ~raw_pipe() {
-      if (data)
-	free(data);
-      close_pipe(pipefds);
-      dec_total_alloc(len);
-      bdout << "raw_pipe " << this << " free " << (void *)data << " "
-	    << buffer::get_total_alloc() << bendl;
-    }
-
-    bool can_zero_copy() const {
-      return true;
-    }
-
-    int set_source(int fd, loff_t *off) {
-      int flags = SPLICE_F_NONBLOCK;
-      ssize_t r = safe_splice(fd, off, pipefds[1], NULL, len, flags);
-      if (r < 0) {
-	bdout << "raw_pipe: error splicing into pipe: " << cpp_strerror(r)
-	      << bendl;
-	return r;
-      }
-      // update length with actual amount read
-      len = r;
-      return 0;
-    }
-
-    int zero_copy_to_fd(int fd, loff_t *offset) {
-      assert(!source_consumed);
-      int flags = SPLICE_F_NONBLOCK;
-      ssize_t r = safe_splice_exact(pipefds[0], NULL, fd, offset, len, flags);
-      if (r < 0) {
-	bdout << "raw_pipe: error splicing from pipe to fd: "
-	      << cpp_strerror(r) << bendl;
-	return r;
-      }
-      source_consumed = true;
-      return 0;
-    }
-
-    buffer::raw* clone_empty() {
-      // cloning doesn't make sense for pipe-based buffers,
-      // and is only used by unit tests for other types of buffers
-      return NULL;
-    }
-
-    char *get_data() {
-      if (data)
-	return data;
-      return copy_pipe(pipefds);
-    }
-
-  private:
-    int set_pipe_size(int *fds, long length) {
-#ifdef CEPH_HAVE_SETPIPE_SZ
-      if (::fcntl(fds[1], F_SETPIPE_SZ, length) == -1) {
-	int r = -errno;
-	if (r == -EPERM) {
-	  // pipe limit must have changed - EPERM means we requested
-	  // more than the maximum size as an unprivileged user
-	  update_max_pipe_size();
-	  throw malformed_input("length larger than new max pipe size");
-	}
-	return r;
-      }
-#endif
-      return 0;
-    }
-
-    int set_nonblocking(int *fds) {
-      if (::fcntl(fds[0], F_SETFL, O_NONBLOCK) == -1)
-	return -errno;
-      if (::fcntl(fds[1], F_SETFL, O_NONBLOCK) == -1)
-	return -errno;
-      return 0;
-    }
-
-    void close_pipe(int *fds) {
-      if (fds[0] >= 0)
-	VOID_TEMP_FAILURE_RETRY(::close(fds[0]));
-      if (fds[1] >= 0)
-	VOID_TEMP_FAILURE_RETRY(::close(fds[1]));
-    }
-    char *copy_pipe(int *fds) {
-      /* preserve original pipe contents by copying into a temporary
-       * pipe before reading.
-       */
-      int tmpfd[2];
-      int r;
-
-      assert(!source_consumed);
-      assert(fds[0] >= 0);
-
-      if (::pipe(tmpfd) == -1) {
-	r = -errno;
-	bdout << "raw_pipe: error creating temp pipe: " << cpp_strerror(r)
-	      << bendl;
-	throw error_code(r);
-      }
-      r = set_nonblocking(tmpfd);
-      if (r < 0) {
-	bdout << "raw_pipe: error setting nonblocking flag on temp pipe: "
-	      << cpp_strerror(r) << bendl;
-	throw error_code(r);
-      }
-      r = set_pipe_size(tmpfd, len);
-      if (r < 0) {
-	bdout << "raw_pipe: error setting pipe size on temp pipe: "
-	      << cpp_strerror(r) << bendl;
-      }
-      int flags = SPLICE_F_NONBLOCK;
-      if (::tee(fds[0], tmpfd[1], len, flags) == -1) {
-	r = errno;
-	bdout << "raw_pipe: error tee'ing into temp pipe: " << cpp_strerror(r)
-	      << bendl;
-	close_pipe(tmpfd);
-	throw error_code(r);
-      }
-      data = (char *)malloc(len);
-      if (!data) {
-	close_pipe(tmpfd);
-	throw bad_alloc();
-      }
-      r = safe_read(tmpfd[0], data, len);
-      if (r < (ssize_t)len) {
-	bdout << "raw_pipe: error reading from temp pipe:" << cpp_strerror(r)
-	      << bendl;
-	free(data);
-	data = NULL;
-	close_pipe(tmpfd);
-	throw error_code(r);
-      }
-      close_pipe(tmpfd);
-      return data;
-    }
-    bool source_consumed;
-    int pipefds[2];
-  };
-#endif // CEPH_HAVE_SPLICE
 
   /*
    * primitive buffer types
@@ -532,59 +300,6 @@ static simple_spinlock_t buffer_debug_lock = SIMPLE_SPINLOCK_INITIALIZER;
     }
   };
 
-#if defined(HAVE_XIO)
-  class buffer::xio_msg_buffer : public buffer::raw {
-  private:
-    XioDispatchHook* m_hook;
-  public:
-    xio_msg_buffer(XioDispatchHook* _m_hook, const char *d,
-	unsigned l) :
-      raw((char*)d, l), m_hook(_m_hook->get()) {}
-
-    bool is_shareable() { return false; }
-    static void operator delete(void *p)
-    {
-      xio_msg_buffer *buf = static_cast<xio_msg_buffer*>(p);
-      // return hook ref (counts against pool);  it appears illegal
-      // to do this in our dtor, because this fires after that
-      buf->m_hook->put();
-    }
-    raw* clone_empty() {
-      return new buffer::raw_char(len);
-    }
-  };
-
-  class buffer::xio_mempool : public buffer::raw {
-  public:
-    struct xio_mempool_obj *mp;
-    xio_mempool(struct xio_mempool_obj *_mp, unsigned l) :
-      raw((char*)mp->addr, l), mp(_mp)
-    { }
-    ~xio_mempool() {}
-    raw* clone_empty() {
-      return new buffer::raw_char(len);
-    }
-  };
-
-  struct xio_mempool_obj* get_xio_mp(const buffer::ptr& bp)
-  {
-    buffer::xio_mempool *mb = dynamic_cast<buffer::xio_mempool*>(bp.get_raw());
-    if (mb) {
-      return mb->mp;
-    }
-    return NULL;
-  }
-
-  buffer::raw* buffer::create_msg(
-      unsigned len, char *buf, XioDispatchHook* m_hook) {
-    XioPool& pool = m_hook->get_pool();
-    buffer::raw* bp =
-      static_cast<buffer::raw*>(pool.alloc(sizeof(xio_msg_buffer)));
-    new (bp) xio_msg_buffer(m_hook, buf, len);
-    return bp;
-  }
-#endif /* HAVE_XIO */
-
   buffer::raw* buffer::copy(const char *c, unsigned len) {
     raw* r = new raw_char(len);
     memcpy(r->data, c, len);
@@ -606,12 +321,12 @@ static simple_spinlock_t buffer_debug_lock = SIMPLE_SPINLOCK_INITIALIZER;
     return new raw_static(buf, len);
   }
   buffer::raw* buffer::create_aligned(unsigned len, unsigned align) {
-#ifndef __CYGWIN__
+//#ifndef __CYGWIN__
     //return new raw_mmap_pages(len);
-    return new raw_posix_aligned(len, align);
-#else
+    //return new raw_posix_aligned(len, align);
+//#else
     return new raw_hack_aligned(len, align);
-#endif
+//#endif
   }
   buffer::raw* buffer::create_page_aligned(unsigned len) {
     return create_aligned(len, CEPH_PAGE_SIZE);
@@ -1736,57 +1451,57 @@ int buffer::list::write_file(const char *fn, int mode)
 
 int buffer::list::write_fd(int fd) const
 {
-  if (can_zero_copy())
-    return write_fd_zero_copy(fd);
-
-  // use writev!
-  iovec iov[IOV_MAX];
-  int iovlen = 0;
-  ssize_t bytes = 0;
-
-  std::list<ptr>::const_iterator p = _buffers.begin();
-  while (p != _buffers.end()) {
-    if (p->length() > 0) {
-      iov[iovlen].iov_base = (void *)p->c_str();
-      iov[iovlen].iov_len = p->length();
-      bytes += p->length();
-      iovlen++;
-    }
-    ++p;
-
-    if (iovlen == IOV_MAX-1 ||
-	p == _buffers.end()) {
-      iovec *start = iov;
-      int num = iovlen;
-      ssize_t wrote;
-    retry:
-      wrote = ::writev(fd, start, num);
-      if (wrote < 0) {
-	int err = errno;
-	if (err == EINTR)
-	  goto retry;
-	return -err;
-      }
-      if (wrote < bytes) {
-	// partial write, recover!
-	while ((size_t)wrote >= start[0].iov_len) {
-	  wrote -= start[0].iov_len;
-	  bytes -= start[0].iov_len;
-	  start++;
-	  num--;
-	}
-	if (wrote > 0) {
-	  start[0].iov_len -= wrote;
-	  start[0].iov_base = (char *)start[0].iov_base + wrote;
-	  bytes -= wrote;
-	}
-	goto retry;
-      }
-      iovlen = 0;
-      bytes = 0;
-    }
-  }
-  return 0;
+//by ketor  if (can_zero_copy())
+//    return write_fd_zero_copy(fd);
+//
+//  // use writev!
+//  iovec iov[IOV_MAX];
+//  int iovlen = 0;
+//  ssize_t bytes = 0;
+//
+//  std::list<ptr>::const_iterator p = _buffers.begin();
+//  while (p != _buffers.end()) {
+//    if (p->length() > 0) {
+//      iov[iovlen].iov_base = (void *)p->c_str();
+//      iov[iovlen].iov_len = p->length();
+//      bytes += p->length();
+//      iovlen++;
+//    }
+//    ++p;
+//
+//    if (iovlen == IOV_MAX-1 ||
+//	p == _buffers.end()) {
+//      iovec *start = iov;
+//      int num = iovlen;
+//      ssize_t wrote;
+//    retry:
+//      wrote = ::writev(fd, start, num);
+//      if (wrote < 0) {
+//	int err = errno;
+//	if (err == EINTR)
+//	  goto retry;
+//	return -err;
+//      }
+//      if (wrote < bytes) {
+//	// partial write, recover!
+//	while ((size_t)wrote >= start[0].iov_len) {
+//	  wrote -= start[0].iov_len;
+//	  bytes -= start[0].iov_len;
+//	  start++;
+//	  num--;
+//	}
+//	if (wrote > 0) {
+//	  start[0].iov_len -= wrote;
+//	  start[0].iov_base = (char *)start[0].iov_base + wrote;
+//	  bytes -= wrote;
+//	}
+//	goto retry;
+//      }
+//      iovlen = 0;
+//      bytes = 0;
+//    }
+//  }
+//  return 0;
 }
 
 int buffer::list::write_fd_zero_copy(int fd) const

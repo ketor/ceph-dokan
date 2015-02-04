@@ -21,7 +21,7 @@
 
 #include "mds/MDSMap.h"
 
-#include <uuid/uuid.h>
+//by ketor #include <uuid/uuid.h>
 
 
 

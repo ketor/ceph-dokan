@@ -2,7 +2,7 @@
 #define CEPH_BACKTRACE_H
 
 #include <iosfwd>
-#include <execinfo.h>
+//#include <execinfo.h>
 #include <stdlib.h>
 
 namespace ceph {
@@ -16,11 +16,12 @@ struct BackTrace {
   char **strings;
 
   BackTrace(int s) : skip(s) {
-    size = backtrace(array, max);
-    strings = backtrace_symbols(array, size);
+    //size = backtrace(array, max);
+    //strings = backtrace_symbols(array, size);
+    size = 0;
   }
   ~BackTrace() {
-    free(strings);
+    //free(strings);
   }
 
   BackTrace(const BackTrace& other);

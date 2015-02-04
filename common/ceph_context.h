@@ -15,23 +15,22 @@
 #ifndef CEPH_CEPHCONTEXT_H
 #define CEPH_CEPHCONTEXT_H
 
+#include "common/ceph-mingw-type.h"
 #include <iostream>
 #include <stdint.h>
 #include <string>
-#include <set>
 
 #include "include/buffer.h"
 #include "include/atomic.h"
 #include "common/cmdparse.h"
 #include "include/Spinlock.h"
 
-class AdminSocket;
+//by ketor class AdminSocket;
 class CephContextServiceThread;
 class PerfCountersCollection;
 class md_config_obs_t;
 struct md_config_t;
 class CephContextHook;
-class CephContextObs;
 class CryptoNone;
 class CryptoAES;
 class CryptoHandler;
@@ -61,10 +60,10 @@ private:
   ~CephContext();
   atomic_t nref;
 public:
-  class AssociatedSingletonObject {
+  /*class AssociatedSingletonObject {
    public:
     virtual ~AssociatedSingletonObject() {}
-  };
+  };*/
   CephContext *get() {
     nref.inc();
     return this;
@@ -89,9 +88,9 @@ public:
   /* Get the PerfCountersCollection of this CephContext */
   PerfCountersCollection *get_perfcounters_collection();
 
-  ceph::HeartbeatMap *get_heartbeat_map() {
+  /*by ketor ceph::HeartbeatMap *get_heartbeat_map() {
     return _heartbeat_map;
-  }
+  }*/
 
   /**
    * Get the admin socket associated with this CephContext.
@@ -101,15 +100,15 @@ public:
    *
    * @return the admin socket
    */
-  AdminSocket *get_admin_socket();
+  //by ketor AdminSocket *get_admin_socket();
 
   /**
    * process an admin socket command
    */
-  void do_command(std::string command, cmdmap_t& cmdmap, std::string format,
-		  bufferlist *out);
+  /*by ketor void do_command(std::string command, cmdmap_t& cmdmap, std::string format,
+		  bufferlist *out);*/
 
-  template<typename T>
+  /*template<typename T>
   void lookup_or_create_singleton_object(T*& p, const std::string &name) {
     ceph_spin_lock(&_associated_objs_lock);
     if (!_associated_objs.count(name)) {
@@ -119,14 +118,11 @@ public:
       p = reinterpret_cast<T*>(_associated_objs[name]);
     }
     ceph_spin_unlock(&_associated_objs_lock);
-  }
+  }*/
   /**
    * get a crypto handler
    */
   CryptoHandler *get_crypto_handler(int type);
-
-  /// check if experimental feature is enable, and emit appropriate warnings
-  bool check_experimental_feature_enabled(std::string feature);
 
 private:
   CephContext(const CephContext &rhs);
@@ -145,7 +141,7 @@ private:
   md_config_obs_t *_log_obs;
 
   /* The admin socket associated with this context */
-  AdminSocket *_admin_socket;
+  //by ketor AdminSocket *_admin_socket;
 
   /* lock which protects service thread creation, destruction, etc. */
   ceph_spinlock_t _service_thread_lock;
@@ -157,21 +153,13 @@ private:
 
   CephContextHook *_admin_hook;
 
-  ceph::HeartbeatMap *_heartbeat_map;
+  //by ketor ceph::HeartbeatMap *_heartbeat_map;
 
   ceph_spinlock_t _associated_objs_lock;
-  std::map<std::string, AssociatedSingletonObject*> _associated_objs;
-
+  //std::map<std::string, AssociatedSingletonObject*> _associated_objs;
   // crypto
   CryptoNone *_crypto_none;
   CryptoAES *_crypto_aes;
-
-  // experimental
-  CephContextObs *_cct_obs;
-  ceph_spinlock_t _feature_lock;
-  std::set<std::string> _experimental_features;
-
-  friend class CephContextObs;
 };
 
 #endif

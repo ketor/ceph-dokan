@@ -47,7 +47,6 @@ protected:
   int default_send_priority;
   /// set to true once the Messenger has started, and set to false on shutdown
   bool started;
-  uint32_t magic;
 
 public:
   /**
@@ -55,7 +54,6 @@ public:
    *  from this value.
    */
   CephContext *cct;
-  int crcflags;
 
   /**
    * A Policy describes the rules of a Connection. Is there a limit on how
@@ -128,8 +126,7 @@ public:
   Messenger(CephContext *cct_, entity_name_t w)
     : my_inst(),
       default_send_priority(CEPH_MSG_PRIO_DEFAULT), started(false),
-      magic(0), cct(cct_),
-      crcflags(get_default_crc_flags(cct->_conf))
+      cct(cct_)
   {
     my_inst.name = w;
   }
@@ -154,6 +151,11 @@ public:
                            uint64_t nonce);
 
   /**
+   * create a anonymous Connection instance
+   */
+  virtual Connection *create_anon_connection() = 0;
+
+  /**
    * @defgroup Accessors
    * @{
    */
@@ -168,10 +170,6 @@ public:
    * set messenger's instance
    */
   void set_myinst(entity_inst_t i) { my_inst = i; }
-
-  uint32_t get_magic() { return magic; }
-  void set_magic(int _magic) { magic = _magic; }
-
   /**
    * Retrieve the Messenger's address.
    *
@@ -183,7 +181,7 @@ protected:
   /**
    * set messenger's address
    */
-  virtual void set_myaddr(const entity_addr_t& a) { my_inst.addr = a; }
+  void set_myaddr(const entity_addr_t& a) { my_inst.addr = a; }
 public:
   /**
    * Retrieve the Messenger's name.
@@ -223,11 +221,6 @@ public:
    * (0 if the queue is empty)
    */
   virtual double get_dispatch_queue_max_age(utime_t now) = 0;
-  /**
-   * Get the default crc flags for this messenger.
-   * but not yet dispatched.
-   */
-  static int get_default_crc_flags(md_config_t *);
 
   /**
    * @} // Accessors

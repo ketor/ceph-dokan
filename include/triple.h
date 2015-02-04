@@ -12,24 +12,18 @@
  * 
  */
 
+#ifndef CEPH_TRIPLE_H
+#define CEPH_TRIPLE_H
 
-
-#ifndef CEPH_MPING_H
-#define CEPH_MPING_H
-
-#include "msg/Message.h"
-#include "include/encoding.h"
-
-class MPing : public Message {
+template<class A, class B, class C>
+class triple {
  public:
-  MPing() : Message(CEPH_MSG_PING) {}
-private:
-  ~MPing() {}
+  A first;
+  B second;
+  C third;
 
-public:
-  void decode_payload() { }
-  void encode_payload(uint64_t features) { }
-  const char *get_type_name() const { return "ping"; }
+  triple() {}
+  triple(A f, B s, C t) : first(f), second(s), third(t) {}
 };
 
 #endif

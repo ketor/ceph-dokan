@@ -9,15 +9,13 @@
 #include "msg/Message.h"
 #include "messages/MOSDOp.h"
 #include "messages/MOSDSubOp.h"
-#include "messages/MOSDRepOp.h"
 #include "include/assert.h"
 #include "osd/osd_types.h"
 
 #ifdef WITH_LTTNG
 #include "tracing/oprequest.h"
-#else
-#define tracepoint(...)
 #endif
+
 
 OpRequest::OpRequest(Message *req, OpTracker *tracker) :
   TrackedOp(tracker, req->get_recv_stamp()),
@@ -32,8 +30,6 @@ OpRequest::OpRequest(Message *req, OpTracker *tracker) :
     reqid = static_cast<MOSDOp*>(req)->get_reqid();
   } else if (req->get_type() == MSG_OSD_SUBOP) {
     reqid = static_cast<MOSDSubOp*>(req)->reqid;
-  } else if (req->get_type() == MSG_OSD_REPOP) {
-    reqid = static_cast<MOSDRepOp*>(req)->reqid;
   }
   tracker->mark_event(this, "header_read", request->get_recv_stamp());
   tracker->mark_event(this, "throttled", request->get_throttle_stamp());
@@ -97,18 +93,15 @@ bool OpRequest::need_class_read_cap() {
 bool OpRequest::need_class_write_cap() {
   return check_rmw(CEPH_OSD_RMW_FLAG_CLASS_WRITE);
 }
-bool OpRequest::need_promote() {
-  return check_rmw(CEPH_OSD_RMW_FLAG_PROMOTE);
-}
 
 void OpRequest::set_rmw_flags(int flags) {
 #ifdef WITH_LTTNG
   int old_rmw_flags = rmw_flags;
 #endif
   rmw_flags |= flags;
-  tracepoint(oprequest, set_rmw_flags, reqid.name._type,
+/*by ketor  tracepoint(oprequest, set_rmw_flags, reqid.name._type,
 	     reqid.name._num, reqid.tid, reqid.inc,
-	     flags, old_rmw_flags, rmw_flags);
+	     flags, old_rmw_flags, rmw_flags);*/
 }
 
 void OpRequest::set_read() { set_rmw_flags(CEPH_OSD_RMW_FLAG_READ); }
@@ -117,7 +110,6 @@ void OpRequest::set_class_read() { set_rmw_flags(CEPH_OSD_RMW_FLAG_CLASS_READ); 
 void OpRequest::set_class_write() { set_rmw_flags(CEPH_OSD_RMW_FLAG_CLASS_WRITE); }
 void OpRequest::set_pg_op() { set_rmw_flags(CEPH_OSD_RMW_FLAG_PGOP); }
 void OpRequest::set_cache() { set_rmw_flags(CEPH_OSD_RMW_FLAG_CACHE); }
-void OpRequest::set_promote() { set_rmw_flags(CEPH_OSD_RMW_FLAG_PROMOTE); }
 
 void OpRequest::mark_flag_point(uint8_t flag, string s) {
 #ifdef WITH_LTTNG
@@ -127,7 +119,7 @@ void OpRequest::mark_flag_point(uint8_t flag, string s) {
   current = s;
   hit_flag_points |= flag;
   latest_flag_point = flag;
-  tracepoint(oprequest, mark_flag_point, reqid.name._type,
+/*by ketor  tracepoint(oprequest, mark_flag_point, reqid.name._type,
 	     reqid.name._num, reqid.tid, reqid.inc, rmw_flags,
-	     flag, s.c_str(), old_flags, hit_flag_points);
+	     flag, s.c_str(), old_flags, hit_flag_points);*/
 }

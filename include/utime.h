@@ -112,7 +112,7 @@ public:
     tv.tv_sec = t->tv_sec;
     tv.tv_nsec = t->tv_nsec;
   }
-
+/*
   utime_t round_to_minute() {
     struct tm bdt;
     time_t tt = sec();
@@ -131,22 +131,23 @@ public:
     tt = mktime(&bdt);
     return utime_t(tt, 0);
   }
-
+*/
   // cast to double
   operator double() const {
     return (double)sec() + ((double)nsec() / 1000000000.0L);
   }
-  operator ceph_timespec() const {
+  operator ceph_timespec() {
     ceph_timespec ts;
     ts.tv_sec = sec();
     ts.tv_nsec = nsec();
     return ts;
   }
 
-  void sleep() const {
-    struct timespec ts;
-    to_timespec(&ts);
-    nanosleep(&ts, NULL);
+  void sleep() {
+    //struct timespec ts = { (__time_t)tv.tv_sec, (long)tv.tv_nsec };
+    struct timespec ts = { tv.tv_sec, (long)tv.tv_nsec };
+    //nanosleep(&ts, &ts);
+    Sleep(ts.tv_sec*1000+ts.tv_nsec);
   }
 
   // output
@@ -162,7 +163,7 @@ public:
       //  aim for http://en.wikipedia.org/wiki/ISO_8601
       struct tm bdt;
       time_t tt = sec();
-      gmtime_r(&tt, &bdt);
+      //gmtime_r(&tt, &bdt);
       out << std::setw(4) << (bdt.tm_year+1900)  // 2007 -> '07'
 	  << '-' << std::setw(2) << (bdt.tm_mon+1)
 	  << '-' << std::setw(2) << bdt.tm_mday
@@ -191,10 +192,10 @@ public:
       //  aim for http://en.wikipedia.org/wiki/ISO_8601
       struct tm bdt;
       time_t tt = sec();
-      gmtime_r(&tt, &bdt);
+      //gmtime_r(&tt, &bdt);
 
       char buf[128];
-      asctime_r(&bdt, buf);
+      //asctime_r(&bdt, buf);
       int len = strlen(buf);
       if (buf[len - 1] == '\n')
         buf[len - 1] = '\0';
@@ -217,7 +218,7 @@ public:
       //  aim for http://en.wikipedia.org/wiki/ISO_8601
       struct tm bdt;
       time_t tt = sec();
-      localtime_r(&tt, &bdt);
+      //localtime_r(&tt, &bdt);
       out << std::setw(4) << (bdt.tm_year+1900)  // 2007 -> '07'
 	  << '-' << std::setw(2) << (bdt.tm_mon+1)
 	  << '-' << std::setw(2) << bdt.tm_mday
@@ -236,7 +237,7 @@ public:
   int sprintf(char *out, int outlen) const {
     struct tm bdt;
     time_t tt = sec();
-    localtime_r(&tt, &bdt);
+    //localtime_r(&tt, &bdt);
 
     return snprintf(out, outlen,
 		    "%04d-%02d-%02d %02d:%02d:%02d.%06ld",
@@ -244,59 +245,59 @@ public:
 		    bdt.tm_hour, bdt.tm_min, bdt.tm_sec, usec());
   }
 
-  static int parse_date(const string& date, uint64_t *epoch, uint64_t *nsec,
-                        string *out_date=NULL, string *out_time=NULL) {
-    struct tm tm;
-    memset(&tm, 0, sizeof(tm));
-
-    if (nsec)
-      *nsec = 0;
-
-    const char *p = strptime(date.c_str(), "%Y-%m-%d", &tm);
-    if (p) {
-      if (*p == ' ') {
-	p++;
-	p = strptime(p, " %H:%M:%S", &tm);
-	if (!p)
-	  return -EINVAL;
-        if (nsec && *p == '.') {
-          ++p;
-          unsigned i;
-          char buf[10]; /* 9 digit + null termination */
-          for (i = 0; (i < sizeof(buf) - 1) && isdigit(*p); ++i, ++p) {
-            buf[i] = *p;
-          }
-          for (; i < sizeof(buf) - 1; ++i) {
-            buf[i] = '0';
-          }
-          buf[i] = '\0';
-          string err;
-          *nsec = (uint64_t)strict_strtol(buf, 10, &err);
-          if (!err.empty()) {
-            return -EINVAL;
-          }
-        }
-      }
-    } else {
-      return -EINVAL;
-    }
-    time_t t = timegm(&tm);
-    if (epoch)
-      *epoch = (uint64_t)t;
-
-    if (out_date) {
-      char buf[32];
-      strftime(buf, sizeof(buf), "%F", &tm);
-      *out_date = buf;
-    }
-    if (out_time) {
-      char buf[32];
-      strftime(buf, sizeof(buf), "%T", &tm);
-      *out_time = buf;
-    }
-
-    return 0;
-  }
+//  static int parse_date(const string& date, uint64_t *epoch, uint64_t *nsec,
+//                        string *out_date=NULL, string *out_time=NULL) {
+//    struct tm tm;
+//    memset(&tm, 0, sizeof(tm));
+//
+//    if (nsec)
+//      *nsec = 0;
+//
+//    const char *p = strptime(date.c_str(), "%Y-%m-%d", &tm);
+//    if (p) {
+//      if (*p == ' ') {
+//	p++;
+//	p = strptime(p, " %H:%M:%S", &tm);
+//	if (!p)
+//	  return -EINVAL;
+//        if (nsec && *p == '.') {
+//          ++p;
+//          unsigned i;
+//          char buf[10]; /* 9 digit + null termination */
+//          for (i = 0; (i < sizeof(buf) - 1) && isdigit(*p); ++i, ++p) {
+//            buf[i] = *p;
+//          }
+//          for (; i < sizeof(buf) - 1; ++i) {
+//            buf[i] = '0';
+//          }
+//          buf[i] = '\0';
+//          string err;
+//          *nsec = (uint64_t)strict_strtol(buf, 10, &err);
+//          if (!err.empty()) {
+//            return -EINVAL;
+//          }
+//        }
+//      }
+//    } else {
+//      return -EINVAL;
+//    }
+//    time_t t = timegm(&tm);
+//    if (epoch)
+//      *epoch = (uint64_t)t;
+//
+//    if (out_date) {
+//      char buf[32];
+//      strftime(buf, sizeof(buf), "%F", &tm);
+//      *out_date = buf;
+//    }
+//    if (out_time) {
+//      char buf[32];
+//      strftime(buf, sizeof(buf), "%T", &tm);
+//      *out_time = buf;
+//    }
+//
+//    return 0;
+//  }
 };
 WRITE_CLASS_ENCODER(utime_t)
 

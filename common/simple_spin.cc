@@ -23,21 +23,21 @@ static uint32_t *foo = &bar;
  
 void simple_spin_lock(simple_spinlock_t *lock)
 {
-  while(1) {
-    __sync_synchronize();
-    uint32_t oldval = *lock;
-    if (oldval == 0) {
-      if (__sync_bool_compare_and_swap(lock, 0, 1))
-	return;
-    }
-    // delay
-    for (int i = 0; i < 100000; i++) {
-      *foo = (*foo * 33) + 17;
-    }
-  }
+//  while(1) {
+//    __sync_synchronize();
+//    uint32_t oldval = *lock;
+//    if (oldval == 0) {
+//      if (__sync_bool_compare_and_swap(lock, 0, 1))
+//	return;
+//    }
+//    // delay
+//    for (int i = 0; i < 100000; i++) {
+//      *foo = (*foo * 33) + 17;
+//    }
+//  }
 }
 
 void simple_spin_unlock(simple_spinlock_t *lock)
 {
-  __sync_bool_compare_and_swap(lock, 1, 0);
+//  __sync_bool_compare_and_swap(lock, 1, 0);
 }

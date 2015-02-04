@@ -18,8 +18,8 @@
 #include <utime.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/statvfs.h>
-#include <sys/socket.h>
+//#include <sys/statvfs.h>
+//#include <sys/socket.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -431,7 +431,7 @@ int ceph_readdir_r(struct ceph_mount_info *cmount, struct ceph_dir_result *dirp,
  *          and a negative error code on failure.
  */
 int ceph_readdirplus_r(struct ceph_mount_info *cmount, struct ceph_dir_result *dirp, struct dirent *de,
-		       struct stat *st, int *stmask);
+		       struct stat_ceph *st, int *stmask);
 
 /**
  * Gets multiple directory entries.
@@ -597,7 +597,7 @@ int ceph_rename(struct ceph_mount_info *cmount, const char *from, const char *to
  * @param stbuf the stat struct that will be filled in with the file's statistics.
  * @returns 0 on success or negative error code on failure.
  */
-int ceph_stat(struct ceph_mount_info *cmount, const char *path, struct stat *stbuf);
+int ceph_stat(struct ceph_mount_info *cmount, const char *path, struct stat_ceph *stbuf);
 
 /**
  * Get a file's statistics and attributes, without following symlinks.
@@ -607,7 +607,7 @@ int ceph_stat(struct ceph_mount_info *cmount, const char *path, struct stat *stb
  * @param stbuf the stat struct that will be filled in with the file's statistics.
  * @returns 0 on success or negative error code on failure.
  */
-int ceph_lstat(struct ceph_mount_info *cmount, const char *path, struct stat *stbuf);
+int ceph_lstat(struct ceph_mount_info *cmount, const char *path, struct stat_ceph *stbuf);
 
 /**
  * Set a file's attributes.
@@ -618,7 +618,7 @@ int ceph_lstat(struct ceph_mount_info *cmount, const char *path, struct stat *st
  * @param mask a mask of all the stat values that have been set on the stat struct.
  * @returns 0 on success or negative error code on failure.
  */
-int ceph_setattr(struct ceph_mount_info *cmount, const char *relpath, struct stat *attr, int mask);
+int ceph_setattr(struct ceph_mount_info *cmount, const char *relpath, struct stat_ceph *attr, int mask);
 
 /**
  * Change the mode bits (permissions) of a file/directory.
@@ -837,7 +837,7 @@ int ceph_fallocate(struct ceph_mount_info *cmount, int fd, int mode,
  *    function.
  * @returns 0 on success or a negative error code on failure
  */
-int ceph_fstat(struct ceph_mount_info *cmount, int fd, struct stat *stbuf);
+int ceph_fstat(struct ceph_mount_info *cmount, int fd, struct stat_ceph *stbuf);
 
 /** @} file */
 
@@ -1272,18 +1272,18 @@ int ceph_ll_lookup_inode(
 int ceph_ll_lookup_root(struct ceph_mount_info *cmount,
                   Inode **parent);
 int ceph_ll_lookup(struct ceph_mount_info *cmount, struct Inode *parent,
-		   const char *name, struct stat *attr,
+		   const char *name, struct stat_ceph *attr,
 		   Inode **out, int uid, int gid);
 int ceph_ll_put(struct ceph_mount_info *cmount, struct Inode *in);
 int ceph_ll_forget(struct ceph_mount_info *cmount, struct Inode *in,
 		   int count);
 int ceph_ll_walk(struct ceph_mount_info *cmount, const char *name,
 		 struct Inode **i,
-		 struct stat *attr);
+		 struct stat_ceph *attr);
 int ceph_ll_getattr(struct ceph_mount_info *cmount, struct Inode *in,
-		    struct stat *attr, int uid, int gid);
+		    struct stat_ceph *attr, int uid, int gid);
 int ceph_ll_setattr(struct ceph_mount_info *cmount, struct Inode *in,
-		    struct stat *st, int mask, int uid, int gid);
+		    struct stat_ceph *st, int mask, int uid, int gid);
 int ceph_ll_open(struct ceph_mount_info *cmount, struct Inode *in, int flags,
 		 struct Fh **fh, int uid, int gid);
 loff_t ceph_ll_lseek(struct ceph_mount_info *cmount, struct Fh* filehandle,
@@ -1324,14 +1324,14 @@ int ceph_ll_removexattr(struct ceph_mount_info *cmount, struct Inode *in,
 			const char *name, int uid, int gid);
 int ceph_ll_create(struct ceph_mount_info *cmount, struct Inode *parent,
 		   const char *name, mode_t mode, int flags,
-		   struct stat *attr, struct Inode **out, Fh **fhp,
+		   struct stat_ceph *attr, struct Inode **out, Fh **fhp,
 		   int uid, int gid);
 int ceph_ll_mkdir(struct ceph_mount_info *cmount, struct Inode *parent,
-		  const char *name, mode_t mode, struct stat *attr,
+		  const char *name, mode_t mode, struct stat_ceph *attr,
 		  Inode **out, int uid, int gid);
 int ceph_ll_link(struct ceph_mount_info *cmount, struct Inode *in,
 		 struct Inode *newparrent, const char *name,
-		 struct stat *attr, int uid, int gid);
+		 struct stat_ceph *attr, int uid, int gid);
 int ceph_ll_truncate(struct ceph_mount_info *cmount, struct Inode *in,
 		     uint64_t length, int uid, int gid);
 int ceph_ll_opendir(struct ceph_mount_info *cmount, struct Inode *in,
@@ -1348,7 +1348,7 @@ int ceph_ll_statfs(struct ceph_mount_info *cmount, struct Inode *in,
 int ceph_ll_readlink(struct ceph_mount_info *cmount, struct Inode *in,
 		     char *buf, size_t bufsize, int uid, int gid);
 int ceph_ll_symlink(struct ceph_mount_info *cmount, struct Inode *parent,
-		    const char *name, const char *value, struct stat *attr,
+		    const char *name, const char *value, struct stat_ceph *attr,
 		    struct Inode **in, int uid, int gid);
 int ceph_ll_rmdir(struct ceph_mount_info *cmount, struct Inode *in,
 		  const char *name, int uid, int gid);

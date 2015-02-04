@@ -37,12 +37,9 @@
 #endif
 #endif
 
-#include <pthread.h>
-
 #include "include/Context.h"
 #include "include/unordered_map.h"
 #include "common/WorkQueue.h"
-#include "net_handler.h"
 
 #define EVENT_NONE 0
 #define EVENT_READABLE 1
@@ -82,6 +79,9 @@ class EventDriver {
 
 /*
  * EventCenter maintain a set of file descriptor and handle registered events.
+ *
+ * EventCenter is aimed to used by one thread, other threads access EventCenter
+ * only can use dispatch_event_external method which is protected by lock.
  */
 class EventCenter {
   struct FileEvent {
@@ -101,22 +101,18 @@ class EventCenter {
   CephContext *cct;
   int nevent;
   // Used only to external event
-  Mutex external_lock, file_lock, time_lock;
+  Mutex lock;
   deque<EventCallbackRef> external_events;
   FileEvent *file_events;
   EventDriver *driver;
   map<utime_t, list<TimeEvent> > time_events;
   uint64_t time_event_next_id;
   time_t last_time; // last time process time event
-  utime_t next_time; // next wake up time
   int notify_receive_fd;
   int notify_send_fd;
-  NetHandler net;
-  pthread_t owner;
 
   int process_time_events();
   FileEvent *_get_file_event(int fd) {
-    assert(fd < nevent);
     FileEvent *p = &file_events[fd];
     if (!p->mask)
       new(p) FileEvent();
@@ -126,26 +122,17 @@ class EventCenter {
  public:
   EventCenter(CephContext *c):
     cct(c), nevent(0),
-    external_lock("AsyncMessenger::external_lock"),
-    file_lock("AsyncMessenger::file_lock"),
-    time_lock("AsyncMessenger::time_lock"),
-    file_events(NULL),
+    lock("AsyncMessenger::lock"),
     driver(NULL), time_event_next_id(0),
-    notify_receive_fd(-1), notify_send_fd(-1), net(c), owner(0) {
+    notify_receive_fd(-1), notify_send_fd(-1) {
     last_time = time(NULL);
   }
   ~EventCenter();
-  ostream& _event_prefix(std::ostream *_dout);
-
   int init(int nevent);
-  void set_owner(pthread_t p) { owner = p; }
-  pthread_t get_owner() { return owner; }
-
   // Used by internal thread
   int create_file_event(int fd, int mask, EventCallbackRef ctxt);
   uint64_t create_time_event(uint64_t milliseconds, EventCallbackRef ctxt);
   void delete_file_event(int fd, int mask);
-  void delete_time_event(uint64_t id);
   int process_events(int timeout_microseconds);
   void wakeup();
 

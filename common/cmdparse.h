@@ -34,24 +34,24 @@ void dump_cmddesc_to_json(ceph::Formatter *jf,
 		          const std::string& avail);
 bool cmdmap_from_json(std::vector<std::string> cmd, cmdmap_t *mapp,
 		      std::stringstream &ss);
-void handle_bad_get(CephContext *cct, std::string k, const char *name);
+//by ketor void handle_bad_get(CephContext *cct, std::string k, const char *name);
 
 std::string cmd_vartype_stringify(const cmd_vartype& v);
 
-template <typename T>
+/*by ketor template <typename T>
 bool
-cmd_getval(CephContext *cct, const cmdmap_t& cmdmap, std::string k, T& val)
+cmd_getval(CephContext *cct, cmdmap_t& cmdmap, std::string k, T& val)
 {
   if (cmdmap.count(k)) {
     try {
-      val = boost::get<T>(cmdmap.find(k)->second);
+      val = boost::get<T>(cmdmap[k]);
       return true;
     } catch (boost::bad_get) {
       handle_bad_get(cct, k, typeid(T).name());
     }
   }
   return false;
-}
+}*/
 
 // with default
 

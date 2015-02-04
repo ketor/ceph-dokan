@@ -135,29 +135,29 @@ void hobject_t::decode(bufferlist::iterator& bl)
   build_filestore_key_cache();
 }
 
-void hobject_t::decode(json_spirit::Value& v)
-{
-  using namespace json_spirit;
-  Object& o = v.get_obj();
-  for (Object::size_type i=0; i<o.size(); i++) {
-    Pair& p = o[i];
-    if (p.name_ == "oid")
-      oid.name = p.value_.get_str();
-    else if (p.name_ == "key")
-      key = p.value_.get_str();
-    else if (p.name_ == "snapid")
-      snap = p.value_.get_uint64();
-    else if (p.name_ == "hash")
-      hash = p.value_.get_int();
-    else if (p.name_ == "max")
-      max = p.value_.get_int();
-    else if (p.name_ == "pool")
-      pool = p.value_.get_int();
-    else if (p.name_ == "namespace")
-      nspace = p.value_.get_str();
-  }
-  build_filestore_key_cache();
-}
+//by ketor void hobject_t::decode(json_spirit::Value& v)
+//{
+//  using namespace json_spirit;
+//  Object& o = v.get_obj();
+//  for (Object::size_type i=0; i<o.size(); i++) {
+//    Pair& p = o[i];
+//    if (p.name_ == "oid")
+//      oid.name = p.value_.get_str();
+//    else if (p.name_ == "key")
+//      key = p.value_.get_str();
+//    else if (p.name_ == "snapid")
+//      snap = p.value_.get_uint64();
+//    else if (p.name_ == "hash")
+//      hash = p.value_.get_int();
+//    else if (p.name_ == "max")
+//      max = p.value_.get_int();
+//    else if (p.name_ == "pool")
+//      pool = p.value_.get_int();
+//    else if (p.name_ == "namespace")
+//      nspace = p.value_.get_str();
+//  }
+//  build_filestore_key_cache();
+//}
 
 void hobject_t::dump(Formatter *f) const
 {
@@ -238,7 +238,7 @@ void ghobject_t::decode(bufferlist::iterator& bl)
   hobj.set_hash(hobj.get_hash()); //to call build_filestore_key_cache();
 }
 
-void ghobject_t::decode(json_spirit::Value& v)
+/*by ketorvoid ghobject_t::decode(json_spirit::Value& v)
 {
   hobj.decode(v);
   using namespace json_spirit;
@@ -250,7 +250,7 @@ void ghobject_t::decode(json_spirit::Value& v)
     else if (p.name_ == "shard_id")
       shard_id.id = p.value_.get_int();
   }
-}
+}*/
 
 void ghobject_t::dump(Formatter *f) const
 {
