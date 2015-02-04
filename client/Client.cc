@@ -35,6 +35,8 @@ using namespace std;
 
 #include "common/config.h"
 
+#include "common/version.h"
+
 // ceph stuff
 
 #include "messages/MMonMap.h"
@@ -206,7 +208,6 @@ dir_result_t::dir_result_t(Inode *in)
 
 Client::Client(Messenger *m, MonClient *mc)
   : Dispatcher(m->cct),
-    cct(m->cct),
     logger(NULL),
     m_command_hook(this),
     timer(m->cct, client_lock),
@@ -223,6 +224,7 @@ Client::Client(Messenger *m, MonClient *mc)
     objecter_finisher(m->cct),
     tick_event(NULL),
     monclient(mc), messenger(m), whoami(m->get_myname().num()),
+    cap_epoch_barrier(0),
     initialized(false), authenticated(false),
     mounted(false), unmounting(false),
     local_osd(-1), local_osd_epoch(0),
@@ -1529,6 +1531,9 @@ int Client::make_request(MetaRequest *request,
     request->resend_mds = use_mds;
 
   while (1) {
+    if (request->aborted)
+      break;
+
     // set up wait cond
     Cond caller_cond;
     request->caller_cond = &caller_cond;
@@ -1585,6 +1590,16 @@ int Client::make_request(MetaRequest *request,
     // did we get a reply?
     if (request->reply) 
       break;
+  }
+
+  if (!request->reply) {
+    assert(request->aborted);
+    assert(!request->got_unsafe);
+    request->item.remove_myself();
+    mds_requests.erase(tid);
+    put_request(request); // request map's
+    put_request(request); // ours
+    return -ETIMEDOUT;
   }
 
   // got it!
@@ -1770,6 +1785,10 @@ void Client::populate_metadata()
 
   // Ceph entity id (the '0' in "client.0")
   metadata["entity_id"] = cct->_conf->name.get_id();
+
+  // Ceph version
+  metadata["ceph_version"] = pretty_version_to_str();
+  metadata["ceph_sha1"] = git_version_to_str();
 }
 
 /**
@@ -2121,7 +2140,7 @@ void Client::handle_osd_map(MOSDMap *m)
     // (i.e. we only need to know which inodes had outstanding ops, not the exact
     // op-to-inode relation)
     for (unordered_map<vinodeno_t,Inode*>::iterator i = inode_map.begin();
-         i != inode_map.end(); i++)
+         i != inode_map.end(); ++i)
     {
       Inode *inode = i->second;
       if (inode->oset.dirty_or_tx) {
@@ -3909,20 +3928,19 @@ void Client::handle_quota(MClientQuota *m)
 
   ldout(cct, 10) << "handle_quota " << *m << " from mds." << mds << dendl;
 
-  Inode *in = NULL;
   vinodeno_t vino(m->ino, CEPH_NOSNAP);
-  if (inode_map.count(vino))
+  if (inode_map.count(vino)) {
+    Inode *in = NULL;
     in = inode_map[vino];
 
-  if (!in)
-    goto done;
+    if (in) {
+      if (in->quota.is_enable() ^ m->quota.is_enable())
+	invalidate_quota_tree(in);
+      in->quota = m->quota;
+      in->rstat = m->rstat;
+    }
+  }
 
-  if (in->quota.is_enable() ^ m->quota.is_enable())
-    invalidate_quota_tree(in);
-  in->quota = m->quota;
-  in->rstat = m->rstat;
-
-done:
   m->put();
 }
 
@@ -4195,8 +4213,24 @@ void Client::_schedule_invalidate_dentry_callback(Dentry *dn, bool del)
     async_dentry_invalidator.queue(new C_Client_DentryInvalidate(this, dn, del));
 }
 
-void Client::_invalidate_inode_parents(Inode *in)
+void Client::_try_to_trim_inode(Inode *in)
 {
+  int ref = in->get_num_ref();
+
+  if (in->dir && !in->dir->dentry_list.empty()) {
+    for (xlist<Dentry*>::iterator p = in->dir->dentry_list.begin();
+	!p.end(); ) {
+      Dentry *dn = *p;
+      ++p;
+      if (dn->lru_is_expireable())
+	unlink(dn, false, false);  // close dir, drop dentry
+    }
+    --ref;
+  }
+  // make sure inode was not freed when closing dir
+  if (ref == 0)
+    return;
+
   set<Dentry*>::iterator q = in->dn_set.begin();
   while (q != in->dn_set.end()) {
     Dentry *dn = *q++;
@@ -4341,7 +4375,7 @@ void Client::handle_cap_grant(MetaSession *session, Inode *in, Cap *cap, MClient
 
   // may drop inode's last ref
   if (deleted_inode)
-    _invalidate_inode_parents(in);
+    _try_to_trim_inode(in);
 
   m->put();
 }
@@ -4687,9 +4721,8 @@ void Client::unmount()
   while (!fd_map.empty()) {
     Fh *fh = fd_map.begin()->second;
     fd_map.erase(fd_map.begin());
-    int release_err = _release_fh(fh);
-    ldout(cct, 0) << " destroyed lost open file " << fh << " on " << *fh->inode << "(async_err = " << release_err << ")" << dendl;
-
+    ldout(cct, 0) << " destroyed lost open file " << fh << " on " << *fh->inode << dendl;
+    _release_fh(fh);
   }
 
   _ll_drop_pins();
@@ -4814,6 +4847,22 @@ void Client::tick()
   timer.add_event_after(cct->_conf->client_tick_interval, tick_event);
 
   utime_t now = ceph_clock_now(cct);
+
+  if (!mounted && !mds_requests.empty()) {
+    MetaRequest *req = mds_requests.begin()->second;
+    if (req->op_stamp + cct->_conf->client_mount_timeout < now) {
+      req->aborted = true;
+      if (req->caller_cond) {
+	req->kick = true;
+	req->caller_cond->Signal();
+      }
+      signal_cond_list(waiting_for_mdsmap);
+      for (map<mds_rank_t,MetaSession*>::iterator p = mds_sessions.begin();
+	   p != mds_sessions.end();
+	  ++p)
+	signal_context_list(p->second->waiting_for_open);
+    }
+  }
 
   if (mdsmap->get_epoch()) {
     // renew caps?
@@ -8583,17 +8632,17 @@ bool Client::_vxattrcb_quota_exists(Inode *in)
 size_t Client::_vxattrcb_quota(Inode *in, char *val, size_t size)
 {
   return snprintf(val, size,
-                  "max_bytes=%ld max_files=%ld",
-                  in->quota.max_bytes,
-                  in->quota.max_files);
+                  "max_bytes=%lld max_files=%lld",
+                  (long long int)in->quota.max_bytes,
+                  (long long int)in->quota.max_files);
 }
 size_t Client::_vxattrcb_quota_max_bytes(Inode *in, char *val, size_t size)
 {
-  return snprintf(val, size, "%ld", in->quota.max_bytes);
+  return snprintf(val, size, "%lld", (long long int)in->quota.max_bytes);
 }
 size_t Client::_vxattrcb_quota_max_files(Inode *in, char *val, size_t size)
 {
-  return snprintf(val, size, "%ld", in->quota.max_files);
+  return snprintf(val, size, "%lld", (long long int)in->quota.max_files);
 }
 
 bool Client::_vxattrcb_layout_exists(Inode *in)

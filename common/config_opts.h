@@ -61,6 +61,8 @@ OPTION(mon_cluster_log_file, OPT_STR,
     "default=/var/log/ceph/$cluster.$channel.log cluster=/var/log/ceph/$cluster.log")
 OPTION(mon_cluster_log_file_level, OPT_STR, "info")
 
+OPTION(enable_experimental_unrecoverable_data_corrupting_features, OPT_STR, "")
+
 DEFAULT_SUBSYS(0, 5)
 SUBSYS(lockdep, 0, 1)
 SUBSYS(context, 0, 1)
@@ -128,6 +130,8 @@ OPTION(ms_dispatch_throttle_bytes, OPT_U64, 100 << 20)
 OPTION(ms_bind_ipv6, OPT_BOOL, false)
 OPTION(ms_bind_port_min, OPT_INT, 6800)
 OPTION(ms_bind_port_max, OPT_INT, 7300)
+OPTION(ms_bind_retry_count, OPT_INT, 3) // If binding fails, how many times do we retry to bind
+OPTION(ms_bind_retry_delay, OPT_INT, 5) // Delay between attemps to bind
 OPTION(ms_rwthread_stack_bytes, OPT_U64, 1024 << 10)
 OPTION(ms_tcp_read_timeout, OPT_U64, 900)
 OPTION(ms_pq_max_tokens_per_priority, OPT_U64, 16777216)
@@ -511,6 +515,8 @@ OPTION(osd_recover_clone_overlap, OPT_BOOL, true)   // preserve clone_overlap du
 OPTION(osd_op_num_threads_per_shard, OPT_INT, 2)
 OPTION(osd_op_num_shards, OPT_INT, 5)
 
+OPTION(osd_read_eio_on_bad_digest, OPT_BOOL, true) // return EIO if object digest is bad
+
 // Only use clone_overlap for recovery if there are fewer than
 // osd_recover_clone_overlap_limit entries in the overlap set
 OPTION(osd_recover_clone_overlap_limit, OPT_INT, 10)
@@ -566,6 +572,7 @@ OPTION(osd_scrub_chunk_max, OPT_INT, 25)
 OPTION(osd_scrub_sleep, OPT_FLOAT, 0)   // sleep between [deep]scrub ops
 OPTION(osd_deep_scrub_interval, OPT_FLOAT, 60*60*24*7) // once a week
 OPTION(osd_deep_scrub_stride, OPT_INT, 524288)
+OPTION(osd_deep_scrub_update_digest_min_age, OPT_INT, 2*60*60)   // objects must be this old (seconds) before we update the whole-object digest on scrub
 OPTION(osd_scan_list_ping_tp_interval, OPT_U64, 100)
 OPTION(osd_auto_weight, OPT_BOOL, false)
 //by ketor OPTION(osd_class_dir, OPT_STR, CEPH_LIBDIR "/rados-classes") // where rados plugins are stored
@@ -597,6 +604,7 @@ OPTION(osd_debug_verify_snaps_on_info, OPT_BOOL, false)
 OPTION(osd_debug_verify_stray_on_activate, OPT_BOOL, false)
 OPTION(osd_debug_skip_full_check_in_backfill_reservation, OPT_BOOL, false)
 OPTION(osd_debug_reject_backfill_probability, OPT_DOUBLE, 0)
+OPTION(osd_debug_inject_copyfrom_error, OPT_BOOL, false)  // inject failure during copyfrom completion
 OPTION(osd_enable_op_tracker, OPT_BOOL, true) // enable/disable OSD op tracking
 OPTION(osd_num_op_tracker_shard, OPT_U32, 32) // The number of shards for holding the ops
 OPTION(osd_op_history_size, OPT_U32, 20)    // Max number of completed ops to track
@@ -679,7 +687,7 @@ OPTION(osd_bench_large_size_max_throughput, OPT_U64, 100 << 20) // 100 MB/s
 OPTION(osd_bench_max_block_size, OPT_U64, 64 << 20) // cap the block size at 64MB
 OPTION(osd_bench_duration, OPT_U32, 30) // duration of 'osd bench', capped at 30s to avoid triggering timeouts
 
-OPTION(memstore_device_bytes, OPT_U32, 1024*1024*1024)
+OPTION(memstore_device_bytes, OPT_U64, 1024*1024*1024)
 
 OPTION(filestore_omap_backend, OPT_STR, "leveldb")
 
@@ -738,10 +746,11 @@ OPTION(filestore_fsync_flushes_journal_data, OPT_BOOL, false)
 OPTION(filestore_fiemap, OPT_BOOL, false)     // (try to) use fiemap
 OPTION(filestore_fadvise, OPT_BOOL, true)
 
-// (try to) use extsize for alloc hint
-// WARNING: extsize seems to trigger data corruption in xfs -- that is why it is
-// off by default, see bug #8830
-OPTION(filestore_xfs_extsize, OPT_BOOL, false)
+// (try to) use extsize for alloc hint NOTE: extsize seems to trigger
+// data corruption in xfs prior to kernel 3.5.  filestore will
+// implicity disable this if it cannot confirm the kernel is newer
+// than that.
+OPTION(filestore_xfs_extsize, OPT_BOOL, true)
 
 OPTION(filestore_journal_parallel, OPT_BOOL, false)
 OPTION(filestore_journal_writeahead, OPT_BOOL, false)
@@ -835,7 +844,9 @@ OPTION(rbd_default_format, OPT_INT, 1)
 OPTION(rbd_default_order, OPT_INT, 22)
 OPTION(rbd_default_stripe_count, OPT_U64, 0) // changing requires stripingv2 feature
 OPTION(rbd_default_stripe_unit, OPT_U64, 0) // changing to non-object size requires stripingv2 feature
-OPTION(rbd_default_features, OPT_INT, 3) // 1 for layering, 3 for layering+stripingv2. only applies to format 2 images
+OPTION(rbd_default_features, OPT_INT, 7) // only applies to format 2 images
+					 // +1 for layering, +2 for stripingv2,
+					 // +4 for exclusive lock
 
 OPTION(nss_db_path, OPT_STR, "") // path to nss db
 

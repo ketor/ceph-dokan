@@ -494,7 +494,7 @@ struct inode_t {
     }
   }
 
-  bool is_backtrace_updated() {
+  bool is_backtrace_updated() const {
     return backtrace_version == version;
   }
   void update_backtrace(version_t pv=0) {
