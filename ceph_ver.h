@@ -1,7 +1,0 @@
-#ifndef CEPH_VERSION_H
-#define CEPH_VERSION_H
-
-#define CEPH_GIT_VER 00a3ac3b67d93860e7f0b6e07319f11b14d0fec0
-#define CEPH_GIT_NICE_VER "0.92"
-
-#endif

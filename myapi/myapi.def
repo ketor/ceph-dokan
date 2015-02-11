@@ -1,8 +1,0 @@
-
-LIBRARY	myapi
-
-EXPORTS
-
-MyConvertSecurityDescriptorToStringSecurityDescriptor
-MyConvertStringSecurityDescriptorToSecurityDescriptor
-
