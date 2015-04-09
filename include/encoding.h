@@ -286,7 +286,7 @@ inline void decode(T &o, bufferlist& bl)
 #include <deque>
 #include <vector>
 #include <string>
-#include <boost/optional.hpp>
+#include <boost/optional/optional_io.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #ifndef _BACKWARD_BACKWARD_WARNING_H
@@ -306,6 +306,10 @@ inline void encode(const boost::optional<T> &p, bufferlist &bl)
     encode(p.get(), bl);
 }
 
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 template<typename T>
 inline void decode(boost::optional<T> &p, bufferlist::iterator &bp)
 {
@@ -317,6 +321,8 @@ inline void decode(boost::optional<T> &p, bufferlist::iterator &bp)
     decode(p.get(), bp);
   }
 }
+#pragma GCC diagnostic pop
+#pragma GCC diagnostic warning "-Wpragmas"
 
 //triple tuple
 template<class A, class B, class C>

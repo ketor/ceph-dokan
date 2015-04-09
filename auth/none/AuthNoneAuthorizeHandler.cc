@@ -13,7 +13,7 @@
  */
 
 #include "AuthNoneAuthorizeHandler.h"
-#include "../common/debug.h"
+#include "common/debug.h"
 
 #define dout_subsys ceph_subsys_auth
 

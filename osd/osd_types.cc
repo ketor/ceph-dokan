@@ -92,6 +92,9 @@ const char * ceph_osd_op_flag_name(unsigned flag)
     case CEPH_OSD_OP_FLAG_FADVISE_DONTNEED:
       name = "fadvise_dontneed";
       break;
+    case CEPH_OSD_OP_FLAG_FADVISE_NOCACHE:
+      name = "fadvise_nocache";
+      break;
     default:
       name = "???";
   };
@@ -691,6 +694,22 @@ void coll_t::generate_test_instances(list<coll_t*>& o)
 
 // ---
 
+std::string pg_vector_string(const vector<int32_t> &a)
+{
+  ostringstream oss;
+  oss << "[";
+  for (vector<int32_t>::const_iterator i = a.begin(); i != a.end(); ++i) {
+    if (i != a.begin()) 
+      oss << ",";
+    if (*i != CRUSH_ITEM_NONE) 
+      oss << *i;
+    else 
+      oss << "NONE";
+  }
+  oss << "]";
+  return oss.str();
+}
+
 std::string pg_state_string(int state)
 {
   ostringstream oss;
@@ -700,6 +719,8 @@ std::string pg_state_string(int state)
     oss << "creating+";
   if (state & PG_STATE_ACTIVE)
     oss << "active+";
+  if (state & PG_STATE_ACTIVATING)
+    oss << "activating+";
   if (state & PG_STATE_CLEAN)
     oss << "clean+";
   if (state & PG_STATE_RECOVERY_WAIT)
@@ -739,6 +760,8 @@ std::string pg_state_string(int state)
     oss << "backfill_toofull+";
   if (state & PG_STATE_INCOMPLETE)
     oss << "incomplete+";
+  if (state & PG_STATE_PEERED)
+    oss << "peered+";
   string ret(oss.str());
   if (ret.length() > 0)
     ret.resize(ret.length() - 1);
@@ -747,6 +770,53 @@ std::string pg_state_string(int state)
   return ret;
 }
 
+int pg_string_state(std::string state)
+{
+  int type;
+  if (state == "active")
+    type = PG_STATE_ACTIVE;
+  else if (state == "clean")
+    type = PG_STATE_CLEAN;
+  else if (state == "down")
+    type = PG_STATE_DOWN;
+  else if (state == "replay")
+    type = PG_STATE_REPLAY;
+  else if (state == "splitting")
+    type = PG_STATE_SPLITTING;
+  else if (state == "scrubbing")
+    type = PG_STATE_SCRUBBING;
+  else if (state == "scrubq")
+    type = PG_STATE_SCRUBQ;
+  else if (state == "degraded")
+    type = PG_STATE_DEGRADED;
+  else if (state == "inconsistent")
+    type = PG_STATE_INCONSISTENT;
+  else if (state == "peering")
+    type = PG_STATE_PEERING;
+  else if (state == "recoverying")
+    type = PG_STATE_RECOVERING;
+  else if (state == "backfill_wait")
+    type = PG_STATE_BACKFILL_WAIT;
+  else if (state == "incomplete")
+    type = PG_STATE_INCOMPLETE;
+  else if (state == "remapped")
+    type = PG_STATE_REMAPPED;
+  else if (state == "stale")
+    type = PG_STATE_STALE;
+  else if (state == "deep_scrub")
+    type = PG_STATE_DEEP_SCRUB;
+  else if (state == "backfill")
+    type = PG_STATE_BACKFILL;
+  else if (state == "backfill_toofull")
+    type = PG_STATE_BACKFILL_TOOFULL;
+  else if (state == "recovery_wait")
+    type = PG_STATE_RECOVERY_WAIT;
+  else if (state == "undersized")
+    type = PG_STATE_UNDERSIZED;
+  else
+    type = -1;
+  return type;
+}
 
 // -- eversion_t --
 string eversion_t::get_key_name() const
@@ -1631,6 +1701,33 @@ void object_stat_sum_t::sub(const object_stat_sum_t& o)
   num_bytes_hit_set_archive -= o.num_bytes_hit_set_archive;
 }
 
+bool operator==(const object_stat_sum_t& l, const object_stat_sum_t& r)
+{
+  return
+    l.num_bytes == r.num_bytes &&
+    l.num_objects == r.num_objects &&
+    l.num_object_clones == r.num_object_clones &&
+    l.num_object_copies == r.num_object_copies &&
+    l.num_objects_missing_on_primary == r.num_objects_missing_on_primary &&
+    l.num_objects_degraded == r.num_objects_degraded &&
+    l.num_objects_misplaced == r.num_objects_misplaced &&
+    l.num_objects_unfound == r.num_objects_unfound &&
+    l.num_rd == r.num_rd &&
+    l.num_rd_kb == r.num_rd_kb &&
+    l.num_wr == r.num_wr &&
+    l.num_wr_kb == r.num_wr_kb &&
+    l.num_scrub_errors == r.num_scrub_errors &&
+    l.num_shallow_scrub_errors == r.num_shallow_scrub_errors &&
+    l.num_deep_scrub_errors == r.num_deep_scrub_errors &&
+    l.num_objects_recovered == r.num_objects_recovered &&
+    l.num_bytes_recovered == r.num_bytes_recovered &&
+    l.num_keys_recovered == r.num_keys_recovered &&
+    l.num_objects_dirty == r.num_objects_dirty &&
+    l.num_whiteouts == r.num_whiteouts &&
+    l.num_objects_omap == r.num_objects_omap &&
+    l.num_objects_hit_set_archive == r.num_objects_hit_set_archive &&
+    l.num_bytes_hit_set_archive == r.num_bytes_hit_set_archive;
+}
 
 // -- object_stat_collection_t --
 
@@ -1675,6 +1772,21 @@ void object_stat_collection_t::generate_test_instances(list<object_stat_collecti
 
 // -- pg_stat_t --
 
+bool pg_stat_t::is_acting_osd(int32_t osd, bool primary) const
+{
+  if (primary && osd == acting_primary) {
+    return true;
+  } else if (!primary) {
+    for(vector<int32_t>::const_iterator it = acting.begin();
+        it != acting.end(); it++)
+    {
+      if (*it == osd)
+        return true;
+    }
+  }
+  return false;
+}
+
 void pg_stat_t::dump(Formatter *f) const
 {
   f->dump_stream("version") << version;
@@ -1684,8 +1796,10 @@ void pg_stat_t::dump(Formatter *f) const
   f->dump_stream("last_fresh") << last_fresh;
   f->dump_stream("last_change") << last_change;
   f->dump_stream("last_active") << last_active;
+  f->dump_stream("last_peered") << last_peered;
   f->dump_stream("last_clean") << last_clean;
   f->dump_stream("last_became_active") << last_became_active;
+  f->dump_stream("last_became_peered") << last_became_peered;
   f->dump_stream("last_unstale") << last_unstale;
   f->dump_stream("last_undegraded") << last_undegraded;
   f->dump_stream("last_fullsized") << last_fullsized;
@@ -1739,7 +1853,7 @@ void pg_stat_t::dump_brief(Formatter *f) const
 
 void pg_stat_t::encode(bufferlist &bl) const
 {
-  ENCODE_START(20, 8, bl);
+  ENCODE_START(21, 8, bl);
   ::encode(version, bl);
   ::encode(reported_seq, bl);
   ::encode(reported_epoch, bl);
@@ -1777,6 +1891,8 @@ void pg_stat_t::encode(bufferlist &bl) const
   ::encode(last_undegraded, bl);
   ::encode(last_fullsized, bl);
   ::encode(hitset_bytes_stats_invalid, bl);
+  ::encode(last_peered, bl);
+  ::encode(last_became_peered, bl);
   ENCODE_FINISH(bl);
 }
 
@@ -1909,6 +2025,13 @@ void pg_stat_t::decode(bufferlist::iterator &bl)
     // encoder may not have supported num_bytes_hit_set_archive accounting.
     hitset_bytes_stats_invalid = true;
   }
+  if (struct_v >= 21) {
+    ::decode(last_peered, bl);
+    ::decode(last_became_peered, bl);
+  } else {
+    last_peered = last_active;
+    last_became_peered = last_became_active;
+  }
   DECODE_FINISH(bl);
 }
 
@@ -1960,6 +2083,47 @@ void pg_stat_t::generate_test_instances(list<pg_stat_t*>& o)
   o.push_back(new pg_stat_t(a));
 }
 
+bool operator==(const pg_stat_t& l, const pg_stat_t& r)
+{
+  return
+    l.version == r.version &&
+    l.reported_seq == r.reported_seq &&
+    l.reported_epoch == r.reported_epoch &&
+    l.state == r.state &&
+    l.last_fresh == r.last_fresh &&
+    l.last_change == r.last_change &&
+    l.last_active == r.last_active &&
+    l.last_clean == r.last_clean &&
+    l.last_unstale == r.last_unstale &&
+    l.last_undegraded == r.last_undegraded &&
+    l.last_fullsized == r.last_fullsized &&
+    l.log_start == r.log_start &&
+    l.ondisk_log_start == r.ondisk_log_start &&
+    l.created == r.created &&
+    l.last_epoch_clean == r.last_epoch_clean &&
+    l.parent == r.parent &&
+    l.parent_split_bits == r.parent_split_bits &&
+    l.last_scrub == r.last_scrub &&
+    l.last_deep_scrub == r.last_deep_scrub &&
+    l.last_scrub_stamp == r.last_scrub_stamp &&
+    l.last_deep_scrub_stamp == r.last_deep_scrub_stamp &&
+    l.last_clean_scrub_stamp == r.last_clean_scrub_stamp &&
+    l.stats == r.stats &&
+    l.stats_invalid == r.stats_invalid &&
+    l.log_size == r.log_size &&
+    l.ondisk_log_size == r.ondisk_log_size &&
+    l.up == r.up &&
+    l.acting == r.acting &&
+    l.mapping_epoch == r.mapping_epoch &&
+    l.blocked_by == r.blocked_by &&
+    l.last_became_active == r.last_became_active &&
+    l.dirty_stats_invalid == r.dirty_stats_invalid &&
+    l.omap_stats_invalid == r.omap_stats_invalid &&
+    l.hitset_stats_invalid == r.hitset_stats_invalid &&
+    l.hitset_bytes_stats_invalid == r.hitset_bytes_stats_invalid &&
+    l.up_primary == r.up_primary &&
+    l.acting_primary == r.acting_primary;
+}
 
 // -- pool_stat_t --
 
@@ -2774,7 +2938,7 @@ void pg_log_entry_t::decode_with_checksum(bufferlist::iterator& p)
 
 void pg_log_entry_t::encode(bufferlist &bl) const
 {
-  ENCODE_START(9, 4, bl);
+  ENCODE_START(10, 4, bl);
   ::encode(op, bl);
   ::encode(soid, bl);
   ::encode(version, bl);
@@ -2798,12 +2962,13 @@ void pg_log_entry_t::encode(bufferlist &bl) const
   ::encode(snaps, bl);
   ::encode(user_version, bl);
   ::encode(mod_desc, bl);
+  ::encode(extra_reqids, bl);
   ENCODE_FINISH(bl);
 }
 
 void pg_log_entry_t::decode(bufferlist::iterator &bl)
 {
-  DECODE_START_LEGACY_COMPAT_LEN(8, 4, 4, bl);
+  DECODE_START_LEGACY_COMPAT_LEN(10, 4, 4, bl);
   ::decode(op, bl);
   if (struct_v < 2) {
     sobject_t old_soid;
@@ -2824,6 +2989,7 @@ void pg_log_entry_t::decode(bufferlist::iterator &bl)
     ::decode(prior_version, bl);
 
   ::decode(reqid, bl);
+
   ::decode(mtime, bl);
   if (struct_v < 5)
     invalid_pool = true;
@@ -2849,6 +3015,8 @@ void pg_log_entry_t::decode(bufferlist::iterator &bl)
     ::decode(mod_desc, bl);
   else
     mod_desc.mark_unrollbackable();
+  if (struct_v >= 10)
+    ::decode(extra_reqids, bl);
 
   DECODE_FINISH(bl);
 }
@@ -2860,6 +3028,17 @@ void pg_log_entry_t::dump(Formatter *f) const
   f->dump_stream("version") << version;
   f->dump_stream("prior_version") << prior_version;
   f->dump_stream("reqid") << reqid;
+  f->open_array_section("extra_reqids");
+  for (vector<pair<osd_reqid_t, version_t> >::const_iterator p =
+	 extra_reqids.begin();
+       p != extra_reqids.end();
+       ++p) {
+    f->open_object_section("extra_reqid");
+    f->dump_stream("reqid") << p->first;
+    f->dump_stream("user_version") << p->second;
+    f->close_section();
+  }
+  f->close_section();
   f->dump_stream("mtime") << mtime;
   if (snaps.length() > 0) {
     vector<snapid_t> v;
@@ -2911,6 +3090,36 @@ ostream& operator<<(ostream& out, const pg_log_entry_t& e)
 
 
 // -- pg_log_t --
+
+// out: pg_log_t that only has entries that apply to import_pgid using curmap
+// reject: Entries rejected from "in" are in the reject.log.  Other fields not set.
+void pg_log_t::filter_log(spg_t import_pgid, const OSDMap &curmap,
+  const string &hit_set_namespace, const pg_log_t &in,
+  pg_log_t &out, pg_log_t &reject)
+{
+  out = in;
+  out.log.clear();
+  reject.log.clear();
+
+  for (list<pg_log_entry_t>::const_iterator i = in.log.begin();
+       i != in.log.end(); ++i) {
+
+    if (i->soid.nspace != hit_set_namespace) {
+      object_t oid = i->soid.oid;
+      object_locator_t loc(i->soid);
+      pg_t raw_pgid = curmap.object_locator_to_pg(oid, loc);
+      pg_t pgid = curmap.raw_pg_to_pg(raw_pgid);
+
+      if (import_pgid.pgid == pgid) {
+        out.log.push_back(*i);
+      } else {
+        reject.log.push_back(*i);
+      }
+    } else {
+      out.log.push_back(*i);
+    }
+  }
+}
 
 void pg_log_t::encode(bufferlist& bl) const
 {
@@ -3367,7 +3576,7 @@ void object_copy_data_t::encode(bufferlist& bl, uint64_t features) const
     return;
   }
 
-  ENCODE_START(5, 5, bl);
+  ENCODE_START(6, 5, bl);
   ::encode(size, bl);
   ::encode(mtime, bl);
   ::encode(attrs, bl);
@@ -3380,12 +3589,13 @@ void object_copy_data_t::encode(bufferlist& bl, uint64_t features) const
   ::encode(flags, bl);
   ::encode(data_digest, bl);
   ::encode(omap_digest, bl);
+  ::encode(reqids, bl);
   ENCODE_FINISH(bl);
 }
 
 void object_copy_data_t::decode(bufferlist::iterator& bl)
 {
-  DECODE_START(5, bl);
+  DECODE_START(6, bl);
   if (struct_v < 5) {
     // old
     ::decode(size, bl);
@@ -3440,6 +3650,9 @@ void object_copy_data_t::decode(bufferlist::iterator& bl)
       ::decode(data_digest, bl);
       ::decode(omap_digest, bl);
     }
+    if (struct_v >= 6) {
+      ::decode(reqids, bl);
+    }
   }
   DECODE_FINISH(bl);
 }
@@ -3473,6 +3686,7 @@ void object_copy_data_t::generate_test_instances(list<object_copy_data_t*>& o)
   o.back()->data.push_back(databp);
   o.back()->omap_header.append("this is an omap header");
   o.back()->snaps.push_back(123);
+  o.back()->reqids.push_back(make_pair(osd_reqid_t(), version_t()));
 }
 
 void object_copy_data_t::dump(Formatter *f) const
@@ -3495,6 +3709,16 @@ void object_copy_data_t::dump(Formatter *f) const
   for (vector<snapid_t>::const_iterator p = snaps.begin();
        p != snaps.end(); ++p)
     f->dump_unsigned("snap", *p);
+  f->close_section();
+  f->open_array_section("reqids");
+  for (vector<pair<osd_reqid_t, version_t> >::const_iterator p = reqids.begin();
+       p != reqids.end();
+       ++p) {
+    f->open_object_section("extra_reqid");
+    f->dump_stream("reqid") << p->first;
+    f->dump_stream("user_version") << p->second;
+    f->close_section();
+  }
   f->close_section();
 }
 

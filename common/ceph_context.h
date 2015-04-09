@@ -127,7 +127,9 @@ public:
   CryptoHandler *get_crypto_handler(int type);
 
   /// check if experimental feature is enable, and emit appropriate warnings
-  bool check_experimental_feature_enabled(std::string feature);
+  bool check_experimental_feature_enabled(const std::string& feature);
+  bool check_experimental_feature_enabled(const std::string& feature,
+					  std::ostream *message);
 
 private:
   CephContext(const CephContext &rhs);

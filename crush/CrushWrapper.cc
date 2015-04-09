@@ -1,3 +1,5 @@
+// -*- mode:C++; tab-width:8; c-basic-offset:2; indent-tabs-mode:t -*-
+// vim: ts=8 sw=2 smarttab
 
 #include "osd/osd_types.h"
 #include "common/debug.h"
@@ -5,6 +7,7 @@
 #include "common/errno.h"
 #define EALREADY 114 /* Operation already in progress */ //by ketor
 #include "CrushWrapper.h"
+#include "CrushTreeDumper.h"
 
 #define dout_subsys ceph_subsys_crush
 
@@ -59,6 +62,18 @@ bool CrushWrapper::is_v3_rule(unsigned ruleid) const
     if (r->steps[j].op == CRUSH_RULE_SET_CHOOSELEAF_VARY_R) {
       return true;
     }
+  }
+  return false;
+}
+
+bool CrushWrapper::has_v4_buckets() const
+{
+  for (int i=0; i<crush->max_buckets; ++i) {
+    crush_bucket *b = crush->buckets[i];
+    if (!b)
+      continue;
+    if (b->type == CRUSH_BUCKET_STRAW2)
+      return true;
   }
   return false;
 }
@@ -541,7 +556,8 @@ int CrushWrapper::insert_item(CephContext *cct, int item, float weight, string n
     if (!name_exists(q->second)) {
       ldout(cct, 5) << "insert_item creating bucket " << q->second << dendl;
       int empty = 0, newid;
-      int r = add_bucket(0, CRUSH_BUCKET_STRAW, CRUSH_HASH_DEFAULT, p->first, 1, &cur, &empty, &newid);
+      int r = add_bucket(0, 0,
+			 CRUSH_HASH_DEFAULT, p->first, 1, &cur, &empty, &newid);
       if (r < 0) {
         ldout(cct, 1) << "add_bucket failure error: " << cpp_strerror(r) << dendl;
         return r;
@@ -923,15 +939,17 @@ int CrushWrapper::add_simple_ruleset(string name, string root_name,
   }
   int steps = 3;
   if (mode == "indep")
-    steps = 4;
+    steps = 5;
   int min_rep = mode == "firstn" ? 1 : 3;
   int max_rep = mode == "firstn" ? 10 : 20;
   //set the ruleset the same as rule_id(rno)
   crush_rule *rule = crush_make_rule(steps, rno, rule_type, min_rep, max_rep);
   assert(rule);
   int step = 0;
-  if (mode == "indep")
+  if (mode == "indep") {
     crush_rule_set_step(rule, step++, CRUSH_RULE_SET_CHOOSELEAF_TRIES, 5, 0);
+    crush_rule_set_step(rule, step++, CRUSH_RULE_SET_CHOOSE_TRIES, 100, 0);
+  }
   crush_rule_set_step(rule, step++, CRUSH_RULE_TAKE, root, 0);
   if (type)
     crush_rule_set_step(rule, step++,
@@ -1075,6 +1093,12 @@ void CrushWrapper::encode(bufferlist& bl, bool lean) const
       }
       break;
 
+    case CRUSH_BUCKET_STRAW2:
+      for (unsigned j=0; j<crush->buckets[i]->size; j++) {
+	::encode((reinterpret_cast<crush_bucket_straw2*>(crush->buckets[i]))->item_weights[j], bl);
+      }
+      break;
+
     default:
       assert(0);
       break;
@@ -1106,6 +1130,7 @@ void CrushWrapper::encode(bufferlist& bl, bool lean) const
   ::encode(crush->chooseleaf_descend_once, bl);
   ::encode(crush->chooseleaf_vary_r, bl);
   ::encode(crush->straw_calc_version, bl);
+  ::encode(crush->allowed_bucket_algs, bl);
 }
 
 static void decode_32_or_64_string_map(map<int32_t,string>& m, bufferlist::iterator& blp)
@@ -1192,6 +1217,9 @@ void CrushWrapper::decode(bufferlist::iterator& blp)
     if (!blp.end()) {
       ::decode(crush->straw_calc_version, blp);
     }
+    if (!blp.end()) {
+      ::decode(crush->allowed_bucket_algs, blp);
+    }
     finalize();
   }
   catch (...) {
@@ -1222,6 +1250,9 @@ void CrushWrapper::decode_crush_bucket(crush_bucket** bptr, bufferlist::iterator
     break;
   case CRUSH_BUCKET_STRAW:
     size = sizeof(crush_bucket_straw);
+    break;
+  case CRUSH_BUCKET_STRAW2:
+    size = sizeof(crush_bucket_straw2);
     break;
   default:
     {
@@ -1282,6 +1313,15 @@ void CrushWrapper::decode_crush_bucket(crush_bucket** bptr, bufferlist::iterator
     for (unsigned j = 0; j < bucket->size; ++j) {
       ::decode(cbs->item_weights[j], blp);
       ::decode(cbs->straws[j], blp);
+    }
+    break;
+  }
+
+  case CRUSH_BUCKET_STRAW2: {
+    crush_bucket_straw2* cbs = reinterpret_cast<crush_bucket_straw2*>(bucket);
+    cbs->item_weights = (__u32*)calloc(1, bucket->size * sizeof(__u32));
+    for (unsigned j = 0; j < bucket->size; ++j) {
+      ::decode(cbs->item_weights[j], blp);
     }
     break;
   }
@@ -1377,9 +1417,12 @@ void CrushWrapper::dump_tunables(Formatter *f) const
   f->dump_int("chooseleaf_descend_once", get_chooseleaf_descend_once());
   f->dump_int("chooseleaf_vary_r", get_chooseleaf_vary_r());
   f->dump_int("straw_calc_version", get_straw_calc_version());
+  f->dump_int("allowed_bucket_algs", get_allowed_bucket_algs());
 
   // be helpful about it
-  if (has_firefly_tunables())
+  if (has_hammer_tunables())
+    f->dump_string("profile", "hammer");
+  else if (has_firefly_tunables())
     f->dump_string("profile", "firefly");
   else if (has_bobtail_tunables())
     f->dump_string("profile", "bobtail");
@@ -1484,113 +1527,63 @@ void CrushWrapper::list_rules(Formatter *f) const
   }
 }
 
-struct qi {
-  int item;
-  int depth;
-  float weight;
-  qi() : item(0), depth(0), weight(0) {}
-  qi(int i, int d, float w) : item(i), depth(d), weight(w) {}
+class CrushTreePlainDumper : public CrushTreeDumper::Dumper<ostream> {
+public:
+  typedef CrushTreeDumper::Dumper<ostream> Parent;
+
+  CrushTreePlainDumper(const CrushWrapper *crush)
+    : Parent(crush) {}
+
+  void dump(ostream *out) {
+    *out << "ID\tWEIGHT\tTYPE NAME\n";
+    Parent::dump(out);
+  }
+
+protected:
+  virtual void dump_item(const CrushTreeDumper::Item &qi, ostream *out) {
+    *out << qi.id << "\t"
+	 << weightf_t(qi.weight) << "\t";
+
+    for (int k=0; k < qi.depth; k++)
+      *out << "\t";
+
+    if (qi.is_bucket())
+    {
+      *out << crush->get_type_name(crush->get_bucket_type(qi.id)) << " "
+	   << crush->get_item_name(qi.id);
+    }
+    else
+    {
+      *out << "osd." << qi.id;
+    }
+    *out << "\n";
+  }
 };
 
-void CrushWrapper::dump_tree(const vector<__u32>& w, ostream *out, Formatter *f) const
-{
-  if (out)
-    *out << "# id\tweight\ttype name\treweight\n";
-  if (f)
+
+class CrushTreeFormattingDumper : public CrushTreeDumper::FormattingDumper {
+public:
+  typedef CrushTreeDumper::FormattingDumper Parent;
+
+  CrushTreeFormattingDumper(const CrushWrapper *crush)
+    : Parent(crush) {}
+
+  void dump(Formatter *f) {
     f->open_array_section("nodes");
-  set<int> touched;
-  set<int> roots;
-  find_roots(roots);
-  for (set<int>::iterator p = roots.begin(); p != roots.end(); ++p) {
-    list<qi> q;
-    q.push_back(qi(*p, 0, get_bucket_weight(*p) / (float)0x10000));
-    while (!q.empty()) {
-      int cur = q.front().item;
-      int depth = q.front().depth;
-      float weight = q.front().weight;
-      q.pop_front();
-
-      if (out) {
-	*out << cur << "\t";
-	int oldprecision = out->precision();
-	*out << std::setprecision(4) << weight << std::setprecision(oldprecision) << "\t";
-
-	for (int k=0; k<depth; k++)
-	  *out << "\t";
-      }
-      if (f) {
-	f->open_object_section("item");
-      }
-      if (cur >= 0) {
-
-	if (f) {
-	  f->dump_unsigned("id", cur);
-	  f->dump_stream("name") << "osd." << cur;
-	  f->dump_string("type", get_type_name(0));
-	  f->dump_int("type_id", 0);
-	}
-	if (out)
-	  *out << "osd." << cur << "\t";
-
-	double wf = (double)w[cur] / (double)0x10000;
-	if (out) {
-	  std::streamsize p = out->precision();
-	  *out << std::setprecision(4)
-	       << wf
-	       << std::setprecision(p)
-	       << "\t";
-	}
-	if (f) {
-	  f->dump_float("reweight", wf);
-	}
-
-	if (out)
-	  *out << "\n";
-	if (f) {
-	  f->dump_float("crush_weight", weight);
-	  f->dump_unsigned("depth", depth);
-	  f->close_section();
-	}
-	touched.insert(cur);
-      }
-      if (cur >= 0) {
-	continue;
-      }
-
-      // queue bucket contents...
-      int type = get_bucket_type(cur);
-      int s = get_bucket_size(cur);
-      if (f) {
-	f->dump_int("id", cur);
-	f->dump_string("name", get_item_name(cur));
-	f->dump_string("type", get_type_name(type));
-	f->dump_int("type_id", type);
-	f->open_array_section("children");
-      }
-      for (int k=s-1; k>=0; k--) {
-	int item = get_bucket_item(cur, k);
-	q.push_front(qi(item, depth+1, (float)get_bucket_item_weight(cur, k) / (float)0x10000));
-	if (f)
-	  f->dump_int("child", item);
-      }
-      if (f)
-	f->close_section();
-
-      if (out)
-	*out << get_type_name(type) << " " << get_item_name(cur) << "\n";
-      if (f) {
-	f->close_section();
-      }
-
-    }
-  }
-  if (f) {
+    Parent::dump(f);
     f->close_section();
     f->open_array_section("stray");
-  }
-
-  if (f)
     f->close_section();
+  }
+};
+
+
+void CrushWrapper::dump_tree(ostream *out, Formatter *f) const
+{
+  if (out)
+    CrushTreePlainDumper(this).dump(out);
+  if (f)
+    CrushTreeFormattingDumper(this).dump(f);
 }
 
 void CrushWrapper::generate_test_instances(list<CrushWrapper*>& o)

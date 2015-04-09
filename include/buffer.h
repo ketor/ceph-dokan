@@ -57,6 +57,11 @@
   #define CEPH_BUFFER_API
 #endif
 
+#if defined(HAVE_XIO)
+struct xio_mempool_obj;
+class XioDispatchHook;
+#endif
+
 namespace ceph {
 
 class CEPH_BUFFER_API buffer {
@@ -136,6 +141,8 @@ private:
   friend std::ostream& operator<<(std::ostream& out, const raw &r);
 
 public:
+  class xio_mempool;
+  class xio_msg_buffer;
 
   /*
    * named constructors 
@@ -150,6 +157,10 @@ public:
   static raw* create_page_aligned(unsigned len);
   static raw* create_zero_copy(unsigned len, int fd, int64_t *offset);
   static raw* create_unshareable(unsigned len);
+
+#if defined(HAVE_XIO)
+  static raw* create_msg(unsigned len, char *buf, XioDispatchHook *m_hook);
+#endif
 
   /*
    * a buffer pointer.  references (a subsequence of) a raw buffer.
@@ -511,6 +522,10 @@ public:
     }
   };
 };
+
+#if defined(HAVE_XIO)
+xio_mempool_obj* get_xio_mp(const buffer::ptr& bp);
+#endif
 
 typedef buffer::ptr bufferptr;
 typedef buffer::list bufferlist;

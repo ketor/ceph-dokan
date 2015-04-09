@@ -136,7 +136,7 @@ typedef void (*client_ino_callback_t)(void *handle, vinodeno_t ino, int64_t off,
 
 typedef void (*client_dentry_callback_t)(void *handle, vinodeno_t dirino,
 					 vinodeno_t ino, string& name);
-typedef void (*client_remount_callback_t)(void *handle);
+typedef int (*client_remount_callback_t)(void *handle);
 
 typedef int (*client_getgroups_callback_t)(void *handle, uid_t uid, gid_t **sgids);
 typedef void(*client_switch_interrupt_callback_t)(void *req, void *data);
@@ -242,6 +242,8 @@ class Client : public Dispatcher {
   client_ino_callback_t ino_invalidate_cb;
   client_dentry_callback_t dentry_invalidate_cb;
   client_getgroups_callback_t getgroups_cb;
+  bool can_invalidate_dentries;
+  bool require_remount;
 
   Finisher async_ino_invalidator;
   Finisher async_dentry_invalidator;
@@ -312,7 +314,8 @@ public:
 			     mds_rank_t mds, int drop, int unless);
   mds_rank_t choose_target_mds(MetaRequest *req);
   void connect_mds_targets(mds_rank_t mds);
-  void send_request(MetaRequest *request, MetaSession *session);
+  void send_request(MetaRequest *request, MetaSession *session,
+		    bool drop_cap_releases=false);
   MClientRequest *build_client_request(MetaRequest *request);
   void kick_requests(MetaSession *session);
   void kick_requests_closed(MetaSession *session);
@@ -418,6 +421,7 @@ protected:
   friend class C_C_Tick; // Asserts on client_lock
   friend class C_Client_SyncCommit; // Asserts on client_lock
   friend class C_Client_RequestInterrupt;
+  friend class C_Client_Remount;
 
   //int get_cache_size() { return lru.lru_get_size(); }
   //void set_cache_size(int m) { lru.lru_set_max(m); }

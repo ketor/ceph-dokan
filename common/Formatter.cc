@@ -63,12 +63,13 @@ Formatter::Formatter() { }
 
 Formatter::~Formatter() { }
 
-Formatter *
-new_formatter(const std::string &type)
+Formatter *Formatter::create(const std::string &type,
+			     const std::string& default_type,
+			     const std::string& fallback)
 {
   std::string mytype = type;
   if (mytype == "")
-    mytype = "json-pretty";
+    mytype = default_type;
 
   if (mytype == "json")
     return new JSONFormatter(false);
@@ -82,6 +83,8 @@ new_formatter(const std::string &type)
     return new TableFormatter();
   else if (mytype == "table-kv")
     return new TableFormatter(true);
+  else if (fallback != "")
+    return create(fallback, "", "");
   else
     return (Formatter *) NULL;
 }
@@ -123,6 +126,8 @@ void JSONFormatter::flush(std::ostream& os)
 {
   finish_pending_string();
   os << m_ss.str();
+  if (m_pretty)
+    os << "\n";
   m_ss.clear();
   m_ss.str("");
 }
@@ -146,7 +151,7 @@ void JSONFormatter::print_comma(json_formatter_stack_entry_d& entry)
     } else {
       m_ss << ",";
     }
-  } else if (entry.is_array && m_pretty) {
+  } else if (m_pretty) {
     m_ss << "\n";
     for (unsigned i = 1; i < m_stack.size(); i++)
       m_ss << "    ";
@@ -155,13 +160,12 @@ void JSONFormatter::print_comma(json_formatter_stack_entry_d& entry)
     m_ss << "    ";
 }
 
-void JSONFormatter::print_quoted_string(const char *s)
+void JSONFormatter::print_quoted_string(const std::string& s)
 {
-  int len = escape_json_attr_len(s);
-  char *escaped = new char[len];
-  escape_json_attr(s, escaped);
+  int len = escape_json_attr_len(s.c_str(), s.size());
+  char escaped[len];
+  escape_json_attr(s.c_str(), s.size(), escaped);
   m_ss << '\"' << escaped << '\"';
-  delete[] escaped;
 }
 
 void JSONFormatter::print_name(const char *name)
@@ -173,10 +177,7 @@ void JSONFormatter::print_name(const char *name)
   print_comma(entry);
   if (!entry.is_array) {
     if (m_pretty) {
-      if (entry.size)
-        m_ss << "  ";
-      else
-        m_ss << " ";
+      m_ss << "    ";
     }
     m_ss << "\"" << name << "\"";
     if (m_pretty)
@@ -230,6 +231,11 @@ void JSONFormatter::close_section()
   finish_pending_string();
 
   struct json_formatter_stack_entry_d& entry = m_stack.back();
+  if (m_pretty && entry.size) {
+    m_ss << "\n";
+    for (unsigned i = 1; i < m_stack.size(); i++)
+      m_ss << "    ";
+  }
   m_ss << (entry.is_array ? ']' : '}');
   m_stack.pop_back();
 }
@@ -237,7 +243,7 @@ void JSONFormatter::close_section()
 void JSONFormatter::finish_pending_string()
 {
   if (m_is_pending_string) {
-    print_quoted_string(m_pending_string.str().c_str());
+    print_quoted_string(m_pending_string.str());
     m_pending_string.str(std::string());
     m_is_pending_string = false;
   }
@@ -263,10 +269,10 @@ void JSONFormatter::dump_float(const char *name, double d)
   m_ss << foo;
 }
 
-void JSONFormatter::dump_string(const char *name, std::string s)
+void JSONFormatter::dump_string(const char *name, const std::string& s)
 {
   print_name(name);
-  print_quoted_string(s.c_str());
+  print_quoted_string(s);
 }
 
 std::ostream& JSONFormatter::dump_stream(const char *name)
@@ -283,9 +289,9 @@ void JSONFormatter::dump_format_va(const char *name, const char *ns, bool quoted
 
   print_name(name);
   if (quoted) {
-    print_quoted_string(buf);
+    print_quoted_string(std::string(buf));
   } else {
-    m_ss << buf;
+    m_ss << std::string(buf);
   }
 }
 
@@ -312,6 +318,8 @@ void XMLFormatter::flush(std::ostream& os)
 {
   finish_pending_string();
   os << m_ss.str();
+  if (m_pretty)
+    os << "\n";
   m_ss.clear();
   m_ss.str("");
 }
@@ -396,7 +404,7 @@ void XMLFormatter::dump_float(const char *name, double d)
     m_ss << "\n";
 }
 
-void XMLFormatter::dump_string(const char *name, std::string s)
+void XMLFormatter::dump_string(const char *name, const std::string& s)
 {
   std::string e(name);
   print_spaces();
@@ -405,7 +413,7 @@ void XMLFormatter::dump_string(const char *name, std::string s)
     m_ss << "\n";
 }
 
-void XMLFormatter::dump_string_with_attrs(const char *name, std::string s, const FormatterAttrs& attrs)
+void XMLFormatter::dump_string_with_attrs(const char *name, const std::string& s, const FormatterAttrs& attrs)
 {
   std::string e(name);
   std::string attrs_str;
@@ -768,7 +776,7 @@ void TableFormatter::dump_float(const char *name, double d)
   m_ss.str("");
 }
 
-void TableFormatter::dump_string(const char *name, std::string s)
+void TableFormatter::dump_string(const char *name, const std::string& s)
 {
   finish_pending_string();
   size_t i = m_vec_index(name);
@@ -779,7 +787,7 @@ void TableFormatter::dump_string(const char *name, std::string s)
   m_ss.str("");
 }
 
-void TableFormatter::dump_string_with_attrs(const char *name, std::string s, const FormatterAttrs& attrs)
+void TableFormatter::dump_string_with_attrs(const char *name, const std::string& s, const FormatterAttrs& attrs)
 {
   finish_pending_string();
   size_t i = m_vec_index(name);

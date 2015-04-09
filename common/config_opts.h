@@ -63,6 +63,18 @@ OPTION(mon_cluster_log_file_level, OPT_STR, "info")
 
 OPTION(enable_experimental_unrecoverable_data_corrupting_features, OPT_STR, "")
 
+OPTION(xio_trace_mempool, OPT_BOOL, false) // mempool allocation counters
+OPTION(xio_trace_msgcnt, OPT_BOOL, false) // incoming/outgoing msg counters
+OPTION(xio_trace_xcon, OPT_BOOL, false) // Xio message encode/decode trace
+OPTION(xio_queue_depth, OPT_INT, 512) // depth of Accelio msg queue
+OPTION(xio_mp_min, OPT_INT, 128) // default min mempool size
+OPTION(xio_mp_max_64, OPT_INT, 65536) // max 64-byte chunks (buffer is 40)
+OPTION(xio_mp_max_256, OPT_INT, 8192) // max 256-byte chunks
+OPTION(xio_mp_max_1k, OPT_INT, 8192) // max 1K chunks
+OPTION(xio_mp_max_page, OPT_INT, 4096) // max 1K chunks
+OPTION(xio_mp_max_hint, OPT_INT, 4096) // max size-hint chunks
+OPTION(xio_portal_threads, OPT_INT, 2) // xio portal threads per messenger
+
 DEFAULT_SUBSYS(0, 5)
 SUBSYS(lockdep, 0, 1)
 SUBSYS(context, 0, 1)
@@ -106,6 +118,7 @@ SUBSYS(javaclient, 1, 5)
 SUBSYS(asok, 1, 5)
 SUBSYS(throttle, 1, 1)
 SUBSYS(refs, 0, 0)
+SUBSYS(xio, 1, 5)
 
 OPTION(key, OPT_STR, "")
 OPTION(keyfile, OPT_STR, "")
@@ -121,7 +134,8 @@ OPTION(ms_tcp_rcvbuf, OPT_INT, 0)
 OPTION(ms_tcp_prefetch_max_size, OPT_INT, 4096) // max prefetch size, we limit this to avoid extra memcpy
 OPTION(ms_initial_backoff, OPT_DOUBLE, .2)
 OPTION(ms_max_backoff, OPT_DOUBLE, 15.0)
-OPTION(ms_nocrc, OPT_BOOL, false)
+OPTION(ms_crc_data, OPT_BOOL, true)
+OPTION(ms_crc_header, OPT_BOOL, true)
 OPTION(ms_die_on_bad_msg, OPT_BOOL, false)
 OPTION(ms_die_on_unhandled_msg, OPT_BOOL, false)
 OPTION(ms_die_on_old_message, OPT_BOOL, false)     // assert if we get a dup incoming message and shouldn't have (may be triggered by pre-541cd3c64be0dfa04e8a2df39422e0eb9541a428 code)
@@ -145,6 +159,13 @@ OPTION(ms_inject_internal_delays, OPT_DOUBLE, 0)   // seconds
 OPTION(ms_dump_on_send, OPT_BOOL, false)           // hexdump msg to log on send
 OPTION(ms_dump_corrupt_message_level, OPT_INT, 1)  // debug level to hexdump undecodeable messages at
 OPTION(ms_async_op_threads, OPT_INT, 2)
+OPTION(ms_async_set_affinity, OPT_BOOL, true)
+// example: ms_async_affinity_cores = 0,1
+// The number of coreset is expected to equal to ms_async_op_threads, otherwise
+// extra op threads will loop ms_async_affinity_cores again.
+// If ms_async_affinity_cores is empty, all threads will be bind to current running
+// core
+OPTION(ms_async_affinity_cores, OPT_STR, "")
 
 OPTION(inject_early_sigterm, OPT_BOOL, false)
 
@@ -190,7 +211,8 @@ OPTION(mon_pg_warn_min_pool_objects, OPT_INT, 1000)  // do not warn on pools bel
 OPTION(mon_cache_target_full_warn_ratio, OPT_FLOAT, .66) // position between pool cache_target_full and max where we start warning
 OPTION(mon_osd_full_ratio, OPT_FLOAT, .95) // what % full makes an OSD "full"
 OPTION(mon_osd_nearfull_ratio, OPT_FLOAT, .85) // what % full makes an OSD near full
-OPTION(mon_globalid_prealloc, OPT_INT, 100)   // how many globalids to prealloc
+OPTION(mon_allow_pool_delete, OPT_BOOL, true) // allow pool deletion
+OPTION(mon_globalid_prealloc, OPT_U32, 10000)   // how many globalids to prealloc
 OPTION(mon_osd_report_timeout, OPT_INT, 900)    // grace period before declaring unresponsive OSDs dead
 OPTION(mon_force_standby_active, OPT_BOOL, true) // should mons force standby-replay mds to be active
 OPTION(mon_warn_on_old_mons, OPT_BOOL, true) // should mons set health to WARN if part of quorum is old?
@@ -211,6 +233,9 @@ OPTION(mon_max_log_entries_per_event, OPT_INT, 4096)
 OPTION(mon_reweight_min_pgs_per_osd, OPT_U64, 10)   // min pgs per osd for reweight-by-pg command
 OPTION(mon_reweight_min_bytes_per_osd, OPT_U64, 100*1024*1024)   // min bytes per osd for reweight-by-utilization command
 OPTION(mon_health_data_update_interval, OPT_FLOAT, 60.0)
+OPTION(mon_health_to_clog, OPT_BOOL, true)
+OPTION(mon_health_to_clog_interval, OPT_INT, 3600)
+OPTION(mon_health_to_clog_tick_interval, OPT_DOUBLE, 60.0)
 OPTION(mon_data_avail_crit, OPT_INT, 5)
 OPTION(mon_data_avail_warn, OPT_INT, 30)
 OPTION(mon_data_size_warn, OPT_U64, 15*1024*1024*1024) // issue a warning when the monitor's data store goes over 15GB (in bytes)
@@ -226,6 +251,7 @@ OPTION(mon_osd_min_down_reporters, OPT_INT, 1)   // number of OSDs who need to r
 OPTION(mon_osd_min_down_reports, OPT_INT, 3)     // number of times a down OSD must be reported for it to count
 OPTION(mon_osd_force_trim_to, OPT_INT, 0)   // force mon to trim maps to this point, regardless of min_last_epoch_clean (dangerous, use with care)
 OPTION(mon_mds_force_trim_to, OPT_INT, 0)   // force mon to trim mdsmaps to this point (dangerous, use with care)
+OPTION(crushtool, OPT_STR, "crushtool")
 
 // dump transactions
 OPTION(mon_debug_dump_transactions, OPT_BOOL, false)
@@ -301,6 +327,8 @@ OPTION(fuse_big_writes, OPT_BOOL, true)
 OPTION(fuse_atomic_o_trunc, OPT_BOOL, true)
 OPTION(fuse_debug, OPT_BOOL, false)
 OPTION(fuse_multithreaded, OPT_BOOL, true)
+OPTION(client_try_dentry_invalidate, OPT_BOOL, true) // the client should try to use dentry invaldation instead of remounting, on kernels it believes that will work for
+OPTION(client_die_on_failed_remount, OPT_BOOL, true)
 
 OPTION(crush_location, OPT_STR, "")       // whitespace-separated list of key=value pairs describing crush location
 
@@ -440,6 +468,9 @@ OPTION(osd_agent_min_evict_effort, OPT_FLOAT, .1)
 OPTION(osd_agent_quantize_effort, OPT_FLOAT, .1)
 OPTION(osd_agent_delay_time, OPT_FLOAT, 5.0)
 
+// osd ignore history.last_epoch_started in find_best_info
+OPTION(osd_find_best_info_ignore_history_les, OPT_BOOL, false)
+
 // decay atime and hist histograms after how many objects go by
 OPTION(osd_agent_hist_halflife, OPT_INT, 1000)
 
@@ -480,8 +511,15 @@ OPTION(osd_erasure_code_plugins, OPT_STR,
        " isa"
 #endif
        ) // list of erasure code plugins
+
+// Allows the "peered" state for recovery and backfill below min_size
+OPTION(osd_allow_recovery_below_min_size, OPT_BOOL, true)
+
 OPTION(osd_pool_default_flags, OPT_INT, 0)   // default flags for new pools
 OPTION(osd_pool_default_flag_hashpspool, OPT_BOOL, true)   // use new pg hashing to prevent pool/pg overlap
+OPTION(osd_pool_default_flag_nodelete, OPT_BOOL, false) // pool can't be deleted
+OPTION(osd_pool_default_flag_nopgchange, OPT_BOOL, false) // pool's pg and pgp num can't be changed
+OPTION(osd_pool_default_flag_nosizechange, OPT_BOOL, false) // pool's size and min size can't be changed
 OPTION(osd_pool_default_hit_set_bloom_fpp, OPT_FLOAT, .05)
 OPTION(osd_pool_default_cache_target_dirty_ratio, OPT_FLOAT, .4)
 OPTION(osd_pool_default_cache_target_full_ratio, OPT_FLOAT, .8)
@@ -503,6 +541,7 @@ OPTION(osd_map_cache_size, OPT_INT, 500)
 OPTION(osd_map_message_max, OPT_INT, 100)  // max maps per MOSDMap message
 OPTION(osd_map_share_max_epochs, OPT_INT, 100)  // cap on # of inc maps we send to peers, clients
 OPTION(osd_inject_bad_map_crc_probability, OPT_FLOAT, 0)
+OPTION(osd_inject_failure_on_pg_removal, OPT_BOOL, false)
 OPTION(osd_op_threads, OPT_INT, 2)    // 0 == no threading
 OPTION(osd_peering_wq_batch_size, OPT_U64, 20)
 OPTION(osd_op_pq_max_tokens_per_priority, OPT_U64, 4194304)
@@ -538,6 +577,7 @@ OPTION(osd_heartbeat_addr, OPT_ADDR, entity_addr_t())
 OPTION(osd_heartbeat_interval, OPT_INT, 6)       // (seconds) how often we ping peers
 OPTION(osd_heartbeat_grace, OPT_INT, 20)         // (seconds) how long before we decide a peer has failed
 OPTION(osd_heartbeat_min_peers, OPT_INT, 10)     // minimum number of peers
+OPTION(osd_heartbeat_use_min_delay_socket, OPT_BOOL, false) // prio the heartbeat tcp socket and set dscp as CS6 on it if true
 
 // max number of parallel snap trims/pg
 OPTION(osd_pg_max_concurrent_snap_trims, OPT_U64, 2)
@@ -564,6 +604,8 @@ OPTION(osd_max_push_cost, OPT_U64, 8<<20)  // max size of push message
 OPTION(osd_max_push_objects, OPT_U64, 10)  // max objects in single push op
 OPTION(osd_recovery_forget_lost_objects, OPT_BOOL, false)   // off for now
 OPTION(osd_max_scrubs, OPT_INT, 1)
+OPTION(osd_scrub_begin_hour, OPT_INT, 0)
+OPTION(osd_scrub_end_hour, OPT_INT, 24)
 OPTION(osd_scrub_load_threshold, OPT_FLOAT, 0.5)
 OPTION(osd_scrub_min_interval, OPT_FLOAT, 60*60*24)    // if load is low
 OPTION(osd_scrub_max_interval, OPT_FLOAT, 7*60*60*24)  // regardless of load
@@ -600,6 +642,7 @@ OPTION(osd_debug_drop_pg_create_probability, OPT_DOUBLE, 0)
 OPTION(osd_debug_drop_pg_create_duration, OPT_INT, 1)
 OPTION(osd_debug_drop_op_probability, OPT_DOUBLE, 0)   // probability of stalling/dropping a client op
 OPTION(osd_debug_op_order, OPT_BOOL, false)
+OPTION(osd_debug_scrub_chance_rewrite_digest, OPT_U64, 0)
 OPTION(osd_debug_verify_snaps_on_info, OPT_BOOL, false)
 OPTION(osd_debug_verify_stray_on_activate, OPT_BOOL, false)
 OPTION(osd_debug_skip_full_check_in_backfill_reservation, OPT_BOOL, false)
@@ -613,8 +656,15 @@ OPTION(osd_target_transaction_size, OPT_INT, 30)     // to adjust various transa
 OPTION(osd_failsafe_full_ratio, OPT_FLOAT, .97) // what % full makes an OSD "full" (failsafe)
 OPTION(osd_failsafe_nearfull_ratio, OPT_FLOAT, .90) // what % full makes an OSD near full (failsafe)
 
+OPTION(osd_pg_object_context_cache_count, OPT_INT, 64)
+
 // determines whether PGLog::check() compares written out log to stored log
 OPTION(osd_debug_pg_log_writeout, OPT_BOOL, false)
+
+// default timeout while caling WaitInterval on an empty queue
+OPTION(threadpool_default_timeout, OPT_INT, 60)
+// default wait time for an empty queue before pinging the hb timeout
+OPTION(threadpool_empty_queue_max_wait, OPT_INT, 2)
 
 OPTION(leveldb_write_buffer_size, OPT_U64, 8 *1024*1024) // leveldb write buffer size
 OPTION(leveldb_cache_size, OPT_U64, 128 *1024*1024) // leveldb cache size
@@ -823,6 +873,10 @@ OPTION(rbd_localize_parent_reads, OPT_BOOL, true)
 OPTION(rbd_readahead_trigger_requests, OPT_INT, 10) // number of sequential requests necessary to trigger readahead
 OPTION(rbd_readahead_max_bytes, OPT_LONGLONG, 512 * 1024) // set to 0 to disable readahead
 OPTION(rbd_readahead_disable_after_bytes, OPT_LONGLONG, 50 * 1024 * 1024) // how many bytes are read in total before readahead is disabled
+OPTION(rbd_clone_copy_on_read, OPT_BOOL, false)
+OPTION(rbd_blacklist_on_break_lock, OPT_BOOL, true) // whether to blacklist clients whose lock was broken
+OPTION(rbd_blacklist_expire_seconds, OPT_INT, 0) // number of seconds to blacklist - set to 0 for OSD default
+OPTION(rbd_request_timed_out_seconds, OPT_INT, 30) // number of seconds before maint request times out
 
 /*
  * The following options change the behavior for librbd's image creation methods that
@@ -844,14 +898,30 @@ OPTION(rbd_default_format, OPT_INT, 1)
 OPTION(rbd_default_order, OPT_INT, 22)
 OPTION(rbd_default_stripe_count, OPT_U64, 0) // changing requires stripingv2 feature
 OPTION(rbd_default_stripe_unit, OPT_U64, 0) // changing to non-object size requires stripingv2 feature
-OPTION(rbd_default_features, OPT_INT, 7) // only applies to format 2 images
+OPTION(rbd_default_features, OPT_INT, 3) // only applies to format 2 images
 					 // +1 for layering, +2 for stripingv2,
-					 // +4 for exclusive lock
+					 // +4 for exclusive lock, +8 for object map
 
 OPTION(nss_db_path, OPT_STR, "") // path to nss db
 
 
 OPTION(rgw_max_chunk_size, OPT_INT, 512 * 1024)
+
+/**
+ * override max bucket index shards in zone configuration (if not zero)
+ *
+ * Represents the number of shards for the bucket index object, a value of zero
+ * indicates there is no sharding. By default (no sharding, the name of the object
+ * is '.dir.{marker}', with sharding, the name is '.dir.{markder}.{sharding_id}',
+ * sharding_id is zero-based value. It is not recommended to set a too large value
+ * (e.g. thousand) as it increases the cost for bucket listing.
+ */
+OPTION(rgw_override_bucket_index_max_shards, OPT_U32, 0)
+
+/**
+ * Represents the maximum AIO pending requests for the bucket index object shards.
+ */
+OPTION(rgw_bucket_index_max_aio, OPT_U32, 8)
 
 OPTION(rgw_data, OPT_STR, "/var/lib/ceph/radosgw/$cluster-$id")
 OPTION(rgw_enable_apis, OPT_STR, "s3, swift, swift_auth, admin")
@@ -950,6 +1020,8 @@ OPTION(rgw_user_quota_sync_idle_users, OPT_BOOL, false) // whether stats for idl
 OPTION(rgw_user_quota_sync_wait_time, OPT_INT, 3600 * 24) // min time between two full stats sync for non-idle users
 
 OPTION(rgw_multipart_min_part_size, OPT_INT, 5 * 1024 * 1024) // min size for each part (except for last one) in multipart upload
+
+OPTION(rgw_olh_pending_timeout_sec, OPT_INT, 3600) // time until we retire a pending olh change
 
 OPTION(mutex_perf_counter, OPT_BOOL, false) // enable/disable mutex perf counter
 OPTION(throttler_perf_counter, OPT_BOOL, true) // enable/disable throttler perf counter
