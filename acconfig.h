@@ -350,13 +350,13 @@
 #define PACKAGE_NAME "ceph"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "ceph 0.93"
+#define PACKAGE_STRING "ceph 0.94.1"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "ceph"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "0.93"
+#define PACKAGE_VERSION "0.94.1"
 
 /* Defined if you want pg ref debugging */
 /* #undef PG_DEBUG_REFS */
@@ -378,7 +378,7 @@
 /* #undef USE_NSS */
 
 /* Version number of package */
-#define VERSION "0.93"
+#define VERSION "0.94.1"
 
 /* define if radosgw enabled */
 #define WITH_RADOSGW 1
