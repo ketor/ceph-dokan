@@ -248,8 +248,10 @@ void SimpleMessenger::reaper()
     p->join();
     lock.Lock();
 
-    if (p->sd >= 0)
+    if (p->sd >= 0) {
+      ::closesocket(p->sd);
       ::close(p->sd);
+    }
     ldout(cct,10) << "reaper reaped pipe " << p << " " << p->get_peer_addr() << dendl;
     p->put();
     ldout(cct,10) << "reaper deleted pipe " << p << dendl;

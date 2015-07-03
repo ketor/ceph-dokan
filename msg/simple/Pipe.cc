@@ -879,8 +879,10 @@ int Pipe::connect()
   const md_config_t *conf = msgr->cct->_conf;
 
   // close old socket.  this is safe because we stopped the reader thread above.
-  if (sd >= 0)
+  if (sd >= 0) {
+    ::closesocket(sd);
     ::close(sd);
+  }
 
   // create socket?
   sd = ::socket(peer_addr.get_family(), SOCK_STREAM, 0);
@@ -1208,6 +1210,10 @@ int Pipe::connect()
 
  stop_locked:
   delete authorizer;
+  if (sd > 0) {
+    ::closesocket(sd);
+    ::close(sd);
+  }
   return -1;
 }
 
