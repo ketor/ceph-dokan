@@ -17,7 +17,7 @@
 #include "common/environment.h"
 #include "common/errno.h"
 #include "common/safe_io.h"
-#include "common/simple_spin.h"
+//#include "common/simple_spin.h"
 #include "common/strtol.h"
 #include "common/likely.h"
 #include "include/atomic.h"
@@ -37,9 +37,9 @@
 namespace ceph {
 
 #ifdef BUFFER_DEBUG
-static simple_spinlock_t buffer_debug_lock = SIMPLE_SPINLOCK_INITIALIZER;
-# define bdout { simple_spin_lock(&buffer_debug_lock); std::cout
-# define bendl std::endl; simple_spin_unlock(&buffer_debug_lock); }
+//static simple_spinlock_t buffer_debug_lock = SIMPLE_SPINLOCK_INITIALIZER;
+//# define bdout { simple_spin_lock(&buffer_debug_lock); std::cout
+//# define bendl std::endl; simple_spin_unlock(&buffer_debug_lock); }
 #else
 # define bdout if (0) { std::cout
 # define bendl std::endl; }

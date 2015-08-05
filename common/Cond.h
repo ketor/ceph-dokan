@@ -23,7 +23,6 @@
 
 #include "include/Context.h"
 
-#include <winsock2.h>
 #include <pthread.h>
 
 class Cond {

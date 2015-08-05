@@ -12,14 +12,12 @@
  * 
  */
 
-//#include <sys/socket.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-//#include <netinet/tcp.h>
-//#include <sys/uio.h>
+#include <sys/socket.h>
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
+#include <sys/uio.h>
 #include <limits.h>
-//#include <poll.h>
-#define SHUT_RDWR SD_BOTH
+#include <poll.h>
 
 #include "msg/Message.h"
 #include "Pipe.h"
@@ -62,14 +60,14 @@ ostream& Pipe::_pipe_prefix(std::ostream *_dout) {
 /*
  * On BSD SO_NOSIGPIPE can be set via setsockopt to block SIGPIPE.
  */
-//by ketor #ifndef MSG_NOSIGNAL
-//# define MSG_NOSIGNAL 0
-//# ifdef SO_NOSIGPIPE
-//#  define CEPH_USE_SO_NOSIGPIPE
-//# else
-//#  error "Cannot block SIGPIPE!"
-//# endif
-//#endif
+#ifndef MSG_NOSIGNAL
+# define MSG_NOSIGNAL 0
+# ifdef SO_NOSIGPIPE
+#  define CEPH_USE_SO_NOSIGPIPE
+# else
+#  error "Cannot block SIGPIPE!"
+# endif
+#endif
 
 /**************************************
  * Pipe
@@ -849,6 +847,27 @@ void Pipe::set_socket_options()
     ldout(msgr->cct,0) << "couldn't set SO_NOSIGPIPE: " << cpp_strerror(r) << dendl;
   }
 #endif
+
+  int prio = msgr->get_socket_priority();
+  if (prio >= 0) {
+    int r;
+#ifdef IPTOS_CLASS_CS6
+    int iptos = IPTOS_CLASS_CS6;
+    r = ::setsockopt(sd, IPPROTO_IP, IP_TOS, &iptos, sizeof(iptos));
+    if (r < 0) {
+      ldout(msgr->cct,0) << "couldn't set IP_TOS to " << iptos
+                         << ": " << cpp_strerror(errno) << dendl;
+    }
+#endif
+    // setsockopt(IPTOS_CLASS_CS6) sets the priority of the socket as 0.
+    // See http://goo.gl/QWhvsD and http://goo.gl/laTbjT
+    // We need to call setsockopt(SO_PRIORITY) after it.
+//    r = ::setsockopt(sd, SOL_SOCKET, SO_PRIORITY, &prio, sizeof(prio));
+//    if (r < 0) {
+//      ldout(msgr->cct,0) << "couldn't set SO_PRIORITY to " << prio
+//                         << ": " << cpp_strerror(errno) << dendl;
+//    }
+  }
 }
 
 int Pipe::connect()
@@ -1210,10 +1229,6 @@ int Pipe::connect()
 
  stop_locked:
   delete authorizer;
-  if (sd > 0) {
-    ::closesocket(sd);
-    ::close(sd);
-  }
   return -1;
 }
 
@@ -1337,7 +1352,11 @@ void Pipe::fault(bool onread)
   if (policy.lossy && state != STATE_CONNECTING) {
     ldout(msgr->cct,10) << "fault on lossy channel, failing" << dendl;
 
+    // disconnect from Connection, and mark it failed.  future messages
+    // will be dropped.
+    assert(connection_state);
     stop();
+    bool cleared = connection_state->clear_pipe(this);
 
     // crib locks, blech.  note that Pipe is now STATE_CLOSED and the
     // rank_pipe entry is ignored by others.
@@ -1359,11 +1378,7 @@ void Pipe::fault(bool onread)
       delay_thread->discard();
     in_q->discard_queue(conn_id);
     discard_out_queue();
-
-    // disconnect from Connection, and mark it failed.  future messages
-    // will be dropped.
-    assert(connection_state);
-    if (connection_state->clear_pipe(this))
+    if (cleared)
       msgr->dispatch_queue.queue_reset(connection_state.get());
     return;
   }

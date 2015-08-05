@@ -1,5 +1,11 @@
+#include "include/int_types.h"
 
-#include "common/ceph-mingw-type.h"
+#if defined(__linux__)
+#include <linux/types.h>
+#elif defined(__FreeBSD__)
+#include <sys/types.h>
+#endif
+
 #include "hash.h"
 
 /*

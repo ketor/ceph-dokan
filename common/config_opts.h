@@ -329,6 +329,7 @@ OPTION(fuse_debug, OPT_BOOL, false)
 OPTION(fuse_multithreaded, OPT_BOOL, true)
 OPTION(client_try_dentry_invalidate, OPT_BOOL, true) // the client should try to use dentry invaldation instead of remounting, on kernels it believes that will work for
 OPTION(client_die_on_failed_remount, OPT_BOOL, true)
+OPTION(client_check_pool_perm, OPT_BOOL, true)
 
 OPTION(crush_location, OPT_STR, "")       // whitespace-separated list of key=value pairs describing crush location
 
@@ -922,6 +923,12 @@ OPTION(rgw_override_bucket_index_max_shards, OPT_U32, 0)
  * Represents the maximum AIO pending requests for the bucket index object shards.
  */
 OPTION(rgw_bucket_index_max_aio, OPT_U32, 8)
+
+/**
+ * whether or not the quota/gc threads should be started
+ */
+OPTION(rgw_enable_quota_threads, OPT_BOOL, true)
+OPTION(rgw_enable_gc_threads, OPT_BOOL, true)
 
 OPTION(rgw_data, OPT_STR, "/var/lib/ceph/radosgw/$cluster-$id")
 OPTION(rgw_enable_apis, OPT_STR, "s3, swift, swift_auth, admin")

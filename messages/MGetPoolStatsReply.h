@@ -16,7 +16,7 @@
 #ifndef CEPH_MGETPOOLSTATSREPLY_H
 #define CEPH_MGETPOOLSTATSREPLY_H
 
-//by ketor #include <uuid/uuid.h>
+#include <uuid/uuid.h>
 
 class MGetPoolStatsReply : public PaxosServiceMessage {
 public:

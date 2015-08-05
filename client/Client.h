@@ -113,10 +113,10 @@ struct CommandOp
 /* getdir result */
 struct DirEntry {
   string d_name;
-  struct stat_ceph st;
+  struct stat st;
   int stmask;
   DirEntry(const string &s) : d_name(s), stmask(0) {}
-  DirEntry(const string &n, struct stat_ceph& s, int stm) : d_name(n), st(s), stmask(stm) {}
+  DirEntry(const string &n, struct stat& s, int stm) : d_name(n), st(s), stmask(stm) {}
 };
 
 struct Inode;
@@ -437,7 +437,7 @@ protected:
   // path traversal for high-level interface
   Inode *cwd;
   int path_walk(const filepath& fp, Inode **end, bool followsym=true);
-  int fill_stat(Inode *in, struct stat_ceph *st, frag_info_t *dirstat=0, nest_info_t *rstat=0);
+  int fill_stat(Inode *in, struct stat *st, frag_info_t *dirstat=0, nest_info_t *rstat=0);
   void touch_dn(Dentry *dn);
 
   // trim cache.
@@ -479,6 +479,10 @@ protected:
   bool is_quota_files_exceeded(Inode *in);
   bool is_quota_bytes_exceeded(Inode *in, int64_t new_bytes);
   bool is_quota_bytes_approaching(Inode *in);
+
+  std::map<int64_t, int> pool_perms;
+  list<Cond*> waiting_for_pool_perm;
+  int check_pool_perm(Inode *in, int need);
 
  public:
   void set_filer_flags(int flags);
@@ -604,7 +608,7 @@ private:
   void fill_dirent(struct dirent *de, const char *name, int type, uint64_t ino, loff_t next_off);
 
   // some readdir helpers
-  typedef int (*add_dirent_cb_t)(void *p, struct dirent *de, struct stat_ceph *st, int stmask, off_t off);
+  typedef int (*add_dirent_cb_t)(void *p, struct dirent *de, struct stat *st, int stmask, off_t off);
 
   int _opendir(Inode *in, dir_result_t **dirpp, int uid=-1, int gid=-1);
   void _readdir_drop_dirp_buffer(dir_result_t *dirp);
@@ -650,7 +654,7 @@ private:
   int _rmdir(Inode *dir, const char *name, int uid=-1, int gid=-1);
   int _symlink(Inode *dir, const char *name, const char *target, int uid=-1, int gid=-1, Inode **inp = 0);
   int _mknod(Inode *dir, const char *name, mode_t mode, dev_t rdev, int uid=-1, int gid=-1, Inode **inp = 0);
-  int _setattr(Inode *in, struct stat_ceph *attr, int mask, int uid=-1, int gid=-1, Inode **inp = 0);
+  int _setattr(Inode *in, struct stat *attr, int mask, int uid=-1, int gid=-1, Inode **inp = 0);
   int _getattr(Inode *in, int mask, int uid=-1, int gid=-1, bool force=false);
   int _readlink(Inode *in, char *buf, size_t size);
   int _getxattr(Inode *in, const char *name, void *value, size_t len, int uid=-1, int gid=-1);
@@ -757,7 +761,7 @@ public:
 
   /**
    * Fill a directory listing from dirp, invoking cb for each entry
-   * with the given pointer, the dirent, the struct stat_ceph, the stmask,
+   * with the given pointer, the dirent, the struct stat, the stmask,
    * and the offset.
    *
    * Returns 0 if it reached the end of the directory.
@@ -767,7 +771,7 @@ public:
 
   struct dirent * readdir(dir_result_t *d);
   int readdir_r(dir_result_t *dirp, struct dirent *de);
-  int readdirplus_r(dir_result_t *dirp, struct dirent *de, struct stat_ceph *st, int *stmask);
+  int readdirplus_r(dir_result_t *dirp, struct dirent *de, struct stat *st, int *stmask);
 
   int getdir(const char *relpath, list<string>& names);  // get the whole dir at once.
 
@@ -803,12 +807,12 @@ public:
   int symlink(const char *existing, const char *newname);
 
   // inode stuff
-  int stat(const char *path, struct stat_ceph *stbuf, frag_info_t *dirstat=0, int mask=CEPH_STAT_CAP_INODE_ALL);
-  int lstat(const char *path, struct stat_ceph *stbuf, frag_info_t *dirstat=0, int mask=CEPH_STAT_CAP_INODE_ALL);
+  int stat(const char *path, struct stat *stbuf, frag_info_t *dirstat=0, int mask=CEPH_STAT_CAP_INODE_ALL);
+  int lstat(const char *path, struct stat *stbuf, frag_info_t *dirstat=0, int mask=CEPH_STAT_CAP_INODE_ALL);
   int lstatlite(const char *path, struct statlite *buf);
 
-  int setattr(const char *relpath, struct stat_ceph *attr, int mask);
-  int fsetattr(int fd, struct stat_ceph *attr, int mask);
+  int setattr(const char *relpath, struct stat *attr, int mask);
+  int fsetattr(int fd, struct stat *attr, int mask);
   int chmod(const char *path, mode_t mode);
   int fchmod(int fd, mode_t mode);
   int lchmod(const char *path, mode_t mode);
@@ -834,7 +838,7 @@ public:
   int fake_write_size(int fd, loff_t size);
   int ftruncate(int fd, loff_t size);
   int fsync(int fd, bool syncdataonly);
-  int fstat(int fd, struct stat_ceph *stbuf);
+  int fstat(int fd, struct stat *stbuf);
   int fallocate(int fd, int mode, loff_t offset, loff_t length);
 
   // full path xattr ops
@@ -878,7 +882,7 @@ public:
   int get_caps_issued(int fd);
   int get_caps_issued(const char *path);
 
-  // low-level interface
+  // low-level interface v2
 //by ketor  inodeno_t ll_get_inodeno(Inode *in) {
 //    Mutex::Locker lock(client_lock);
 //    return _get_inodeno(in);
@@ -889,12 +893,12 @@ public:
 //    return _get_vino(in);
 //  }
 //  Inode *ll_get_inode(vinodeno_t vino);
-//  int ll_lookup(Inode *parent, const char *name, struct stat_ceph *attr,
+//  int ll_lookup(Inode *parent, const char *name, struct stat *attr,
 //		Inode **out, int uid = -1, int gid = -1);
 //  bool ll_forget(Inode *in, int count);
 //  bool ll_put(Inode *in);
-//  int ll_getattr(Inode *in, struct stat_ceph *st, int uid = -1, int gid = -1);
-//  int ll_setattr(Inode *in, struct stat_ceph *st, int mask, int uid = -1,
+//  int ll_getattr(Inode *in, struct stat *st, int uid = -1, int gid = -1);
+//  int ll_setattr(Inode *in, struct stat *st, int mask, int uid = -1,
 //		 int gid = -1);
 //  int ll_getxattr(Inode *in, const char *name, void *value, size_t size,
 //		  int uid=-1, int gid=-1);
@@ -906,38 +910,38 @@ public:
 //  int ll_releasedir(dir_result_t* dirp);
 //  int ll_readlink(Inode *in, char *buf, size_t bufsize, int uid = -1, int gid = -1);
 //  int ll_mknod(Inode *in, const char *name, mode_t mode, dev_t rdev,
-//	       struct stat_ceph *attr, Inode **out, int uid = -1, int gid = -1);
-//  int ll_mkdir(Inode *in, const char *name, mode_t mode, struct stat_ceph *attr,
+//	       struct stat *attr, Inode **out, int uid = -1, int gid = -1);
+//  int ll_mkdir(Inode *in, const char *name, mode_t mode, struct stat *attr,
 //	       Inode **out, int uid = -1, int gid = -1);
 //  int ll_symlink(Inode *in, const char *name, const char *value,
-//		 struct stat_ceph *attr, Inode **out, int uid = -1, int gid = -1);
+//		 struct stat *attr, Inode **out, int uid = -1, int gid = -1);
 //  int ll_unlink(Inode *in, const char *name, int uid = -1, int gid = -1);
 //  int ll_rmdir(Inode *in, const char *name, int uid = -1, int gid = -1);
 //  int ll_rename(Inode *parent, const char *name, Inode *newparent,
 //		const char *newname, int uid = -1, int gid = -1);
 //  int ll_link(Inode *in, Inode *newparent, const char *newname,
-//	      struct stat_ceph *attr, int uid = -1, int gid = -1);
+//	      struct stat *attr, int uid = -1, int gid = -1);
 //  int ll_open(Inode *in, int flags, Fh **fh, int uid = -1, int gid = -1);
 //  int ll_create(Inode *parent, const char *name, mode_t mode, int flags,
-//		struct stat_ceph *attr, Inode **out, Fh **fhp, int uid = -1,
+//		struct stat *attr, Inode **out, Fh **fhp, int uid = -1,
 //		int gid = -1);
 //  int ll_read_block(Inode *in, uint64_t blockid, char *buf,  uint64_t offset,
 //		    uint64_t length, ceph_file_layout* layout);
-//
+
 //  int ll_write_block(Inode *in, uint64_t blockid,
 //		     char* buf, uint64_t offset,
 //		     uint64_t length, ceph_file_layout* layout,
 //		     uint64_t snapseq, uint32_t sync);
 //  int ll_commit_blocks(Inode *in, uint64_t offset, uint64_t length);
-//
+
 //  int ll_statfs(Inode *in, struct statvfs *stbuf);
-//  int ll_walk(const char* name, Inode **i, struct stat_ceph *attr); // XXX in?
+//  int ll_walk(const char* name, Inode **i, struct stat *attr); // XXX in?
 //  int ll_listxattr_chunks(Inode *in, char *names, size_t size,
 //			  int *cookie, int *eol, int uid, int gid);
 //  uint32_t ll_stripe_unit(Inode *in);
 //  int ll_file_layout(Inode *in, ceph_file_layout *layout);
 //  uint64_t ll_snap_seq(Inode *in);
-//
+
 //  int ll_read(Fh *fh, loff_t off, loff_t len, bufferlist *bl);
 //  int ll_write(Fh *fh, loff_t off, loff_t len, const char *data);
 //  loff_t ll_lseek(Fh *fh, loff_t offset, int whence);
@@ -945,15 +949,20 @@ public:
 //  int ll_fsync(Fh *fh, bool syncdataonly);
 //  int ll_fallocate(Fh *fh, int mode, loff_t offset, loff_t length);
 //  int ll_release(Fh *fh);
+//  int ll_getlk(Fh *fh, struct flock *fl, uint64_t owner);
+//  int ll_setlk(Fh *fh, struct flock *fl, uint64_t owner, int sleep, void *fuse_req);
+//  int ll_flock(Fh *fh, int cmd, uint64_t owner, void *fuse_req);
+//  void ll_interrupt(void *d);
 //  int ll_get_stripe_osd(struct Inode *in, uint64_t blockno,
 //			ceph_file_layout* layout);
 //  uint64_t ll_get_internal_offset(struct Inode *in, uint64_t blockno);
-//
+
 //  int ll_num_osds(void);
 //  int ll_osdaddr(int osd, uint32_t *addr);
 //  int ll_osdaddr(int osd, char* buf, size_t size);
 
 //  void ll_register_callbacks(struct client_callback_args *args);
+//  int test_dentry_handling(bool can_invalidate);
 };
 
 #endif

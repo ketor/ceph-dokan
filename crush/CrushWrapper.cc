@@ -5,7 +5,7 @@
 #include "common/debug.h"
 #include "common/Formatter.h"
 #include "common/errno.h"
-#define EALREADY 114 /* Operation already in progress */ //by ketor
+
 #include "CrushWrapper.h"
 #include "CrushTreeDumper.h"
 

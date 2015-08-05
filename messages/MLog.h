@@ -19,7 +19,7 @@
 #include "messages/PaxosServiceMessage.h"
 
 #include <deque>
-//by ketor #include <uuid/uuid.h>
+#include <uuid/uuid.h>
 
 class MLog : public PaxosServiceMessage {
 public:

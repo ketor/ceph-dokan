@@ -2,7 +2,6 @@
 #define CEPH_INTTYPES_H
 
 #include "acconfig.h"
-#include "common/ceph-mingw-type.h"
 
 /*
  * Get 64b integers either from inttypes.h or glib.h

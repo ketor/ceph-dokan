@@ -21,17 +21,17 @@
 #include "include/unordered_map.h"
 #include "include/hash_namespace.h"
 
-//by ketor #if defined(__FreeBSD__) && defined(__LP64__)	// On FreeBSD pthread_t is a pointer.
-//CEPH_HASH_NAMESPACE_START
-//  template<>
-//    struct hash<pthread_t>
-//    {
-//      size_t
-//      operator()(pthread_t __x) const
-//      { return (uintptr_t)__x; }
-//    };
-//CEPH_HASH_NAMESPACE_END
-//#endif
+#if defined(__FreeBSD__) && defined(__LP64__)	// On FreeBSD pthread_t is a pointer.
+CEPH_HASH_NAMESPACE_START
+  template<>
+    struct hash<pthread_t>
+    {
+      size_t
+      operator()(pthread_t __x) const
+      { return (uintptr_t)__x; }
+    };
+CEPH_HASH_NAMESPACE_END
+#endif
 
 /******* Constants **********/
 #define lockdep_dout(v) lsubdout(g_lockdep_ceph_ctx, lockdep, v)

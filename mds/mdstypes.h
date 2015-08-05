@@ -21,9 +21,7 @@
 
 #include "inode_backtrace.h"
 
-//if"#define BOOST_SYSTEM_NO_DEPRECATED" or do not use pool.hpp,or link will need
-//boost::system::generic_category() & boost::system::system_category()
-//by ketor #include <boost/pool/pool.hpp>
+#include <boost/pool/pool.hpp>
 #include "include/assert.h"
 #include "include/hash_namespace.h"
 #include <boost/serialization/strong_typedef.hpp>

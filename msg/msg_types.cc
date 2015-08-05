@@ -1,10 +1,10 @@
 
 #include "msg_types.h"
 
-//by ketor #include <arpa/inet.h>
+#include <arpa/inet.h>
 #include <stdlib.h>
 #include <string.h>
-//by ketor #include <netdb.h>
+#include <netdb.h>
 
 #include "common/Formatter.h"
 

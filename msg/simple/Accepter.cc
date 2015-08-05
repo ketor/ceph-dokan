@@ -12,12 +12,12 @@
  * 
  */
 
-//#include <sys/socket.h>
-#include <winsock2.h>
-//#include <netinet/tcp.h>
-//#include <sys/uio.h>
+#include <sys/socket.h>
+#include <netinet/tcp.h>
+#include <sys/uio.h>
 #include <limits.h>
-//#include <poll.h>
+#include <poll.h>
+
 #include "msg/Message.h"
 
 #include "Accepter.h"

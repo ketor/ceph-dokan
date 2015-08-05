@@ -486,7 +486,7 @@ extern "C" int ceph_readdir_r(struct ceph_mount_info *cmount, struct ceph_dir_re
 }
 
 extern "C" int ceph_readdirplus_r(struct ceph_mount_info *cmount, struct ceph_dir_result *dirp,
-				  struct dirent *de, struct stat_ceph *st, int *stmask)
+				  struct dirent *de, struct stat *st, int *stmask)
 {
   if (!cmount->is_mounted())
     return -ENOTCONN;
@@ -594,7 +594,7 @@ extern "C" int ceph_symlink(struct ceph_mount_info *cmount, const char *existing
 
 // inode stuff
 extern "C" int ceph_stat(struct ceph_mount_info *cmount, const char *path,
-			 struct stat_ceph *stbuf)
+			 struct stat *stbuf)
 {
   if (!cmount->is_mounted())
     return -ENOTCONN;
@@ -602,7 +602,7 @@ extern "C" int ceph_stat(struct ceph_mount_info *cmount, const char *path,
 }
 
 extern "C" int ceph_lstat(struct ceph_mount_info *cmount, const char *path,
-			  struct stat_ceph *stbuf)
+			  struct stat *stbuf)
 {
   if (!cmount->is_mounted())
     return -ENOTCONN;
@@ -610,7 +610,7 @@ extern "C" int ceph_lstat(struct ceph_mount_info *cmount, const char *path,
 }
 
 extern "C" int ceph_setattr(struct ceph_mount_info *cmount, const char *relpath,
-			    struct stat_ceph *attr, int mask)
+			    struct stat *attr, int mask)
 {
   if (!cmount->is_mounted())
     return -ENOTCONN;
@@ -805,7 +805,7 @@ extern "C" int ceph_fallocate(struct ceph_mount_info *cmount, int fd, int mode,
   return cmount->get_client()->fallocate(fd, mode, offset, length);
 }
 
-extern "C" int ceph_fstat(struct ceph_mount_info *cmount, int fd, struct stat_ceph *stbuf)
+extern "C" int ceph_fstat(struct ceph_mount_info *cmount, int fd, struct stat *stbuf)
 {
   if (!cmount->is_mounted())
     return -ENOTCONN;
@@ -1313,7 +1313,7 @@ extern "C" int ceph_get_pool_replication(struct ceph_mount_info *cmount,
 //
 //extern "C" int ceph_ll_lookup(class ceph_mount_info *cmount,
 //			      struct Inode *parent, const char *name,
-//			      struct stat_ceph *attr, Inode **out,
+//			      struct stat *attr, Inode **out,
 //			      int uid, int gid)
 //{
 //  return (cmount->get_client())->ll_lookup(parent, name, attr, out, uid, gid);
@@ -1332,20 +1332,20 @@ extern "C" int ceph_get_pool_replication(struct ceph_mount_info *cmount,
 //
 //extern "C" int ceph_ll_walk(class ceph_mount_info *cmount, const char *name,
 //			    struct Inode **i,
-//			    struct stat_ceph *attr)
+//			    struct stat *attr)
 //{
 //  return(cmount->get_client()->ll_walk(name, i, attr));
 //}
 //
 //extern "C" int ceph_ll_getattr(class ceph_mount_info *cmount,
-//			       Inode *in, struct stat_ceph *attr,
+//			       Inode *in, struct stat *attr,
 //			       int uid, int gid)
 //{
 //  return (cmount->get_client()->ll_getattr(in, attr, uid, gid));
 //}
 //
 //extern "C" int ceph_ll_setattr(class ceph_mount_info *cmount,
-//			       Inode *in, struct stat_ceph *st,
+//			       Inode *in, struct stat *st,
 //			       int mask, int uid, int gid)
 //{
 //  return (cmount->get_client()->ll_setattr(in, st, mask, uid, gid));
@@ -1441,7 +1441,7 @@ extern "C" int ceph_get_pool_replication(struct ceph_mount_info *cmount,
 //
 //extern "C" int ceph_ll_create(class ceph_mount_info *cmount,
 //			      struct Inode *parent, const char *name,
-//			      mode_t mode, int flags, struct stat_ceph *attr,
+//			      mode_t mode, int flags, struct stat *attr,
 //			      struct Inode **out, Fh **fhp, int uid, int gid)
 //{
 //  return (cmount->get_client())->ll_create(parent, name, mode, flags,
@@ -1450,7 +1450,7 @@ extern "C" int ceph_get_pool_replication(struct ceph_mount_info *cmount,
 //
 //extern "C" int ceph_ll_mkdir(class ceph_mount_info *cmount,
 //			     Inode *parent, const char *name,
-//			     mode_t mode, struct stat_ceph *attr, Inode **out,
+//			     mode_t mode, struct stat *attr, Inode **out,
 //			     int uid, int gid)
 //{
 //  return (cmount->get_client()->ll_mkdir(parent, name, mode, attr, out, uid,
@@ -1459,7 +1459,7 @@ extern "C" int ceph_get_pool_replication(struct ceph_mount_info *cmount,
 //
 //extern "C" int ceph_ll_link(class ceph_mount_info *cmount,
 //			    Inode *in, Inode *newparent,
-//			    const char *name, struct stat_ceph *attr, int uid,
+//			    const char *name, struct stat *attr, int uid,
 //			    int gid)
 //{
 //  return (cmount->get_client()->ll_link(in, newparent, name, attr, uid,
@@ -1470,7 +1470,7 @@ extern "C" int ceph_get_pool_replication(struct ceph_mount_info *cmount,
 //				Inode *in, uint64_t length, int uid,
 //				int gid)
 //{
-//  struct stat_ceph st;
+//  struct stat st;
 //  st.st_size=length;
 //
 //  return(cmount->get_client()->ll_setattr(in, &st, CEPH_SETATTR_SIZE, uid,
@@ -1524,7 +1524,7 @@ extern "C" int ceph_get_pool_replication(struct ceph_mount_info *cmount,
 //
 //extern "C" int ceph_ll_symlink(class ceph_mount_info *cmount,
 //			       Inode *in, const char *name,
-//			       const char *value, struct stat_ceph *attr,
+//			       const char *value, struct stat *attr,
 //			       Inode **out, int uid, int gid)
 //{
 //  return (cmount->get_client()->ll_symlink(in, name, value, attr, out, uid,

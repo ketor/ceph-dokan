@@ -20,7 +20,7 @@
 #include "mds/MDSMap.h"
 #include "include/ceph_features.h"
 
-//by ketor #include <uuid/uuid.h>
+#include <uuid/uuid.h>
 
 class MMDSMap : public Message {
  public:

@@ -4,7 +4,7 @@
 #include "Log.h"
 
 #include <errno.h>
-//#include <syslog.h>
+#include <syslog.h>
 
 #include <iostream>
 #include <sstream>

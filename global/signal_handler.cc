@@ -26,8 +26,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-//void install_sighandler(int signum, signal_handler_t handler, int flags)
-//{
+void install_sighandler(int signum, signal_handler_t handler, int flags)
+{
 //  int ret;
 //  struct sigaction oldact;
 //  struct sigaction act;
@@ -46,7 +46,7 @@
 //    dout_emergency(buf);
 //    exit(1);
 //  }
-//}
+}
 
 void sighup_handler(int signum)
 {

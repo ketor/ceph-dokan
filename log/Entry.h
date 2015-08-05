@@ -6,7 +6,6 @@
 
 #include "include/utime.h"
 #include "common/PrebufferedStreambuf.h"
-#include <winsock2.h>
 #include <pthread.h>
 #include <string>
 

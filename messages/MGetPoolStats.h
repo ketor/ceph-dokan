@@ -16,7 +16,7 @@
 #ifndef CEPH_MGETPOOLSTATS_H
 #define CEPH_MGETPOOLSTATS_H
 
-//by ketor #include <uuid/uuid.h>
+#include <uuid/uuid.h>
 
 #include "messages/PaxosServiceMessage.h"
 

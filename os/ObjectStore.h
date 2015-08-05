@@ -27,11 +27,11 @@
 #include <vector>
 #include <map>
 
-//by ketor #if defined(DARWIN) || defined(__FreeBSD__)
-//#include <sys/statvfs.h>
-//#else
-//#include <sys/vfs.h>    /* or <sys/statfs.h> */
-//#endif /* DARWIN */
+#if defined(DARWIN) || defined(__FreeBSD__)
+#include <sys/statvfs.h>
+#else
+#include <sys/vfs.h>    /* or <sys/statfs.h> */
+#endif /* DARWIN */
 
 #define OPS_PER_PTR 32
 

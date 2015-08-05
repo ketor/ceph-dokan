@@ -136,18 +136,17 @@ public:
   operator double() const {
     return (double)sec() + ((double)nsec() / 1000000000.0L);
   }
-  operator ceph_timespec() {
+  operator ceph_timespec() const {
     ceph_timespec ts;
     ts.tv_sec = sec();
     ts.tv_nsec = nsec();
     return ts;
   }
 
-  void sleep() {
-    //struct timespec ts = { (__time_t)tv.tv_sec, (long)tv.tv_nsec };
-    struct timespec ts = { tv.tv_sec, (long)tv.tv_nsec };
-    //nanosleep(&ts, &ts);
-    Sleep(ts.tv_sec*1000+ts.tv_nsec);
+  void sleep() const {
+    struct timespec ts;
+    to_timespec(&ts);
+    nanosleep(&ts, NULL);
   }
 
   // output

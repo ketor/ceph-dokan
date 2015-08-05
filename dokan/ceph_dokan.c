@@ -399,7 +399,7 @@ WinCephCreateFile(
     }
     else
     {
-        struct stat_ceph st_buf;
+        struct stat st_buf;
         int ret = ceph_stat(cmount, file_name, &st_buf);
         if(ret==0) /*File Exists*/
         {
@@ -692,7 +692,7 @@ WinCephCreateDirectory(
             return -ERROR_ACCESS_DENIED;
     }
     
-    struct stat_ceph st_buf;
+    struct stat st_buf;
     int ret = ceph_stat(cmount, file_name, &st_buf);
     if(ret==0){
         if(S_ISDIR(st_buf.st_mode)){
@@ -739,7 +739,7 @@ WinCephOpenDirectory(
     
     //fwprintf(stderr, L"OpenDirectoryLinux : %s\n", FileName);
     
-    struct stat_ceph st_buf;
+    struct stat st_buf;
     int ret = ceph_stat(cmount, file_name, &st_buf);
     if(ret){
         DbgPrint("\terror code = %d\n\n", ret);
@@ -1094,7 +1094,7 @@ WinCephGetFileInformation(
     int len = wchar_to_char(file_name, FileName, MAX_PATH_CEPH);
     ToLinuxFilePath(file_name);
     
-    struct stat_ceph stbuf;
+    struct stat stbuf;
     struct fd_context fdc;
     memcpy(&fdc, &(DokanFileInfo->Context), sizeof(fdc));
     if (fdc.fd==0) {
@@ -1117,9 +1117,9 @@ WinCephGetFileInformation(
     HandleFileInformation->nFileSizeHigh = stbuf.st_size >> 32;
     
     //fill stbuf.st_mtim
-    UnixTimeToFileTime(stbuf.st_mtim.tv_sec, &HandleFileInformation->ftCreationTime);
-    UnixTimeToFileTime(stbuf.st_mtim.tv_sec, &HandleFileInformation->ftLastAccessTime);
-    UnixTimeToFileTime(stbuf.st_mtim.tv_sec, &HandleFileInformation->ftLastWriteTime);
+    UnixTimeToFileTime(stbuf.st_mtime, &HandleFileInformation->ftCreationTime);
+    UnixTimeToFileTime(stbuf.st_mtime, &HandleFileInformation->ftLastAccessTime);
+    UnixTimeToFileTime(stbuf.st_mtime, &HandleFileInformation->ftLastWriteTime);
     
     //fwprintf(stderr, L"GetFileInformation6 [%s][size:%lld][time a:%lld m:%lld c:%lld]\n", 
     //    FileName, stbuf.st_size, stbuf.st_atim.tv_sec, stbuf.st_mtim.tv_sec, stbuf.st_ctim.tv_sec);
@@ -1193,7 +1193,7 @@ WinCephFindFiles(
     {
         memset(&findData, 0, sizeof(findData));
         struct dirent result;
-        struct stat_ceph stbuf;
+        struct stat stbuf;
         int stmask;
         
         ret = ceph_readdirplus_r(cmount, dirp, &result, &stbuf, &stmask);
@@ -1219,9 +1219,9 @@ WinCephFindFiles(
         findData.nFileSizeHigh = stbuf.st_size >> 32;
         
         //st_mtim
-        UnixTimeToFileTime(stbuf.st_mtim.tv_sec, &findData.ftCreationTime);
-        UnixTimeToFileTime(stbuf.st_mtim.tv_sec, &findData.ftLastAccessTime);
-        UnixTimeToFileTime(stbuf.st_mtim.tv_sec, &findData.ftLastWriteTime);
+        UnixTimeToFileTime(stbuf.st_mtime, &findData.ftCreationTime);
+        UnixTimeToFileTime(stbuf.st_mtime, &findData.ftLastAccessTime);
+        UnixTimeToFileTime(stbuf.st_mtime, &findData.ftLastWriteTime);
         
         //st_mode
         if(S_ISDIR(stbuf.st_mode)){
@@ -1475,7 +1475,7 @@ WinCephSetAllocationSize(
     
     fwprintf(stderr, L"SetAllocationSize [%s][%d][AllocSize:%lld]\n", FileName, fdc.fd, AllocSize);
     
-    struct stat_ceph stbuf;
+    struct stat stbuf;
     int ret = ceph_fstat(cmount, fdc.fd, &stbuf);
     if(ret){
         fwprintf(stderr, L"SetAllocationSize ceph_stat error [%s][%d][AllocSize:%lld]\n", FileName, ret, AllocSize);
@@ -1548,7 +1548,7 @@ WinCephSetFileTime(
     //int len = wchar_to_char(file_name, FileName, MAX_PATH_CEPH);
     //ToLinuxFilePath(file_name);
     
-    //struct stat_ceph stbuf;
+    //struct stat stbuf;
     //memset(&stbuf, 0, sizeof(stbuf));
     //
     //int mask = 0;
@@ -1619,7 +1619,7 @@ WinCephGetFakeFileSecurity(
     int len = wchar_to_char(file_name, FileName, MAX_PATH_CEPH);
     ToLinuxFilePath(file_name);
     
-    struct stat_ceph stbuf;
+    struct stat stbuf;
     int ret = ceph_stat(cmount, file_name, &stbuf);
     if(ret){
         fwprintf(stderr, L"GetFileSecurity ceph_stat error [%s]\n", FileName);
@@ -1802,16 +1802,16 @@ int __cdecl
 //wmain(ULONG argc, PWCHAR argv[])
 main(int argc, char* argv[])
 {
-//    printf("sizeof(DWORD) is [%d]\n", sizeof(DWORD));
-//    printf("sizeof(WCHAR) is [%d]\n", sizeof(WCHAR));
-//    printf("sizeof(ULONG) is [%d]\n", sizeof(ULONG));
-//    printf("sizeof(LPWSTR) is [%d]\n", sizeof(LPWSTR));
-//    printf("sizeof(LPCVOID) is [%d]\n", sizeof(LPCVOID));
-//    printf("sizeof(HANDLE) is [%d]\n", sizeof(HANDLE));
-//    printf("sizeof(dirent) is %d\n", sizeof(struct dirent));
-//    printf("sizeof(short) is %d\n", sizeof(short));
-//    printf("sizeof(int) is %d\n", sizeof(int));
-//    printf("sizeof(long) is %d\n", sizeof(long));
+    printf("sizeof(DWORD) is [%d]\n", sizeof(DWORD));
+    printf("sizeof(WCHAR) is [%d]\n", sizeof(WCHAR));
+    printf("sizeof(ULONG) is [%d]\n", sizeof(ULONG));
+    printf("sizeof(LPWSTR) is [%d]\n", sizeof(LPWSTR));
+    printf("sizeof(LPCVOID) is [%d]\n", sizeof(LPCVOID));
+    printf("sizeof(HANDLE) is [%d]\n", sizeof(HANDLE));
+    printf("sizeof(dirent) is %d\n", sizeof(struct dirent));
+    printf("sizeof(short) is %d\n", sizeof(short));
+    printf("sizeof(int) is %d\n", sizeof(int));
+    printf("sizeof(long) is %d\n", sizeof(long));
     
     char sub_mount_path[4096];
     strcpy(sub_mount_path, "/");

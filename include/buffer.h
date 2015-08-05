@@ -14,8 +14,9 @@
 #ifndef CEPH_BUFFER_H
 #define CEPH_BUFFER_H
 
+#if defined(__linux__) || defined(__FreeBSD__)
 #include <stdlib.h>
-#include "common/ceph-mingw-type.h"
+#endif
 
 #ifndef _XOPEN_SOURCE
 # define _XOPEN_SOURCE 600
@@ -31,9 +32,9 @@
 #include <stdint.h>
 #include <string.h>
 
-//by ketor #ifndef __CYGWIN__
-//# include <sys/mman.h>
-//#endif
+#ifndef __CYGWIN__
+# include <sys/mman.h>
+#endif
 
 #include <iostream>
 #include <istream>
@@ -131,8 +132,8 @@ private:
   class raw;
   class raw_malloc;
   class raw_static;
-  //class raw_mmap_pages;
-  //class raw_posix_aligned;
+  class raw_mmap_pages;
+  class raw_posix_aligned;
   class raw_hack_aligned;
   class raw_char;
   class raw_pipe;

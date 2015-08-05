@@ -23,7 +23,6 @@
 #include "log/Log.h"
 #include "include/assert.h"
 
-#include <winsock2.h>
 #include <iostream>
 #include <pthread.h>
 #include <streambuf>

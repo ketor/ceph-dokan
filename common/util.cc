@@ -18,9 +18,9 @@
 #include "common/errno.h"
 #include "common/strtol.h"
 
-/*by ketor #ifdef HAVE_SYS_VFS_H
+#ifdef HAVE_SYS_VFS_H
 #include <sys/vfs.h>
-#endif*/
+#endif
 
 // test if an entire buf is zero in 8-byte chunks
 bool buf_is_zero(const char *buf, size_t len)
@@ -109,9 +109,9 @@ int64_t unit_to_bytesize(string val, ostream *pss)
   return (r * (1LL << modifier));
 }
 
-/*by ketor int get_fs_stats(ceph_data_stats_t &stats, const char *path)
+int get_fs_stats(ceph_data_stats_t &stats, const char *path)
 {
-  if (!path)
+/*  if (!path)
     return -EINVAL;
 
   struct statfs stbuf;
@@ -124,5 +124,6 @@ int64_t unit_to_bytesize(string val, ostream *pss)
   stats.byte_used = (stbuf.f_blocks - stbuf.f_bfree) * stbuf.f_bsize;
   stats.byte_avail = stbuf.f_bavail * stbuf.f_bsize;
   stats.avail_percent = (((float)stats.byte_avail/stats.byte_total)*100);
-  return 0;
-}*/
+  return 0;*/
+  return -EINVAL;
+}

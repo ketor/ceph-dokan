@@ -62,10 +62,10 @@ private:
   ~CephContext();
   atomic_t nref;
 public:
-  /*class AssociatedSingletonObject {
+  class AssociatedSingletonObject {
    public:
     virtual ~AssociatedSingletonObject() {}
-  };*/
+  };
   CephContext *get() {
     nref.inc();
     return this;
@@ -163,7 +163,8 @@ private:
   //by ketor ceph::HeartbeatMap *_heartbeat_map;
 
   ceph_spinlock_t _associated_objs_lock;
-  //std::map<std::string, AssociatedSingletonObject*> _associated_objs;
+  std::map<std::string, AssociatedSingletonObject*> _associated_objs;
+
   // crypto
   CryptoNone *_crypto_none;
   CryptoAES *_crypto_aes;

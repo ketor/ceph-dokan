@@ -125,7 +125,7 @@
 /* #undef HAVE_LIBZFS */
 
 /* Define to 1 if you have the <linux/types.h> header file. */
-//#define HAVE_LINUX_TYPES_H 1
+#define HAVE_LINUX_TYPES_H 1 //crack for mingw, a bit dirty
 
 /* Define to 1 if you have the <linux/version.h> header file. */
 #define HAVE_LINUX_VERSION_H 1
@@ -194,7 +194,7 @@
 /* #undef HAVE_STAT_ST_MTIMESPEC_TV_NSEC */
 
 /* Define if you have struct stat.st_mtim.tv_nsec */
-#define HAVE_STAT_ST_MTIM_TV_NSEC 1
+//#define HAVE_STAT_ST_MTIM_TV_NSEC 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
@@ -262,7 +262,7 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <sys/vfs.h> header file. */
-#define HAVE_SYS_VFS_H 1
+//#define HAVE_SYS_VFS_H 1
 
 /* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
 #define HAVE_SYS_WAIT_H 1
@@ -381,4 +381,11 @@
 #define VERSION "0.94.1"
 
 /* define if radosgw enabled */
-#define WITH_RADOSGW 1
+#define WITH_RADOSGW 0
+
+#ifdef __struct_timespec_defined
+#ifndef HAVE_STRUCT_TIMESPEC
+#define HAVE_STRUCT_TIMESPEC
+#endif
+#endif
+
