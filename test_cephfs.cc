@@ -23,7 +23,7 @@ static int findfiles(struct ceph_mount_info *cmount, char* file_name)
     while(1)
     {
         struct dirent result;
-        struct stat_ceph stbuf;
+        struct stat stbuf;
         int stmask;
         
         ret = ceph_readdirplus_r(cmount, dirp, &result, &stbuf, &stmask);

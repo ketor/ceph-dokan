@@ -15,7 +15,6 @@
 #ifndef CEPH_CEPHCONTEXT_H
 #define CEPH_CEPHCONTEXT_H
 
-#include "common/ceph-mingw-type.h"
 #include <iostream>
 #include <stdint.h>
 #include <string>

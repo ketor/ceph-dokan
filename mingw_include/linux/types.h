@@ -31,16 +31,7 @@ typedef unsigned int __u32;
 
 typedef __signed__ long long __s64;
 typedef unsigned long long __u64;
-/*
-typedef int8_t __s8;
-typedef uint8_t __u8;
-typedef int16_t __s16;
-typedef uint16_t __u16;
-typedef int32_t __s32;
-typedef uint32_t __u32;
-typedef int64_t __s64;
-typedef uint64_t __u64;
-*/
+
 #define __bitwise__
 
 typedef __u16 __bitwise__ __le16;
@@ -132,58 +123,6 @@ struct statvfs
 #define __off_t long long
 #define __blksize_t long long
 #define __blkcnt_t long long
-
-struct stat_ceph {
-    __dev_t st_dev;
-    __ino_t st_ino;
-    __nlink_t st_nlink;
-    __mode_t st_mode;
-    __uid_t st_uid;
-    __gid_t st_gid;
-    int __pad0;
-    __dev_t st_rdev;
-    unsigned short int __pad2;
-    __off_t st_size;
-    __blksize_t st_blksize;
-    __blkcnt_t st_blocks;
-    struct timespec st_atim;
-    struct timespec st_mtim;
-    struct timespec st_ctim;
-    long long __unused[3];
-};
-
-//struct stat_ceph
-//  {
-//    unsigned int st_dev;		/* Device.  */
-//    unsigned long long st_ino;		/* File serial number.	*/
-//
-//    unsigned int st_nlink;		/* Link count.  */
-//    unsigned int st_mode;		/* File mode.  */
-//
-//    unsigned int st_uid;		/* User ID of the file's owner.	*/
-//    unsigned int st_gid;		/* Group ID of the file's group.*/
-//    unsigned int st_rdev;		/* Device number, if device.  */
-//    unsigned short int __pad2;
-//
-//    unsigned long long st_size;			/* Size of file, in bytes.  */
-//
-//    unsigned long long st_blksize;	/* Optimal block size for I/O.  */
-//    unsigned long long st_blocks;		/* Number 512-byte blocks allocated. */
-//
-//    /* Nanosecond resolution timestamps are stored in a format
-//       equivalent to 'struct timespec'.  This is the type used
-//       whenever possible but the Unix namespace rules do not allow the
-//       identifier 'timespec' to appear in the <sys/stat.h> header.
-//       Therefore we have to handle the use of this header in strictly
-//       standard-compliant sources special.  */
-//    struct timespec st_atim;		/* Time of last access.  */
-//    struct timespec st_mtim;		/* Time of last modification.  */
-//    struct timespec st_ctim;		/* Time of last status change.  */
-//    time_t st_atime ;	/* Backward compatibility.  */
-//    time_t st_mtime ;
-//    time_t st_ctime ;
-//    unsigned long long st_ino1;			/* File serial number.	*/
-//  };
 
 #define O_SYNC	    04010000
 #define O_DSYNC	010000	/* Synchronize data.  */
