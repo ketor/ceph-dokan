@@ -1,7 +1,7 @@
 /* Extended attribute names */
 
-#include "common/ceph-mingw-type.h"
-#include "dokan/posix_acl.h"
+#include "../common/ceph-mingw-type.h"
+#include "posix_acl.h"
 
 #include <string>
 
@@ -685,7 +685,7 @@ int fuse_check_acl(struct ceph_mount_info *cmount, const char *path, const char 
         return error;
     }
     
-    /*         uid   gid      stat*/
+    /*文件的uid和gid取自stat*/
     struct inode_cxt inode;
     struct stat_ceph stbuf;
     int ret = ceph_lstat(cmount, path, &stbuf);
@@ -695,7 +695,7 @@ int fuse_check_acl(struct ceph_mount_info *cmount, const char *path, const char 
     inode.i_uid = stbuf.st_uid;
     inode.i_gid = stbuf.st_gid;
     
-    /*               uid   gid            */
+    /*外部环境的uid、gid取自入参*/
     struct inode_cxt evn_cxt;
     evn_cxt.i_uid = uid;
     evn_cxt.i_gid = gid;
@@ -706,7 +706,7 @@ int fuse_check_acl(struct ceph_mount_info *cmount, const char *path, const char 
     return error;
 }
 
-/*                     ACL                     ACL                                    ugo            */
+/*先检测是否存在ACL，若存在则进行ACL权限判定，若不存在则执行ugo权限判定*/
 int permission_walk(struct ceph_mount_info *cmount, const char *path, uid_t uid, gid_t gid, int perm_chk)
 {
     //I'm root~~
@@ -741,7 +741,7 @@ int fuse_init_acl(struct ceph_mount_info *cmount, const char *path, umode_t i_mo
     //fprintf(stderr, "%s %d\n", path, i_mode);
     int error=-EAGAIN;
     
-    /*                  default ACL      */
+    /*获取父目录的default ACL信息*/
     int l = strlen(path);
     while(--l)
         if(path[l] == '/')
@@ -764,7 +764,7 @@ int fuse_init_acl(struct ceph_mount_info *cmount, const char *path, umode_t i_mo
         return error;
     }
     
-    /*                  default ACL                                 ACL      */
+    /*根据父目录的default ACL信息生成子目录或文件的ACL信息*/
     if (acl) {
         char buffer[XATTR_MAX_SIZE];
 
@@ -801,7 +801,7 @@ cleanup:
 }
 
 /*
-     path                     acl mask   rwx      Samba                     
+  对path指向的文件设置acl mask为rwx，与Samba的处理保持一�?
 */
 int fuse_disable_acl_mask(struct ceph_mount_info *cmount, const char *path)
 {
@@ -854,14 +854,14 @@ cleanup:
 }
 
 /*
-         Samba                           ACL                              
-                  Path                  
+   模拟Samba的操作根据父目录的ACL权限生成子目录的权限
+   注意：入参Path必须是全路径
 */
 int fuse_inherit_acl(struct ceph_mount_info *cmount, const char *path)
 {
     int error=-EAGAIN;
     
-    /*                  default ACL      */
+    /*获取父目录的default ACL信息*/
     int l = strlen(path);
     while(--l)
         if(path[l] == '/')
@@ -882,7 +882,7 @@ int fuse_inherit_acl(struct ceph_mount_info *cmount, const char *path)
         return error;
     }
     
-    /*                  default ACL                                 ACL      */
+    /*根据父目录的default ACL信息生成子目录或文件的ACL信息*/
     if (acl) {
         char buffer[XATTR_MAX_SIZE];
         memset(buffer, 0x00, sizeof(buffer));
