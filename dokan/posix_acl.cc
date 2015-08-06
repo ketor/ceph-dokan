@@ -627,7 +627,7 @@ int permission_walk_ugo(struct ceph_mount_info *cmount, const char *path, uid_t 
         return 0;
     }
     
-    struct stat_ceph stbuf;
+    struct stat stbuf;
     int chk = perm_chk;
     int res = ceph_stat(cmount, path, &stbuf);
     if(res){
@@ -687,7 +687,7 @@ int fuse_check_acl(struct ceph_mount_info *cmount, const char *path, const char 
     
     /*文件的uid和gid取自stat*/
     struct inode_cxt inode;
-    struct stat_ceph stbuf;
+    struct stat stbuf;
     int ret = ceph_lstat(cmount, path, &stbuf);
     if(ret == -1){
         return -101;

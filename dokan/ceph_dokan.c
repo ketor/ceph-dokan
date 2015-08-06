@@ -68,24 +68,24 @@ struct timespec {
 #define __blksize_t long long
 #define __blkcnt_t long long
 
-struct stat_ceph {
-    __dev_t st_dev;
-    __ino_t st_ino;
-    __nlink_t st_nlink;
-    __mode_t st_mode;
-    __uid_t st_uid;
-    __gid_t st_gid;
-    int __pad0;
-    __dev_t st_rdev;
-    unsigned short int __pad2;
-    __off_t st_size;
-    __blksize_t st_blksize;
-    __blkcnt_t st_blocks;
-    struct timespec st_atim;
-    struct timespec st_mtim;
-    struct timespec st_ctim;
-    long long __unused[3];
-};
+//struct stat_ceph {
+//    __dev_t st_dev;
+//    __ino_t st_ino;
+//    __nlink_t st_nlink;
+//    __mode_t st_mode;
+//    __uid_t st_uid;
+//    __gid_t st_gid;
+//    int __pad0;
+//    __dev_t st_rdev;
+//    unsigned short int __pad2;
+//    __off_t st_size;
+//    __blksize_t st_blksize;
+//    __blkcnt_t st_blocks;
+//    struct timespec st_atim;
+//    struct timespec st_mtim;
+//    struct timespec st_ctim;
+//    long long __unused[3];
+//};
 
 struct statvfs
 {

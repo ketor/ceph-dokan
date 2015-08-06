@@ -323,7 +323,7 @@ struct dirent * ceph_readdir(struct ceph_mount_info *cmount, struct ceph_dir_res
 int ceph_readdir_r(struct ceph_mount_info *cmount, struct ceph_dir_result *dirp, struct dirent *de);
 
 /**
- * A safe version of ceph_readdir that also returns the file statistics (readdir+stat_ceph).
+ * A safe version of ceph_readdir that also returns the file statistics (readdir+stat).
  *
  * @param cmount the ceph mount handle to use for performing the readdir_plus_r.
  * @param dirp the directory stream pointer from an opendir holding the state of the
@@ -335,7 +335,7 @@ int ceph_readdir_r(struct ceph_mount_info *cmount, struct ceph_dir_result *dirp,
  *          and a negative error code on failure.
  */
 int ceph_readdirplus_r(struct ceph_mount_info *cmount, struct ceph_dir_result *dirp, struct dirent *de,
-		       struct stat_ceph *st, int *stmask);
+		       struct stat *st, int *stmask);
 
 /**
  * Gets multiple directory entries.
@@ -496,33 +496,33 @@ int ceph_rename(struct ceph_mount_info *cmount, const char *from, const char *to
 /**
  * Get a file's statistics and attributes.
  *
- * @param cmount the ceph mount handle to use for performing the stat_ceph.
+ * @param cmount the ceph mount handle to use for performing the stat.
  * @param path the file or directory to get the statistics of.
- * @param stbuf the stat_ceph struct that will be filled in with the file's statistics.
+ * @param stbuf the stat struct that will be filled in with the file's statistics.
  * @returns 0 on success or negative error code on failure.
  */
-int ceph_stat(struct ceph_mount_info *cmount, const char *path, struct stat_ceph *stbuf);
+int ceph_stat(struct ceph_mount_info *cmount, const char *path, struct stat *stbuf);
 
 /**
  * Get a file's statistics and attributes, without following symlinks.
  *
- * @param cmount the ceph mount handle to use for performing the stat_ceph.
+ * @param cmount the ceph mount handle to use for performing the stat.
  * @param path the file or directory to get the statistics of.
- * @param stbuf the stat_ceph struct that will be filled in with the file's statistics.
+ * @param stbuf the stat struct that will be filled in with the file's statistics.
  * @returns 0 on success or negative error code on failure.
  */
-int ceph_lstat(struct ceph_mount_info *cmount, const char *path, struct stat_ceph *stbuf);
+int ceph_lstat(struct ceph_mount_info *cmount, const char *path, struct stat *stbuf);
 
 /**
  * Set a file's attributes.
  * 
  * @param cmount the ceph mount handle to use for performing the setattr.
  * @param relpath the path to the file/directory to set the attributes of.
- * @param attr the stat_ceph struct that must include attribute values to set on the file.
- * @param mask a mask of all the stat_ceph values that have been set on the stat_ceph struct.
+ * @param attr the stat struct that must include attribute values to set on the file.
+ * @param mask a mask of all the stat values that have been set on the stat struct.
  * @returns 0 on success or negative error code on failure.
  */
-int ceph_setattr(struct ceph_mount_info *cmount, const char *relpath, struct stat_ceph *attr, int mask);
+int ceph_setattr(struct ceph_mount_info *cmount, const char *relpath, struct stat *attr, int mask);
 
 /**
  * Change the mode bits (permissions) of a file/directory.
@@ -719,11 +719,11 @@ int ceph_fsync(struct ceph_mount_info *cmount, int fd, int syncdataonly);
  *
  * @param cmount the ceph mount handle to use for performing the fstat.
  * @param fd the file descriptor of the file to get statistics of.
- * @param stbuf the stat_ceph struct of the file's statistics, filled in by the
+ * @param stbuf the stat struct of the file's statistics, filled in by the
  *    function.
  * @returns 0 on success or a negative error code on failure
  */
-int ceph_fstat(struct ceph_mount_info *cmount, int fd, struct stat_ceph *stbuf);
+int ceph_fstat(struct ceph_mount_info *cmount, int fd, struct stat *stbuf);
 
 /** @} file */
 
