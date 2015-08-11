@@ -1597,9 +1597,11 @@ int Client::make_request(MetaRequest *request,
   if (!request->reply) {
     assert(request->aborted);
     assert(!request->got_unsafe);
-    request->item.remove_myself();
-    mds_requests.erase(tid);
-    put_request(request); // request map's
+    if (request->retry_attempt == 0) {
+      request->item.remove_myself();
+      mds_requests.erase(tid);
+      put_request(request);
+    }
     put_request(request); // ours
     return -ETIMEDOUT;
   }
@@ -1919,6 +1921,13 @@ void Client::_kick_stale_sessions()
 void Client::send_request(MetaRequest *request, MetaSession *session,
 			  bool drop_cap_releases)
 {
+  if (request->aborted) {
+    ldout(cct, 10) << "send_request aborted request " << request->get_tid() << dendl;
+    request->item.remove_myself();
+    mds_requests.erase(request->get_tid());
+    put_request(request);
+    return;
+  }
   // make the request
   mds_rank_t mds = session->mds_num;
   ldout(cct, 10) << "send_request rebuilding request " << request->get_tid()
@@ -2400,14 +2409,15 @@ void Client::kick_requests(MetaSession *session)
 {
   ldout(cct, 10) << "kick_requests for mds." << session->mds_num << dendl;
   for (map<ceph_tid_t, MetaRequest*>::iterator p = mds_requests.begin();
-       p != mds_requests.end();
-       ++p) {
-    if (p->second->got_unsafe)
+       p != mds_requests.end(); ) {
+    MetaRequest *req = p->second;
+    ++p;
+    if (req->got_unsafe)
       continue;
-    if (p->second->retry_attempt > 0)
+    if (req->retry_attempt > 0)
       continue; // new requests only
-    if (p->second->mds == session->mds_num) {
-      send_request(p->second, session);
+    if (req->mds == session->mds_num) {
+      send_request(req, session);
     }
   }
 }
@@ -2415,16 +2425,18 @@ void Client::kick_requests(MetaSession *session)
 void Client::resend_unsafe_requests(MetaSession *session)
 {
   for (xlist<MetaRequest*>::iterator iter = session->unsafe_requests.begin();
-       !iter.end();
-       ++iter)
-    send_request(*iter, session);
+       !iter.end(); ) {
+    MetaRequest *req = *iter;
+    ++iter;
+    send_request(req, session);
+  }
 
   // also re-send old requests when MDS enters reconnect stage. So that MDS can
   // process completed requests in clientreplay stage.
   for (map<ceph_tid_t, MetaRequest*>::iterator p = mds_requests.begin();
-       p != mds_requests.end();
-       ++p) {
+       p != mds_requests.end(); ) {
     MetaRequest *req = p->second;
+    ++p;
     if (req->got_unsafe)
       continue;
     if (req->retry_attempt == 0)
