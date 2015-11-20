@@ -38,13 +38,15 @@ Then you will see a new Drive[M:] in your explorer.
 How to compile
 ------------
 
-Download MinGW from http://ceph.com/misc/MinGW-20150115.zip
+Download MinGW from https://www.dropbox.com/s/i72wyymzo0ets2s/MinGW-20151112.zip?dl=0
 
-Unzip the MinGW-20150115.zip to C:\
+Unzip the MinGW-20151112.zip to C:\
+
+Download and compile Boost Libs in C:\Setup\boost_1_58_0\
 
 Open C:\MinGW\msys\1.0\msys.bat you will get a MINGW32 bash shell.
 
-Git clone the ceph-dokan, in MINGW32 shell cd ceph-dokan code directory, just input the command 'make', after serval min you will get ceph-dokan.exe and libcephfs.dll.
+Git clone the ceph-dokan, in MINGW32 shell cd ceph-dokan code directory, just input the command 'make', after serval minutes you will get ceph-dokan.exe and libcephfs.dll.
 
 
 Future
