@@ -26,8 +26,7 @@ Mutex::Mutex(const char *n, bool r, bool ld,
   name(n), id(-1), recursive(r), lockdep(ld), backtrace(bt),
   nlock(0), cct(cct), logger(0)
 {
-	locked_by.p = NULL;
-	locked_by.x = 0;
+	locked_by = 0;
   if (cct) {
     PerfCountersBuilder b(cct, string("mutex-") + name,
 			  l_mutex_first, l_mutex_last);

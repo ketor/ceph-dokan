@@ -10,10 +10,29 @@
 
 #define _FAKE_TIME_H_SOURCED	1
 #define __need_struct_timespec	1
-#include <parts/time.h>
+#include <time.h>
 #undef __need_struct_timespec
 
 #define HAVE_STRUCT_TIMESPEC 1
+
+/* The nanosleep() function provides the most general purpose API for
+ * process/thread suspension; it provides for specification of periods
+ * ranging from ~7.5 ms mean, (on WinNT derivatives; ~27.5 ms on Win9x),
+ * extending up to ~136 years, (effectively eternity).
+ */
+__cdecl __MINGW_NOTHROW
+int nanosleep( const struct timespec *, struct timespec * );
+
+#ifndef __NO_INLINE__
+__CRT_INLINE __LIBIMPL__(( FUNCTION = nanosleep ))
+int nanosleep( const struct timespec *period, struct timespec *residual )
+{
+  if( residual != (void *)(0) )
+    residual->__tv64_sec = (__time64_t)(residual->tv_nsec = 0);
+  return __mingw_sleep((unsigned)(period->__tv64_sec), (period->__tv64_sec < 0LL)
+    ? (unsigned)(-1) : (unsigned)(period->tv_nsec));
+}
+#endif
 
 #endif /* __struct_timespec_defined */
 #endif /* HAVE_STRUCT_TIMESPEC */

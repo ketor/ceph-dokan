@@ -46,10 +46,8 @@ Log::Log(SubsystemMap *s)
     m_max_recent(DEFAULT_MAX_RECENT),
     m_inject_segv(false)
 {
-  m_queue_mutex_holder.p = NULL;
-  m_queue_mutex_holder.x = 0;
-  m_flush_mutex_holder.p = NULL;
-  m_flush_mutex_holder.x = 0;
+  m_queue_mutex_holder = 0;
+  m_flush_mutex_holder = 0;
   int ret;
 
   ret = pthread_mutex_init(&m_flush_mutex, NULL);
@@ -146,7 +144,7 @@ void Log::set_stderr_level(int log, int crash)
 void Log::submit_entry(Entry *e)
 {
   pthread_mutex_lock(&m_queue_mutex);
-  m_queue_mutex_holder.p = pthread_self().p;
+  m_queue_mutex_holder = pthread_self();
 
   if (m_inject_segv)
     *(int *)(0) = 0xdead;
@@ -157,7 +155,7 @@ void Log::submit_entry(Entry *e)
 
   m_new.enqueue(e);
   pthread_cond_signal(&m_cond_flusher);
-  m_queue_mutex_holder.p = 0;
+  m_queue_mutex_holder = 0;
   pthread_mutex_unlock(&m_queue_mutex);
 }
 
@@ -181,13 +179,13 @@ Entry *Log::create_entry(int level, int subsys)
 void Log::flush()
 {
   pthread_mutex_lock(&m_flush_mutex);
-  m_flush_mutex_holder.p = pthread_self().p;
+  m_flush_mutex_holder = pthread_self();
   pthread_mutex_lock(&m_queue_mutex);
-  m_queue_mutex_holder.p = pthread_self().p;
+  m_queue_mutex_holder = pthread_self();
   EntryQueue t;
   t.swap(m_new);
   pthread_cond_broadcast(&m_cond_loggers);
-  m_queue_mutex_holder.p = 0;
+  m_queue_mutex_holder = 0;
   pthread_mutex_unlock(&m_queue_mutex);
   _flush(&t, &m_recent, false);
 
@@ -196,7 +194,7 @@ void Log::flush()
     delete m_recent.dequeue();
   }
 
-  m_flush_mutex_holder.p = 0;
+  m_flush_mutex_holder = 0;
   pthread_mutex_unlock(&m_flush_mutex);
 }
 
@@ -219,7 +217,7 @@ void Log::_flush(EntryQueue *t, EntryQueue *requeue, bool crash)
 	buflen += snprintf(buf, sizeof(buf), "%6d> ", -t->m_len);
       buflen += e->m_stamp.sprintf(buf + buflen, sizeof(buf)-buflen);
       buflen += snprintf(buf + buflen, sizeof(buf)-buflen, " %lx %2d ",
-			(unsigned long)e->m_thread.p/*by ketor*/, e->m_prio);
+			(unsigned long)e->m_thread, e->m_prio);
 
       // FIXME: this is slow
       string s = e->get_str();
@@ -270,15 +268,15 @@ void Log::_log_message(const char *s, bool crash)
 void Log::dump_recent()
 {
   pthread_mutex_lock(&m_flush_mutex);
-  m_flush_mutex_holder.p = pthread_self().p;
+  m_flush_mutex_holder = pthread_self();
 
   pthread_mutex_lock(&m_queue_mutex);
-  m_queue_mutex_holder.p = pthread_self().p;
+  m_queue_mutex_holder = pthread_self();
 
   EntryQueue t;
   t.swap(m_new);
 
-  m_queue_mutex_holder.p = 0;
+  m_queue_mutex_holder = 0;
   pthread_mutex_unlock(&m_queue_mutex);
   _flush(&t, &m_recent, false);
 
@@ -308,7 +306,7 @@ void Log::dump_recent()
 
   _log_message("--- end dump of recent events ---", true);
 
-  m_flush_mutex_holder.p = 0;
+  m_flush_mutex_holder = 0;
   pthread_mutex_unlock(&m_flush_mutex);
 }
 
@@ -335,20 +333,20 @@ void Log::stop()
 void *Log::entry()
 {
   pthread_mutex_lock(&m_queue_mutex);
-  m_queue_mutex_holder.p = pthread_self().p;
+  m_queue_mutex_holder = pthread_self();
   while (!m_stop) {
     if (!m_new.empty()) {
-      m_queue_mutex_holder.p = 0;
+      m_queue_mutex_holder = 0;
       pthread_mutex_unlock(&m_queue_mutex);
       flush();
       pthread_mutex_lock(&m_queue_mutex);
-      m_queue_mutex_holder.p = pthread_self().p;
+      m_queue_mutex_holder = pthread_self();
       continue;
     }
 
     pthread_cond_wait(&m_cond_flusher, &m_queue_mutex);
   }
-  m_queue_mutex_holder.p = 0;
+  m_queue_mutex_holder = 0;
   pthread_mutex_unlock(&m_queue_mutex);
   flush();
   return NULL;
@@ -357,8 +355,8 @@ void *Log::entry()
 bool Log::is_inside_log_lock()
 {
   return
-    pthread_self().p == m_queue_mutex_holder.p ||
-    pthread_self().p == m_flush_mutex_holder.p;
+    pthread_self() == m_queue_mutex_holder ||
+    pthread_self() == m_flush_mutex_holder;
 }
 
 void Log::inject_segv()

@@ -5666,12 +5666,12 @@ int Client::fill_stat(Inode *in, struct stat *st, frag_info_t *dirstat, nest_inf
   if (in->is_dir()) {
     //st->st_size = in->dirstat.size();
     st->st_size = in->rstat.rbytes;
-    st->st_blocks = 1;
+    /* st->st_blocks = 1; */
   } else {
     st->st_size = in->size;
-    st->st_blocks = (in->size + 511) >> 9;
+    /* st->st_blocks = (in->size + 511) >> 9; */
   }
-  st->st_blksize = MAX(in->layout.fl_stripe_unit, 4096);
+  /* st->st_blksize = MAX(in->layout.fl_stripe_unit, 4096); */
 
   if (dirstat)
     *dirstat = in->dirstat;

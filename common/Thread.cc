@@ -30,13 +30,11 @@
 
 
 Thread::Thread()
-  : /*by ketor thread_id(0),*/
+  : thread_id(0),
     pid(0),
     ioprio_class(-1),
     ioprio_priority(-1)
 {
-	thread_id.p = NULL;
-	thread_id.x = 0;
 }
 
 Thread::~Thread()
@@ -70,17 +68,17 @@ const pthread_t &Thread::get_thread_id()
 
 bool Thread::is_started() const
 {
-  return thread_id.p != NULL;
+  return thread_id != 0;
 }
 
 bool Thread::am_self()
 {
-  return (pthread_self().p == thread_id.p);
+  return (pthread_self() == thread_id);
 }
 
 int Thread::kill(int signal)
 {
-  if (thread_id.p != NULL)
+  if (thread_id != 0)
     return pthread_kill(thread_id, signal);
   else
     return -EINVAL;
@@ -134,15 +132,14 @@ void Thread::create(size_t stacksize)
 
 int Thread::join(void **prval)
 {
-  if (thread_id.p == NULL) {
+  if (thread_id == 0) {
     assert("join on thread that was never started" == 0);
     return -EINVAL;
   }
 
   int status = pthread_join(thread_id, prval);
   assert(status == 0);
-  thread_id.p = NULL;
-  thread_id.x = 0;
+  thread_id = 0;
   return status;
 }
 

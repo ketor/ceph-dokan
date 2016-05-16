@@ -70,7 +70,7 @@ public:
     return (nlock > 0);
   }
   bool is_locked_by_me() const {
-    return nlock > 0 && locked_by.p == pthread_self().p;
+    return nlock > 0 && locked_by == pthread_self();
   }
 
   bool TryLock() {
@@ -87,7 +87,7 @@ public:
   void _post_lock() {
     if (!recursive) {
       assert(nlock == 0);
-      locked_by.p = pthread_self().p;
+      locked_by = pthread_self();
     };
     nlock++;
   }
@@ -96,8 +96,8 @@ public:
     assert(nlock > 0);
     --nlock;
     if (!recursive) {
-      assert(locked_by.p == pthread_self().p);
-      locked_by.p = NULL;
+      assert(locked_by == pthread_self());
+      locked_by = 0;
       assert(nlock == 0);
     }
   }

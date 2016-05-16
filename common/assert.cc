@@ -53,7 +53,7 @@ namespace ceph {
     snprintf(buf, sizeof(buf),
 	     "%s: In function '%s' thread %llx time %s\n"
 	     "%s: %d: FAILED assert(%s)\n",
-	     file, func, (unsigned long long)pthread_self().p, tss.str().c_str(),
+	     file, func, (unsigned long long)pthread_self(), tss.str().c_str(),
 	     file, line, assertion);
     dout_emergency(buf);
 
@@ -116,7 +116,7 @@ namespace ceph {
     BackTrace *bt = new BackTrace(1);
     ba.printf("%s: In function '%s' thread %llx time %s\n"
 	     "%s: %d: FAILED assert(%s)\n",
-	     file, func, (unsigned long long)pthread_self().p, tss.str().c_str(),
+	     file, func, (unsigned long long)pthread_self(), tss.str().c_str(),
 	     file, line, assertion);
     ba.printf("Assertion details: ");
     va_list args;

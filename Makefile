@@ -1,11 +1,12 @@
-#Makefile by Ketor 
-CC        = gcc -D__USE_FILE_OFFSET64 -DHAVE_CONFIG_H -I. -D__CEPH__ -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE -fno-strict-aliasing -fsigned-char -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -g -DPIC 
-CPP       = g++ -D__USE_FILE_OFFSET64 -DHAVE_CONFIG_H -I. -D__CEPH__ -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE -fno-strict-aliasing -fsigned-char -Wno-invalid-offsetof -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -g -DPIC 
+#Makefile by Ketor
+CC        = gcc -D__USE_FILE_OFFSET64 -DHAVE_CONFIG_H -I. -D__CEPH__ -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE -fno-strict-aliasing -fsigned-char -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -g -DPIC
+CPP       = g++ -D__USE_FILE_OFFSET64 -DHAVE_CONFIG_H -I. -D__CEPH__ -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE -fno-strict-aliasing -fsigned-char -Wno-invalid-offsetof -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -g -DPIC
 
-CEPH_INCLUDE = -I./ -I./global -I./mingw_include -I/c/Setup/boost_1_58_0/
+BOOST_PATH=C:\boost_1_60_0
+BOOST_SYSTEM_LIB=libboost_system-mgw51-mt-1_60.a
+CEPH_INCLUDE = -I./ -I./global -I./mingw_include -I$(BOOST_PATH)
 CFLAGS   = $(CEPH_INCLUDE)
-CLIBS    = 
-BOOST_LIBS = /c/Setup/boost_1_58_0/stage/lib/
+CLIBS    =
 
 %.o:%.cc
 	$(CPP) -c $(CFLAGS) $^ -o $@
@@ -62,8 +63,8 @@ test-cephfs.exe:test_cephfs.o libcephfs.dll
 	@echo "MAKE "$@" FINISH"
 	@echo "**************************************************************"
 
-ceph-dokan.exe:dokan/ceph_dokan.o dokan/posix_acl.o dokan/dokan.lib $(OBJECTS) $(BOOST_LIBS)/libboost_system-mgw48-mt-d-1_58.a
-	$(CPP) $(CFLAGS) $(CLIBS) -o $@ $^ -lws2_32 -lpthread -unicode 
+ceph-dokan.exe:dokan/ceph_dokan.o dokan/posix_acl.o dokan/dokan.lib $(OBJECTS) $(BOOST_SYSTEM_LIB)
+	$(CPP) $(CFLAGS) $(CLIBS) -o $@ $^ -lws2_32 -lpthread -unicode
 	@echo "**************************************************************"
 	@echo "MAKE "$@" FINISH"
 	@echo "**************************************************************"
