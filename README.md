@@ -38,15 +38,19 @@ Then you will see a new Drive[M:] in your explorer.
 How to compile
 ------------
 
-Download MinGW from https://www.dropbox.com/s/i72wyymzo0ets2s/MinGW-20151112.zip?dl=0
+Download & install TDM-GCC from http://sourceforge.net/projects/tdm-gcc/files/TDM-GCC%20Installer/tdm-gcc-5.1.0-3.exe/download
 
-Unzip the MinGW-20151112.zip to C:\
+Download Boost Libs in C:\boost_1_60_0
 
-Download and compile Boost Libs in C:\Setup\boost_1_58_0\
+Compile boost system:
 
-Open C:\MinGW\msys\1.0\msys.bat you will get a MINGW32 bash shell.
+bootstrap.bat mingw
 
-Git clone the ceph-dokan, in MINGW32 shell cd ceph-dokan code directory, just input the command 'make', after serval minutes you will get ceph-dokan.exe and libcephfs.dll.
+b2 toolset=gcc --with-system
+
+Then you will get C:\boost_1_60_0\libboost_system-mgw49-mt-1_60.a
+
+Git clone the ceph-dokan, open cmd and cd ceph-dokan code directory, just input the command 'mingw32-make', after serval minutes you will get ceph-dokan.exe and libcephfs.dll.
 
 
 Future
