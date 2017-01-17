@@ -40,15 +40,15 @@ How to compile
 
 Download & install TDM-GCC from http://sourceforge.net/projects/tdm-gcc/files/TDM-GCC%20Installer/tdm-gcc-5.1.0-3.exe/download
 
-Download Boost Libs in C:\boost_1_60_0
+Download Boost Libs in C:\boost_1_63_0
 
-Compile boost system:
+Compile boost system if you want (libboost_system-mgw51-mt-1_63.a precompiled in repo, no need to compile):
 
-bootstrap.bat mingw
+bootstrap.bat gcc
 
 b2 toolset=gcc --with-system
 
-Then you will get C:\boost_1_60_0\libboost_system-mgw49-mt-1_60.a
+Then you will get libboost_system-mgw51-mt-1_63.a in stage\lib of your boost directory.
 
 Git clone the ceph-dokan, open cmd and cd ceph-dokan code directory, just input the command 'mingw32-make', after serval minutes you will get ceph-dokan.exe and libcephfs.dll.
 
