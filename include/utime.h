@@ -143,10 +143,17 @@ public:
     return ts;
   }
 
-  void sleep() const {
-    struct timespec ts;
-    to_timespec(&ts);
-    nanosleep(&ts, NULL);
+  /* void sleep() const { */
+  /*   struct timespec ts; */
+  /*   to_timespec(&ts); */
+  /*   nanosleep(&ts, NULL); */
+  /* } */
+
+  void sleep() {
+    //struct timespec ts = { (__time_t)tv.tv_sec, (long)tv.tv_nsec };
+    struct timespec ts = { tv.tv_sec, (long)tv.tv_nsec };
+    //nanosleep(&ts, &ts);
+    Sleep(ts.tv_sec*1000+ts.tv_nsec);
   }
 
   // output

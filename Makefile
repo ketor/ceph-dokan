@@ -2,8 +2,8 @@
 CC        = gcc -D__USE_FILE_OFFSET64 -DHAVE_CONFIG_H -I. -D__CEPH__ -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE -fno-strict-aliasing -fsigned-char -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -g -DPIC
 CPP       = g++ -D__USE_FILE_OFFSET64 -DHAVE_CONFIG_H -I. -D__CEPH__ -D_FILE_OFFSET_BITS=64 -D_REENTRANT -D_THREAD_SAFE -D__STDC_FORMAT_MACROS -D_GNU_SOURCE -fno-strict-aliasing -fsigned-char -Wno-invalid-offsetof -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -g -DPIC
 
-BOOST_PATH=C:\boost_1_60_0
-BOOST_SYSTEM_LIB=libboost_system-mgw51-mt-1_60.a
+BOOST_PATH=C:\boost_1_63_0
+BOOST_SYSTEM_LIB=libboost_system-mgw51-mt-1_63.a
 CEPH_INCLUDE = -I./ -I./global -I./mingw_include -I$(BOOST_PATH)
 CFLAGS   = $(CEPH_INCLUDE)
 CLIBS    =
